@@ -1,0 +1,460 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Aayan Desai — a portfolio you drive through</title>
+<meta name="description" content="Aayan Desai is a QA automation engineer and full-stack developer. The portfolio is a sunlit park: drive the kart up to About, Education, Skills, Experience, Projects, and Contact.">
+<meta name="theme-color" content="#f7efe4">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect x=%224%22 y=%229%22 width=%2224%22 height=%2214%22 rx=%225%22 fill=%22%23ff5b3a%22/%3E%3Ccircle cx=%229%22 cy=%2224%22 r=%224%22 fill=%22%232a1d38%22/%3E%3Ccircle cx=%2223%22 cy=%2224%22 r=%224%22 fill=%22%232a1d38%22/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<!-- display: Syne (poster voice, heavy) · text: General Sans · labels: Space Mono -->
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Space+Mono&display=swap" rel="stylesheet">
+<link href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500&display=swap" rel="stylesheet">
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/",
+  "cannon-es": "https://cdn.jsdelivr.net/npm/cannon-es@0.20.0/dist/cannon-es.js"
+} }
+</script>
+<style>
+/* ---------- root ladder (board 1440) ---------- */
+html { font-size: 16px; }
+@media (min-width: 641px)  { html { font-size: 1.5625vw; } }
+@media (min-width: 1025px) { html { font-size: 1.111111vw; } }
+@media (min-width: 1600px) { html { font-size: 17.8px; } }
+
+:root {
+  /* the light: a warm late-morning sun over a lilac-blue sky */
+  --paper: #f7efe4;          /* the unrevealed ground, warm cream */
+  --paper-2: #fbf6ee;        /* sheets */
+  --ink: #2a1d38;            /* deep plum — the outline colour of the world */
+  --ink-80: rgba(42,29,56,.8);
+  --ink-62: rgba(42,29,56,.62);
+  --ink-40: rgba(42,29,56,.4);
+  --ink-16: rgba(42,29,56,.16);
+  --ink-08: rgba(42,29,56,.08);
+  --coral: #ff5b3a;          /* the spark: the kart's paint, the CTA, nothing else */
+  --sun: #ffd27a;            /* the lit ring */
+  --mint: #a9dcb6; --lilac: #cdb8f0; --peach: #ffc4a3; --pink: #f6b3c7; --butter: #ffe08f; --sky: #a9d4f2;
+  --ease: cubic-bezier(.16,1,.3,1);
+  --hover: 150ms cubic-bezier(.2,0,0,1);
+  --f-display: "Syne", "General Sans", system-ui, sans-serif;
+  --f-text: "General Sans", system-ui, -apple-system, sans-serif;
+  --f-mono: "Space Mono", ui-monospace, Menlo, monospace;
+  --gutter: clamp(16px, 1.5rem, 32px);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; background: var(--paper); color: var(--ink); }
+body { font-family: var(--f-text); -webkit-font-smoothing: antialiased; overscroll-behavior: none; touch-action: none; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--coral); outline-offset: 3px; border-radius: 6px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.mono { font-family: var(--f-mono); font-size: max(.6875rem, 11px); letter-spacing: .14em; text-transform: uppercase; font-variant-numeric: tabular-nums; }
+
+#gl { position: fixed; inset: 0; width: 100%; height: 100%; display: block; outline: none; }
+
+/* ---------- loader ---------- */
+#loader { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; background: #f6e2c4; perspective: 900px;
+  transition: opacity 900ms var(--ease), visibility 0s linear 900ms; }
+#loader.out { opacity: 0; visibility: hidden; }
+#loader .frame { position: relative; width: min(78vw, 28rem); aspect-ratio: 16 / 9; display: grid; place-items: center;
+  transform: rotateX(54deg) rotateZ(-42deg); transform-style: preserve-3d; }
+#loader .frame span.box { position: absolute; inset: 0; border: 3px solid #fff; }
+#loader .load { font-family: var(--f-display); font-weight: 800; font-size: clamp(1.4rem, 3vw, 2rem); letter-spacing: .18em; color: #fff; }
+#loader .pct { margin-top: .35rem; font-family: var(--f-mono); font-size: .8rem; letter-spacing: .16em; color: rgba(255,255,255,.85); }
+#loader .pct i { font-style: normal; }
+#loader .arc { position: absolute; width: 0; height: 0; overflow: hidden; }
+
+/* ---------- click to start ---------- */
+#start { position: fixed; z-index: 20; left: 0; top: 0; pointer-events: none; opacity: 0; transition: opacity 700ms var(--ease); }
+#start.on { opacity: 1; }
+#start:not(.on) { transition-duration: 250ms; }
+#start .tag { display: flex; align-items: flex-start; gap: .5rem; transform: translate(0, -50%); }
+#start svg { width: 3.4rem; height: 2.2rem; flex: none; margin-top: .3rem; margin-right: .5rem; }
+#start svg path { fill: none; stroke: var(--ink); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+#start b { display: block; font-family: var(--f-display); font-weight: 800; font-size: 1.75rem; line-height: .9; letter-spacing: -.03em; text-transform: uppercase; }
+#start b span:first-child { color: var(--coral); }
+#start small { display: block; margin-top: .45rem; color: var(--ink-62); }
+#start .word { display: inline-block; }
+
+/* ---------- HUD ---------- */
+.hud { position: fixed; z-index: 10; }
+.chip { display: inline-flex; align-items: center; gap: .5rem; height: 2.5rem; min-height: 40px; padding: 0 1rem; border-radius: 99px;
+  background: rgba(251,246,238,.94); box-shadow: inset 0 0 0 1px var(--ink-16), 0 6px 18px -10px rgba(42,29,56,.35);
+  transition: transform var(--hover), background var(--hover); }
+.chip:hover { transform: translateY(-2px); }
+.chip.ink { background: var(--ink); color: var(--paper-2); box-shadow: 0 8px 22px -10px rgba(42,29,56,.6); }
+.chip svg { width: 1rem; height: 1rem; min-width: 14px; min-height: 14px; }
+
+#brand { top: var(--gutter); left: var(--gutter); display: flex; flex-direction: column; gap: .5rem; }
+#brand h1 { font-family: var(--f-display); font-weight: 800; font-size: 2rem; line-height: .82; letter-spacing: -.045em; text-transform: uppercase; }
+#brand h1 .l { display: inline-block; }
+#brand h1 .dim { color: var(--ink-40); }
+#brand p { color: var(--ink-62); margin-top: .6rem; }
+#brand .plate { padding: .9rem 1.1rem .85rem; border-radius: 1.1rem; background: rgba(251,246,238,.94); box-shadow: inset 0 0 0 1px var(--ink-16), 0 10px 26px -14px rgba(42,29,56,.4); }
+
+#nav { top: var(--gutter); right: var(--gutter); display: flex; gap: .5rem; }
+#hint { left: var(--gutter); bottom: var(--gutter); display: flex; gap: 1.1rem; align-items: center; padding: .7rem 1rem; border-radius: 1rem;
+  background: rgba(251,246,238,.94); box-shadow: inset 0 0 0 1px var(--ink-16); }
+#hint .k { display: inline-grid; place-items: center; min-width: 1.6rem; height: 1.6rem; padding: 0 .35rem; border-radius: .4rem; margin-right: .3rem;
+  box-shadow: inset 0 0 0 1px var(--ink-40), inset 0 -2px 0 var(--ink-16); font-size: max(.625rem, 10px); letter-spacing: .04em; color: var(--ink); }
+#hint > span { color: var(--ink-62); display: inline-flex; align-items: center; }
+#hint .jump { height: 1.9rem; min-height: 44px; padding: 0 .9rem; border-radius: 99px; background: var(--ink); color: var(--paper-2); font-family: var(--f-mono); font-size: max(.625rem, 10px); letter-spacing: .08em; }
+
+#stamps { right: var(--gutter); bottom: var(--gutter); padding: .85rem 1rem .9rem; border-radius: 1rem; background: rgba(251,246,238,.94);
+  box-shadow: inset 0 0 0 1px var(--ink-16), 0 10px 26px -14px rgba(42,29,56,.4); min-width: 14rem; }
+#stamps .row { display: flex; gap: .4rem; margin-top: .6rem; }
+#stamps .st { width: 1.5rem; height: 1.5rem; border-radius: 50%; box-shadow: inset 0 0 0 1px var(--ink-40); display: grid; place-items: center;
+  font-family: var(--f-mono); font-size: max(.5625rem, 9px); color: var(--ink-40); transition: background 500ms var(--ease), color 500ms var(--ease), box-shadow 500ms var(--ease), transform 500ms var(--ease); }
+#stamps .st.got { background: var(--c); color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--ink); transform: rotate(-8deg) scale(1.08); }
+#stamps .top { display: flex; justify-content: space-between; gap: 1rem; color: var(--ink-62); }
+#stamps .top b { color: var(--ink); font-weight: 400; }
+#stamps .count { display: none; color: var(--ink); }
+
+#toast { left: 50%; top: var(--gutter); transform: translate(-50%, -140%); padding: .7rem 1.1rem .75rem; border-radius: 99px; background: var(--ink); color: var(--paper-2);
+  display: flex; gap: .7rem; align-items: center; transition: transform 700ms var(--ease), opacity 400ms var(--ease); white-space: nowrap; z-index: 15; opacity: 0; }
+#toast.on { transform: translate(-50%, 0); opacity: 1; }
+#toast .dot { width: .55rem; height: .55rem; border-radius: 50%; background: var(--coral); flex: none; }
+#toast .t { font-family: var(--f-display); font-weight: 700; font-size: 1rem; letter-spacing: -.01em; }
+#toast .s { color: rgba(251,246,238,.6); }
+
+/* hud entrance: each element starts displaced, a class lifts the gate */
+.gate { opacity: 0; transition: opacity 900ms var(--ease), transform 1100ms var(--ease), filter 900ms var(--ease); }
+#nav.gate { transform: translateY(-1.2rem); }
+#hint.gate { transform: translateY(1.2rem); }
+#stamps.gate { transform: translateX(1.5rem); }
+/* the id'd offsets above outrank a bare .gate.in, so the landed state names them too */
+.gate.in, #nav.gate.in, #hint.gate.in, #stamps.gate.in { opacity: 1; transform: none; }
+.blr { display: inline-block; opacity: 0; transform: translateY(.42em); filter: blur(10px);
+  transition: opacity 700ms var(--ease), transform 900ms var(--ease), filter 700ms var(--ease); }
+.in .blr, .blr.in { opacity: 1; transform: none; filter: blur(0); }
+
+/* ---------- project sheet ---------- */
+#panel { position: fixed; z-index: 30; top: var(--gutter); right: var(--gutter); bottom: var(--gutter); width: 31rem; max-width: calc(100vw - 2 * var(--gutter));
+  background: var(--paper-2); border-radius: 1.5rem; box-shadow: inset 0 0 0 1px var(--ink-16), 0 30px 60px -30px rgba(42,29,56,.55);
+  display: flex; flex-direction: column; overflow: hidden; transform: translateX(calc(100% + 3rem)) rotate(2deg); transition: transform 1000ms var(--ease); visibility: hidden; }
+#panel.on { transform: none; visibility: visible; }
+#panel.closing { visibility: visible; }
+#panel .figure { position: relative; flex: none; aspect-ratio: 4/3; max-height: 46%; overflow: hidden; background: var(--c, var(--peach)); }
+#panel .figure img { width: 100%; height: 100%; object-fit: cover; display: block; transform: scale(1.06); transition: transform 1600ms var(--ease); }
+#panel.on .figure img { transform: scale(1); }
+#panel .figure .idx { position: absolute; left: 1.1rem; top: 1rem; padding: .35rem .6rem; border-radius: 99px; background: rgba(251,246,238,.92); box-shadow: inset 0 0 0 1px var(--ink-16); }
+#panel .x { position: absolute; right: .8rem; top: .8rem; width: 2.6rem; height: 2.6rem; min-width: 40px; min-height: 40px; border-radius: 50%; background: var(--ink); color: var(--paper-2);
+  display: grid; place-items: center; transition: transform var(--hover); z-index: 2; }
+#panel .x:hover { transform: rotate(90deg); }
+#panel .x svg { width: 1rem; height: 1rem; min-width: 14px; min-height: 14px; }
+#panel .body { padding: 1.5rem 1.6rem 1.25rem; overflow-y: auto; flex: 1; overscroll-behavior: contain; touch-action: pan-y; }
+#panel h2 { font-family: var(--f-display); font-weight: 800; font-size: 3rem; line-height: .86; letter-spacing: -.05em; text-transform: uppercase; margin-top: .55rem; }
+#panel .lede { font-size: 1.25rem; line-height: 1.22; letter-spacing: -.015em; margin-top: .9rem; font-weight: 500; }
+#panel .lede .dim { color: var(--ink-62); font-weight: 400; }
+#panel .meta { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem 1rem; margin-top: 1.3rem; padding-top: 1rem; border-top: 1px solid var(--ink-16); }
+#panel .meta dt { color: var(--ink-40); }
+#panel .meta dd { font-size: .9375rem; margin-top: .2rem; }
+#panel .copy p { font-size: .9375rem; line-height: 1.55; color: var(--ink-80); margin-top: .9rem; max-width: 34em; }
+#panel .foot { flex: none; display: flex; align-items: center; justify-content: space-between; gap: .75rem; padding: .9rem 1.1rem 1rem 1.6rem; border-top: 1px solid var(--ink-16); }
+#panel .cta { display: inline-flex; align-items: center; gap: .6rem; height: 2.9rem; min-height: 44px; padding: 0 1.25rem; border-radius: 99px; background: var(--coral); color: #2a1206;
+  font-weight: 500; text-decoration: none; transition: transform var(--hover); }
+#panel .cta:hover { transform: translateY(-2px); }
+#panel .cta svg { width: .9rem; height: .9rem; }
+#panel .steps { display: flex; gap: .4rem; }
+#panel .steps button { width: 2.9rem; height: 2.9rem; min-width: 44px; min-height: 44px; border-radius: 50%; box-shadow: inset 0 0 0 1px var(--ink-40); display: grid; place-items: center; transition: transform var(--hover); }
+#panel .steps button:hover { transform: translateX(var(--n, 3px)); }
+#panel .steps button:first-child { --n: -3px; }
+#panel .steps svg { width: 1rem; height: 1rem; }
+#panel .tourbar { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: var(--ink); transform-origin: left; transform: scaleX(0); }
+#panel .chips { display: flex; flex-wrap: wrap; gap: .35rem; margin-top: .9rem; }
+#panel .chips a { padding: .3rem .6rem; border-radius: 99px; box-shadow: inset 0 0 0 1px var(--ink-16); text-decoration: none; }
+#panel .blockh { font-family: var(--f-display); font-weight: 800; font-size: 1.15rem; letter-spacing: -.02em; margin-top: 1.15rem; }
+#panel .bul { margin: .35rem 0 0 1.1rem; }
+#panel .bul li { font-size: .9375rem; line-height: 1.45; color: var(--ink-80); margin-top: .35rem; }
+#panel .scam { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .7rem; }
+#panel .scam button { padding: .4rem .75rem; border-radius: 99px; box-shadow: inset 0 0 0 1px var(--ink-40); }
+#panel .scam-out { flex: 1 0 100%; font-size: .9rem; line-height: 1.45; color: var(--ink-80); margin-top: .35rem; }
+#panel .contact a { font-family: var(--f-display); font-weight: 700; font-size: 1.35rem; letter-spacing: -.03em; text-decoration: none; border-bottom: 2px solid var(--coral); }
+#panel .contact a { font-family: var(--f-display); font-weight: 700; font-size: 1.6rem; letter-spacing: -.03em; text-decoration: none; display: inline-block; margin-top: 1rem; border-bottom: 2px solid var(--coral); }
+
+/* ---------- project list (keyboard-free, accessible) ---------- */
+#list { position: fixed; inset: 0; z-index: 40; display: grid; place-items: center; padding: var(--gutter); background: rgba(42,29,56,.28);
+  opacity: 0; visibility: hidden; transition: opacity 500ms var(--ease), visibility 0s linear 500ms; }
+#list.on { opacity: 1; visibility: visible; transition: opacity 500ms var(--ease); }
+#list .sheet { width: min(44rem, 100%); max-height: 100%; overflow-y: auto; background: var(--paper-2); border-radius: 1.5rem; padding: 1.6rem 1.6rem 1.2rem;
+  box-shadow: inset 0 0 0 1px var(--ink-16), 0 40px 80px -40px rgba(42,29,56,.7); transform: translateY(1.5rem); transition: transform 900ms var(--ease); touch-action: pan-y; }
+#list.on .sheet { transform: none; }
+#list header { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
+#list h2 { font-family: var(--f-display); font-weight: 800; font-size: 2.6rem; line-height: .86; letter-spacing: -.05em; text-transform: uppercase; }
+#list h2 .dim { color: var(--ink-40); }
+#list ol { list-style: none; margin-top: 1.2rem; }
+#list li { border-top: 1px solid var(--ink-16); }
+#list li button { width: 100%; display: grid; grid-template-columns: 2.5rem 1fr auto; gap: 1rem; align-items: center; text-align: left; padding: .95rem .2rem; transition: background var(--hover); border-radius: .6rem; }
+#list li button:hover { background: var(--ink-08); }
+#list li .sw { width: 2.5rem; height: 2.5rem; border-radius: .6rem; background: var(--c); box-shadow: inset 0 0 0 1px var(--ink-16); overflow: hidden; }
+#list li .sw img { width: 100%; height: 100%; object-fit: cover; }
+#list li strong { display: block; font-family: var(--f-display); font-weight: 700; font-size: 1.35rem; letter-spacing: -.03em; line-height: 1; }
+#list li em { display: block; font-style: normal; color: var(--ink-62); font-size: .875rem; margin-top: .3rem; }
+#list .go { color: var(--ink-62); }
+#list .tourbtn { margin-top: 1rem; }
+
+/* ---------- touch controls ---------- */
+#touch { display: none; }
+.touch.driving #touch { display: block; }
+#joy { position: fixed; z-index: 12; left: var(--gutter); bottom: calc(var(--gutter) + env(safe-area-inset-bottom)); width: 8.4rem; height: 8.4rem; border-radius: 50%;
+  background: rgba(251,246,238,.8); box-shadow: inset 0 0 0 1px var(--ink-16), 0 10px 30px -14px rgba(42,29,56,.5); touch-action: none; }
+#joy::before { content: ""; position: absolute; inset: 22%; border-radius: 50%; box-shadow: inset 0 0 0 1px var(--ink-08); }
+#joy .nub { position: absolute; left: 50%; top: 50%; width: 3.3rem; height: 3.3rem; margin: -1.65rem 0 0 -1.65rem; border-radius: 50%; background: var(--ink);
+  box-shadow: 0 6px 14px -6px rgba(42,29,56,.7); }
+#joy .nub::after { content: ""; position: absolute; inset: 36%; border-radius: 50%; background: var(--coral); }
+#tbtns { position: fixed; z-index: 12; right: var(--gutter); bottom: calc(var(--gutter) + env(safe-area-inset-bottom)); display: flex; flex-direction: column; gap: .7rem; align-items: flex-end; }
+#tbtns button { width: 4.4rem; height: 4.4rem; border-radius: 50%; background: rgba(251,246,238,.9); box-shadow: inset 0 0 0 1px var(--ink-16), 0 10px 30px -14px rgba(42,29,56,.5);
+  touch-action: none; display: grid; place-items: center; }
+#tbtns button.on { background: var(--ink); color: var(--paper-2); }
+#tbtns .mono { font-size: 10px; letter-spacing: .12em; }
+
+/* ---------- no WebGL, or the park script never booted: the stands as a plain page ---------- */
+#fallback { display: none; }
+.nogl, .nogl body { height: auto; overflow: auto; }
+.nogl body { touch-action: auto; overscroll-behavior: auto; }
+.nogl #gl, .nogl #loader, .nogl #start, .nogl #brand, .nogl #nav, .nogl #hint, .nogl #stamps, .nogl #toast, .nogl #panel, .nogl #list, .nogl #touch { display: none; }
+.nogl #fallback { display: block; max-width: 72rem; margin: 0 auto; padding: 2.5rem var(--gutter) 3rem; animation: fbIn 700ms var(--ease) both; }
+@keyframes fbIn { from { opacity: 0; } }
+#fallback .why-boot, .boot-fail #fallback .why-gl { display: none; }
+.boot-fail #fallback .why-boot { display: inline; }
+#fallback .k { color: var(--ink-62); }
+#fallback h2 { font-family: var(--f-display); font-weight: 800; font-size: 3.4rem; line-height: .88; letter-spacing: -.05em; text-transform: uppercase; margin-top: .8rem; max-width: 14em; }
+#fallback h2 .dim { color: var(--ink-40); }
+#fallback .idx { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: 1.6rem; }
+#fallback .idx a { text-decoration: none; }
+#fallback .idx a i { font-style: normal; width: .6rem; height: .6rem; border-radius: 50%; background: var(--c); box-shadow: inset 0 0 0 1px var(--ink-40); }
+#fallback ol { list-style: none; margin-top: 2.2rem; }
+#fallback li { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2.4rem; padding: 2.2rem 0; border-top: 1px solid var(--ink-16); scroll-margin-top: 1rem; }
+#fallback li > div { grid-column: 1 / -1; }
+#fallback figure { aspect-ratio: 4/3; border-radius: 1.1rem; overflow: hidden; background: var(--c); box-shadow: inset 0 0 0 1px var(--ink-16); }
+#fallback figure img, #fallback figure svg { width: 100%; height: 100%; object-fit: cover; display: block; }
+#fallback h3 { font-family: var(--f-display); font-weight: 800; font-size: 2.6rem; line-height: .88; letter-spacing: -.05em; text-transform: uppercase; margin-top: .55rem; }
+#fallback .lede { font-size: 1.25rem; line-height: 1.22; letter-spacing: -.015em; font-weight: 500; margin-top: .9rem; max-width: 30em; }
+#fallback .lede .dim { color: var(--ink-62); font-weight: 400; }
+#fallback .chips { display: flex; flex-wrap: wrap; gap: .35rem; margin-top: .9rem; }
+#fallback .chips span { padding: .3rem .6rem; border-radius: 99px; box-shadow: inset 0 0 0 1px var(--ink-16); }
+#fallback .copy p { font-size: .9375rem; line-height: 1.55; color: var(--ink-80); margin-top: .9rem; max-width: 36em; }
+#fallback .mail { display: inline-block; margin-top: 1rem; font-family: var(--f-display); font-weight: 700; font-size: 1.6rem; letter-spacing: -.03em; text-decoration: none; border-bottom: 2px solid var(--coral); overflow-wrap: anywhere; }
+#fallback .meta { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem 1rem; margin-top: 1.3rem; padding-top: 1rem; border-top: 1px solid var(--ink-16); max-width: 36rem; }
+#fallback .meta dt { color: var(--ink-40); }
+#fallback .meta dd { font-size: .9375rem; margin-top: .2rem; }
+
+/* ---------- phone: designed, not squeezed ---------- */
+@media (max-width: 640px) {
+  :root { --gutter: 16px; }
+  #brand h1 { font-size: 1.4rem; }
+  #brand .plate { padding: .7rem .85rem .65rem; border-radius: .9rem; }
+  #brand p { display: none; }
+  #nav { gap: .35rem; }
+  #nav .chip { padding: 0 .8rem; }
+  /* icon-only chips on phone (the labels stay for screen readers), so the nav clears the name plate */
+  #nav .chip .lbl { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  #hint { display: none; }
+  #stamps { right: auto; left: 50%; bottom: auto; top: calc(var(--gutter) + 4.6rem); transform: translateX(-50%); min-width: 0; padding: .5rem .7rem; border-radius: 99px; display: flex; gap: .7rem; align-items: center; }
+  #stamps.gate { transform: translate(-50%, -.6rem); }
+  #stamps.gate.in { transform: translateX(-50%); }
+  #stamps .top { display: none; }
+  #stamps .row { margin: 0; gap: .3rem; }
+  #stamps .st { width: 1.2rem; height: 1.2rem; font-size: 0; }
+  #stamps .count { display: inline; }
+  #panel { top: auto; left: 8px; right: 8px; bottom: 8px; width: auto; max-width: none; height: min(72vh, 40rem); border-radius: 1.4rem; transform: translateY(calc(100% + 2rem)); }
+  #panel.on { transform: none; }
+  #panel .figure { aspect-ratio: 16/9; max-height: 34%; }
+  #panel h2 { font-size: 2.6rem; }
+  #panel .body { padding: 1.2rem 1.2rem 1rem; }
+  #panel .foot { padding: .75rem .8rem .8rem 1.2rem; }
+  #list h2 { font-size: 2rem; }
+  #list .sheet { padding: 1.2rem 1.1rem 1rem; }
+  #start b { font-size: 1.45rem; }
+  #toast { max-width: calc(100vw - 32px); top: calc(var(--gutter) + 7.2rem); }
+  #fallback h2 { font-size: 2.1rem; }
+  #fallback li { grid-template-columns: minmax(0, 1fr); gap: 1.2rem; padding: 1.8rem 0; }
+  #fallback h3 { font-size: 2.1rem; }
+  #fallback .lede { font-size: 1.15rem; }
+}
+
+/* tablet: the toast drops below the name plate instead of running into it */
+@media (min-width: 641px) and (max-width: 1279px) {
+  #toast { top: calc(var(--gutter) + 7.8rem); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: 1ms !important; }
+}
+</style>
+</head>
+<body>
+<canvas id="gl" tabindex="0" aria-label="A sunlit park with an electric go-kart. Use the arrow keys or WASD to drive up to each section."></canvas>
+
+<div id="loader" role="status" aria-live="polite">
+  <div class="frame">
+    <span class="box" aria-hidden="true"></span>
+    <div>
+      <div class="load">LOADING…</div>
+      <div class="pct"><span id="pctn">0</span><i>%</i></div>
+    </div>
+  </div>
+  <span class="arc" aria-hidden="true"></span>
+</div>
+
+<div id="start" aria-hidden="true">
+  <div class="tag">
+    <svg viewBox="0 0 54 34"><path d="M52 6 C 40 2, 22 4, 12 16 S 4 30, 3 31"/><path d="M3 31 L 2 22 M3 31 L 11 27"/></svg>
+    <div><b><span class="word">Click</span> <span class="word">to</span> <span class="word">drive</span></b><small class="mono">Aayan Desai</small></div>
+  </div>
+</div>
+
+<header class="hud" id="brand">
+  <div class="plate">
+    <h1 aria-label="Aayan Desai"><span class="w1"></span><br><span class="w2 dim"></span></h1>
+    <p class="mono gate" id="role">QA automation · full-stack · drive to explore</p>
+  </div>
+</header>
+
+<nav class="hud gate" id="nav" aria-label="Site">
+  <button class="chip" id="btnList" aria-haspopup="dialog"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4h12M2 8h12M2 12h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg><span class="lbl">Sections</span></button>
+  <button class="chip ink" id="btnTour"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3l8 5-8 5z" fill="currentColor"/></svg><span class="lbl">Auto-tour</span></button>
+  <button class="chip" id="btnSound" aria-pressed="true" aria-label="Sound"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 6h3l4-3v10l-4-3H2z" fill="currentColor"/><path class="wv" d="M11 5.5c1 .8 1 4.2 0 5M13 4c2 1.8 2 6.2 0 8" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg></button>
+</nav>
+
+<div class="hud gate" id="hint" aria-hidden="true">
+  <span class="mono"><span class="k">W</span><span class="k">A</span><span class="k">S</span><span class="k">D</span>drive</span>
+  <span class="mono"><span class="k">⇧</span>boost</span>
+  <span class="mono"><span class="k">space</span>hop</span>
+  <button type="button" class="jump" id="btnJump">Jump</button>
+  <span class="mono"><span class="k">R</span>reset</span>
+</div>
+
+<aside class="hud gate" id="stamps" aria-label="Stands visited">
+  <div class="top mono"><span>Stand stamps</span><b id="stampN">0 / 7</b></div>
+  <div class="row" id="stampRow"></div>
+  <span class="count mono" id="stampN2">0/7</span>
+</aside>
+
+<div class="hud" id="toast" role="status" aria-live="polite"><span class="dot"></span><span class="t" id="toastT"></span><span class="s mono" id="toastS"></span></div>
+
+<aside id="panel" role="dialog" aria-modal="false" aria-labelledby="pTitle">
+  <div class="figure"><img id="pImg" alt=""><span class="idx mono" id="pIdx"></span></div>
+  <button class="x" id="pClose" aria-label="Close"><svg viewBox="0 0 16 16"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
+  <div class="body" id="pBody"></div>
+  <div class="foot">
+    <a class="cta" id="pCta" href="#" target="_blank" rel="noopener"><span id="pCtaT">Open the case study</span><svg viewBox="0 0 16 16"><path d="M4 12L12 4M6 4h6v6" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg></a>
+    <div class="steps"><button id="pPrev" aria-label="Previous stand"><svg viewBox="0 0 16 16"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg></button><button id="pNext" aria-label="Next stand"><svg viewBox="0 0 16 16"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg></button></div>
+  </div>
+  <div class="tourbar" id="pBar"></div>
+</aside>
+
+<div id="list" role="dialog" aria-modal="true" aria-labelledby="lTitle">
+  <div class="sheet">
+    <header>
+      <div><p class="mono" style="color:var(--ink-62)">Everything in the park</p><h2 id="lTitle" style="margin-top:.6rem">The stands, <span class="dim">no driving needed</span></h2></div>
+      <button class="chip" id="lClose" aria-label="Close list">Close</button>
+    </header>
+    <ol id="lItems"></ol>
+    <button class="chip ink tourbtn" id="lTour"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3l8 5-8 5z" fill="currentColor"/></svg>Drive me round all of them</button>
+  </div>
+</div>
+
+<div id="touch" aria-hidden="true">
+  <div id="joy"><div class="nub" id="nub"></div></div>
+  <div id="tbtns"><button id="tHop"><span class="mono">hop</span></button><button id="tBoost"><span class="mono">boost</span></button></div>
+</div>
+
+<!-- the stands as a plain page: shown without WebGL or if the park script never boots. Keep in step with STANDS in kart.js -->
+<div id="fallback">
+  <p class="mono k">Aayan Desai · QA automation · full-stack</p>
+  <h2><span class="why-gl">The park needs WebGL,</span><span class="why-boot">The park did not load,</span> <span class="dim">so here is the list.</span></h2>
+  <nav class="idx" aria-label="Sections">
+    <a class="chip" href="#fb-about" style="--c:#cdb8f0"><i></i>About</a>
+    <a class="chip" href="#fb-education" style="--c:#ffe08f"><i></i>Education</a>
+    <a class="chip" href="#fb-skills" style="--c:#a9d4f2"><i></i>Skills</a>
+    <a class="chip" href="#fb-patchifi" style="--c:#ffc4a3"><i></i>Patchifi</a>
+    <a class="chip" href="#fb-appify" style="--c:#ffc4a3"><i></i>Appify</a>
+    <a class="chip" href="#fb-projects" style="--c:#cdb8f0"><i></i>Projects</a>
+    <a class="chip ink" href="#fb-contact" style="--c:#f6b3c7"><i></i>Contact</a>
+  </nav>
+  <ol>
+    <li id="fb-about" style="--c:#cdb8f0">
+      <div>
+        <p class="mono k">ABOUT</p>
+        <h3>Aayan Irshad Desai</h3>
+        <p class="lede">QA Automation Engineer | Full-Stack Developer. <span class="dim">Al Nahda, Sharjah, UAE.</span></p>
+        <div class="copy"><p>Cybersecurity-focused Computer Science student and QA automation engineer. I build large Playwright suites, production web systems, and AI-driven automation pipelines.</p><p>The work sits between secure application development and shipping: authentication workarounds, endpoint remediation at scale, and full-stack apps from React and Node to Python computer vision.</p></div>
+        <dl class="meta"><div><dt class="mono">Focus</dt><dd>Cybersecurity · QA · Full-stack</dd></div><div><dt class="mono">Based</dt><dd>Sharjah, UAE</dd></div><div><dt class="mono">Now</dt><dd>BCS, University of Wollongong in Dubai</dd></div></dl>
+      </div>
+    </li>
+    <li id="fb-education" style="--c:#ffe08f">
+      <div>
+        <p class="mono k">EDUCATION</p>
+        <h3>University of Wollongong in Dubai</h3>
+        <p class="lede">Bachelor of Computer Science, Cybersecurity. <span class="dim">April 2025 – April 2028 · Dubai, UAE.</span></p>
+        <div class="copy"><p>Google Cybersecurity, Meta Front-End Developer, and Microsoft Python Development professional certificates.</p></div>
+      </div>
+    </li>
+    <li id="fb-skills" style="--c:#a9d4f2">
+      <div>
+        <p class="mono k">SKILLS</p>
+        <h3>Skills</h3>
+        <p class="lede">Four benches. One inventory. <span class="dim">Security is a skill group, not its own district.</span></p>
+        <div class="copy"><p>Python, JavaScript, TypeScript, C++, SQL. React, Next.js, Node.js, Playwright, OpenCV, n8n. QA automation, endpoint remediation, cybersecurity fundamentals.</p></div>
+      </div>
+    </li>
+    <li id="fb-patchifi" style="--c:#ffc4a3">
+      <div>
+        <p class="mono k">EXPERIENCE · Patchifi</p>
+        <h3>Patchifi</h3>
+        <p class="lede">QA &amp; Automation Intern. <span class="dim">Apr 2026 – Sept 2026 · Remote.</span></p>
+        <div class="copy"><p>840+ Playwright tests across 8 modules, an OTP session reused by 800+ tests, an n8n pipeline to LinkedIn, and 22 endpoint remediation scripts validated on Azure Bastion.</p></div>
+      </div>
+    </li>
+    <li id="fb-appify" style="--c:#ffc4a3">
+      <div>
+        <p class="mono k">EXPERIENCE · Appify Brands</p>
+        <h3>Appify Brands</h3>
+        <p class="lede">Web Developer · freelance. <span class="dim">Sept 2026 · Remote.</span></p>
+        <div class="copy"><p>Two production landing pages in React, Next.js, and Three.js, with Framer Motion and GSAP.</p></div>
+      </div>
+    </li>
+    <li id="fb-projects" style="--c:#cdb8f0">
+      <div>
+        <p class="mono k">PROJECT</p>
+        <h3>Projects</h3>
+        <p class="lede">Five builds. Not company doors. <span class="dim">Experience stays on the two peach shops.</span></p>
+        <div class="copy"><p>Internship Management System. AI Resume Analyzer. Voice Scam Shield. AI Face &amp; Object Detection. Hand Snake.</p></div>
+      </div>
+    </li>
+    <li id="fb-contact" style="--c:#f6b3c7">
+      <div>
+        <p class="mono k">CONTACT</p>
+        <h3>Say hello</h3>
+        <p class="lede">GitHub, LinkedIn, or a straight email. <span class="dim">Al Nahda, Sharjah.</span></p>
+        <a class="mail" href="mailto:aayanirshad99@gmail.com">aayanirshad99@gmail.com</a>
+        <div class="copy"><p>+971 56-123-5034 · github.com/Rapid1234-star · linkedin.com/in/aayan-desai</p></div>
+      </div>
+    </li>
+  </ol>
+</div>
+
+<script>
+/* failsafe outside the module: without WebGL, or if the park script never boots, the curtain still lifts and the stands show as a list */
+(function () {
+  var root = document.documentElement;
+  try { var c = document.createElement('canvas'); if (!(c.getContext('webgl2') || c.getContext('webgl'))) root.classList.add('nogl'); } catch (e) { root.classList.add('nogl'); }
+  setTimeout(function () {
+    if (window.__booted) return;
+    root.classList.add('nogl', 'boot-fail');
+    var l = document.getElementById('loader');
+    if (l) l.classList.add('out');
+  }, 10500);
+})();
+</script>
+<script type="module" src="kart.js"></script>
+</body>
+</html>
