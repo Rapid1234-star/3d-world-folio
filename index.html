@@ -60,15 +60,22 @@ a { color: inherit; }
 #gl { position: fixed; inset: 0; width: 100%; height: 100%; display: block; outline: none; }
 
 /* ---------- loader ---------- */
-#loader { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; background: #f6e2c4; perspective: 900px;
+#loader { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; background: radial-gradient(ellipse at 50% 45%, #fbeed6 0%, #f6e2c4 55%, #efd3ad 100%); perspective: 900px; overflow: hidden;
   transition: opacity 900ms var(--ease), visibility 0s linear 900ms; }
 #loader.out { opacity: 0; visibility: hidden; }
-#loader .frame { position: relative; width: min(78vw, 28rem); aspect-ratio: 16 / 9; display: grid; place-items: center;
-  transform: rotateX(54deg) rotateZ(-42deg); transform-style: preserve-3d; }
-#loader .frame span.box { position: absolute; inset: 0; border: 3px solid #fff; }
-#loader .load { font-family: var(--f-display); font-weight: 800; font-size: clamp(1.4rem, 3vw, 2rem); letter-spacing: .18em; color: #fff; }
-#loader .pct { margin-top: .35rem; font-family: var(--f-mono); font-size: .8rem; letter-spacing: .16em; color: rgba(255,255,255,.85); }
-#loader .pct i { font-style: normal; }
+#loader .frame { position: relative; width: min(78vw, 30rem); aspect-ratio: 16/9; display: grid; place-items: center; transform: rotateX(54deg) rotateZ(-42deg); transform-style: preserve-3d; animation: ldFloat 3.2s ease-in-out infinite alternate; }
+@keyframes ldFloat { to { transform: rotateX(54deg) rotateZ(-42deg) translateZ(14px); } }
+#loader .lp { position: absolute; inset: 0; border-radius: 10px; }
+#loader .p3 { transform: translateZ(-46px); background: rgba(42,26,51,.28); filter: blur(9px); }
+#loader .p2 { transform: translateZ(-30px); background: #2c203b; }
+#loader .p1 { transform: translateZ(-15px); background: var(--coral); }
+#loader .p0 { transform: translateZ(0); background: rgba(255,255,255,.22); border: 4px solid #fff; box-shadow: inset 0 0 0 2px rgba(42,26,51,.12), 0 0 0 2px rgba(42,26,51,.55); overflow: hidden; }
+#loader .p0::after { content: ""; position: absolute; left: 0; bottom: 0; height: 7px; width: var(--p, 0%); background: #ff5b3a; box-shadow: 0 0 14px rgba(255,91,58,.8); }
+#loader .txt { position: relative; transform: translateZ(26px); display: flex; flex-direction: column; align-items: center; gap: .55rem; }
+#loader .load { font-family: var(--f-mono); font-weight: 500; font-size: clamp(.8rem, 1.7vw, 1rem); letter-spacing: .5em; text-indent: .5em; color: #2a1a33; text-shadow: 0 1px 0 #fff; }
+#loader .pct { font-family: var(--f-display); font-weight: 800; font-size: clamp(4.2rem, 11vw, 7.2rem); line-height: .85; letter-spacing: -.04em; color: #fff; font-variant-numeric: tabular-nums;
+  -webkit-text-stroke: 2px #2a1a33; paint-order: stroke fill; text-shadow: 0 3px 0 #2a1a33, 0 6px 0 #ff5b3a, 0 9px 0 rgba(42,26,51,.55), 0 16px 26px rgba(42,26,51,.35); }
+#loader .pct i { font-style: normal; font-size: .5em; color: #ff5b3a; vertical-align: .55em; margin-left: .06em; }
 #loader .arc { position: absolute; width: 0; height: 0; overflow: hidden; }
 
 /* ---------- click to start ---------- */
@@ -295,16 +302,14 @@ a { color: inherit; }
 
 <div id="loader" role="status" aria-live="polite">
   <div class="frame">
-    <span class="box" aria-hidden="true"></span>
-    <div>
-      <div class="load">LOADING…</div>
+    <span class="lp p3"></span><span class="lp p2"></span><span class="lp p1"></span><span class="lp p0"></span>
+    <div class="txt">
+      <div class="load">LOADING�</div>
       <div class="pct"><span id="pctn">0</span><i>%</i></div>
     </div>
   </div>
   <span class="arc" aria-hidden="true"></span>
-</div>
-
-<div id="start" aria-hidden="true">
+</div><div id="start" aria-hidden="true">
   <div class="tag">
     <svg viewBox="0 0 54 34"><path d="M52 6 C 40 2, 22 4, 12 16 S 4 30, 3 31"/><path d="M3 31 L 2 22 M3 31 L 11 27"/></svg>
     <div><b><span class="word">Click</span> <span class="word">to</span> <span class="word">drive</span></b><small class="mono">Aayan Desai</small></div>
@@ -327,6 +332,8 @@ a { color: inherit; }
 <div class="hud gate" id="hint" aria-hidden="true">
   <span class="mono"><span class="k">W</span><span class="k">A</span><span class="k">S</span><span class="k">D</span>drive</span>
   <span class="mono"><span class="k">⇧</span>boost</span>
+  <span class="mono" id="boostState">cruise</span>
+  <span class="mono" id="lapTime">LAP 0:00.0</span>
   <span class="mono"><span class="k">space</span>hop</span>
   <button type="button" class="jump" id="btnJump">Jump</button>
   <span class="mono"><span class="k">R</span>reset</span>
@@ -455,6 +462,6 @@ a { color: inherit; }
   }, 10500);
 })();
 </script>
-<script type="module" src="kart.js"></script>
+<script type="module" src="js/main.js"></script>
 </body>
 </html>

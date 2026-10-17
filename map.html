@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Aayan Desai — Portfolio Park World Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #f7efe4;
+    --paper-card: #fdfaf5;
+    --ink: #2a1d38;
+    --ink-sub: rgba(42,29,56,0.68);
+    --ink-muted: rgba(42,29,56,0.42);
+    --ink-line: rgba(42,29,56,0.14);
+    --coral: #ff5b3a;
+    --lawn: #bfe3bf;
+    --pave: #ece4ec;
+    --pave-curb: #d2c2d2;
+    --skate-pave: #e3d8ef;
+    
+    /* Sector accent colors from kart.js */
+    --c-about: #cdb8f0;
+    --c-edu: #ffe08f;
+    --c-skills: #a9d4f2;
+    --c-patchifi: #ffc4a3;
+    --c-appify: #ffc4a3;
+    --c-projects: #a9dcb6;
+    --c-contact: #f6b3c7;
+    --c-skate: #ffc4a3;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background-color: var(--paper);
+    color: var(--ink);
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    min-height: 100vh;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  header.header {
+    max-width: 1100px;
+    width: 100%;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .title-group h1 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+    letter-spacing: -0.04em;
+    line-height: 1;
+    text-transform: uppercase;
+  }
+  .title-group p {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--ink-sub);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-top: 6px;
+  }
+  .badge-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #fff;
+    padding: 8px 16px;
+    border-radius: 99px;
+    border: 1px solid var(--ink-line);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem;
+    box-shadow: 0 4px 14px rgba(42,29,56,0.06);
+  }
+  .badge-tag .dot {
+    width: 8px; height: 8px; border-radius: 50%; background: var(--coral);
+    animation: pulse 2s infinite ease-in-out;
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.4); opacity: 0.7; }
+  }
+
+  /* Map Container Layout */
+  .layout-grid {
+    max-width: 1200px;
+    width: 100%;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 340px;
+    gap: 24px;
+    align-items: start;
+  }
+  @media (max-width: 980px) {
+    .layout-grid { grid-template-columns: 1fr; }
+  }
+
+  .map-card {
+    background: #ffffff;
+    border: 1.5px solid var(--ink-line);
+    border-radius: 28px;
+    padding: 20px;
+    box-shadow: 0 16px 40px -15px rgba(42,29,56,0.12);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* SVG Map Rendering Styles */
+  svg.map-svg {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 20px;
+    user-select: none;
+    background: #fbf6ee;
+  }
+
+  /* Interactive SVG node classes */
+  .stand-group {
+    cursor: pointer;
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), filter 0.2s;
+    outline: none;
+  }
+  .stand-group:hover, .stand-group:focus {
+    filter: drop-shadow(0 6px 14px rgba(42,29,56,0.25));
+  }
+  .stand-group:hover .pin-marker, .stand-group:focus .pin-marker {
+    transform: translateY(-4px);
+  }
+  .pin-marker {
+    transition: transform 0.25s ease;
+  }
+
+  /* Sidebar info card */
+  .sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .info-panel {
+    background: var(--paper-card);
+    border: 1.5px solid var(--ink-line);
+    border-radius: 24px;
+    padding: 24px;
+    box-shadow: 0 10px 28px -10px rgba(42,29,56,0.08);
+  }
+  .info-panel .tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 6px;
+    background: var(--coral);
+    color: #fff;
+    margin-bottom: 12px;
+  }
+  .info-panel h2 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.8rem;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    margin-bottom: 8px;
+  }
+  .info-panel .subtitle {
+    font-size: 0.95rem;
+    color: var(--ink-sub);
+    line-height: 1.45;
+    margin-bottom: 16px;
+    font-weight: 500;
+  }
+  .info-panel .desc {
+    font-size: 0.88rem;
+    line-height: 1.6;
+    color: var(--ink-sub);
+    border-top: 1px solid var(--ink-line);
+    padding-top: 14px;
+  }
+  .info-panel .stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--ink-line);
+  }
+  .stat-item .k {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--ink-muted);
+    text-transform: uppercase;
+  }
+  .stat-item .v {
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin-top: 2px;
+  }
+
+  /* Quick Navigation buttons */
+  .quick-links {
+    background: #fff;
+    border: 1.5px solid var(--ink-line);
+    border-radius: 20px;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .quick-links h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 6px;
+  }
+  .nav-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    border-radius: 12px;
+    border: 1px solid transparent;
+    background: #fbf6ee;
+    color: var(--ink);
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s ease;
+  }
+  .nav-btn:hover, .nav-btn.active {
+    border-color: var(--ink-line);
+    background: #fff;
+    box-shadow: 0 4px 12px rgba(42,29,56,0.08);
+    transform: translateX(4px);
+  }
+  .nav-btn .pill {
+    width: 10px; height: 10px; border-radius: 50%;
+  }
+
+  /* Map Legend */
+  .legend-bar {
+    margin-top: 16px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    font-size: 0.75rem;
+    color: var(--ink-sub);
+    font-family: 'Space Mono', monospace;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .legend-box {
+    width: 12px; height: 12px; border-radius: 3px; border: 1px solid var(--ink-line);
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="title-group">
+    <h1>Aayan Desai — Portfolio Map</h1>
+    <p>Precise Top-Down Cartographic World Map · Scale 1m = 10px</p>
+  </div>
+  <div class="badge-tag">
+    <span class="dot"></span>
+    <span>Interactive Park Guide</span>
+  </div>
+</header>
+
+<div class="layout-grid">
+  <!-- Map Graphic Card -->
+  <div class="map-card">
+    <svg class="map-svg" viewBox="-600 -600 1200 1240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Interactive Map of Aayan Desai 3D Portfolio Park">
+      <defs>
+        <!-- Filter for soft dropped shadow on pavilions and blocks -->
+        <filter id="dropShadow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="3" dy="6" stdDeviation="5" flood-color="#2a1d38" flood-opacity="0.18" />
+        </filter>
+        <filter id="softGlow" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur stdDeviation="8" result="blur"/>
+          <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+        </filter>
+
+        <!-- Wedge sector clips and patterns -->
+        <radialGradient id="ringReveal" cx="0" cy="45" r="480" gradientUnits="userSpaceOnUse">
+          <stop offset="85%" stop-color="#fff" stop-opacity="1"/>
+          <stop offset="100%" stop-color="#fff" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+
+      <!-- 1. BASE LAWN & SECTOR WEDGES (r=460px from kart.js paintGround) -->
+      <!-- Base green ground -->
+      <circle cx="0" cy="0" r="480" fill="#bfe3bf" />
+
+      <!-- Sector Colored Wedges (LAWN_SECTIONS from kart.js):
+           Angle 0° is North (-y).
+           West to South-East:
+           -126° to -90°: About (#cdb8f0)
+           -90° to -54°: Education (#ffe08f)
+           -54° to -18°: Skills (#a9d4f2)
+           -18° to 54°: Patchifi & Appify (#ffc4a3)
+           54° to 90°: Projects (#a9dcb6)
+           90° to 126°: Contact (#f6b3c7)
+      -->
+      <!-- About Wedge (-126° to -90°) -->
+      <path d="M 0 0 L -388.3 -282.1 A 480 480 0 0 1 -480 0 Z" fill="#cdb8f0" opacity="0.95" />
+      <!-- Education Wedge (-90° to -54°) -->
+      <path d="M 0 0 L -480 0 A 480 480 0 0 1 -388.3 -282.1 Z" fill="#ffe08f" opacity="0.95" />
+      <!-- Skills Wedge (-54° to -18°) -->
+      <path d="M 0 0 L -388.3 -282.1 A 480 480 0 0 1 -148.3 -456.5 Z" fill="#a9d4f2" opacity="0.95" />
+      <!-- Experience: Patchifi & Appify Wedge (-18° to 54°) -->
+      <path d="M 0 0 L -148.3 -456.5 A 480 480 0 0 1 388.3 -282.1 Z" fill="#ffc4a3" opacity="0.95" />
+      <!-- Projects Wedge (54° to 90°) -->
+      <path d="M 0 0 L 388.3 -282.1 A 480 480 0 0 1 480 0 Z" fill="#a9dcb6" opacity="0.95" />
+      <!-- Contact Wedge (90° to 126°) -->
+      <path d="M 0 0 L 480 0 A 480 480 0 0 1 388.3 282.1 Z" fill="#f6b3c7" opacity="0.95" />
+
+      <!-- Inner lawn cutout: Keep inner ring area base soft pastel grass -->
+      <circle cx="0" cy="0" r="245" fill="#cbe9c5" />
+
+      <!-- 2. PAVING & ROAD NETWORK (Exact geometry from onPaved and paintGround) -->
+      <!-- Curbs / border outlines -->
+      <g stroke="#d2c2d2" stroke-width="4" fill="#ece4ec" filter="url(#dropShadow)">
+        <!-- Outer Ring Road: R=220, W=50 -> outer r=245, inner r=195 -->
+        <path d="M 0 -245 A 245 245 0 1 1 0 245 A 245 245 0 1 1 0 -245 M 0 -195 A 195 195 0 1 0 0 195 A 195 195 0 1 0 0 -195" fill-rule="evenodd" />
+
+        <!-- Radial Spokes: North, South, East, West (width 46px -> x/y from -23 to +23) -->
+        <!-- North Spoke -->
+        <rect x="-23" y="-245" width="46" height="245" />
+        <!-- South Spoke leading straight to Skatepark -->
+        <rect x="-23" y="0" width="46" height="290" />
+        <!-- East Spoke -->
+        <rect x="0" y="-23" width="245" height="46" />
+        <!-- West Spoke -->
+        <rect x="-245" y="-23" width="245" height="46" />
+
+        <!-- Central Plaza: PLAZA_R = 100px (10m) -->
+        <circle cx="0" cy="0" r="100" />
+
+        <!-- Skatepark Slab: x0=-120, x1=120, z0=285, z1=420 (w=240, h=135) -->
+        <rect x="-120" y="285" width="240" height="135" rx="28" fill="#e3d8ef" />
+      </g>
+
+      <!-- Road markings & dash lines -->
+      <!-- Ring road center lane dashed line (r=220px) -->
+      <circle cx="0" cy="0" r="220" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="3" stroke-dasharray="14 14" />
+
+      <!-- Central Plaza concentric paving rings & stone joints -->
+      <g fill="none" stroke="rgba(190,165,180,0.55)" stroke-width="1.2">
+        <circle cx="0" cy="0" r="25" />
+        <circle cx="0" cy="0" r="50" />
+        <circle cx="0" cy="0" r="75" />
+        <circle cx="0" cy="0" r="95" />
+        <!-- Radial stone score lines -->
+        <line x1="0" y1="-95" x2="0" y2="95" stroke-dasharray="4 6"/>
+        <line x1="-95" y1="0" x2="95" y2="0" stroke-dasharray="4 6"/>
+      </g>
+
+      <!-- Skate slab joints -->
+      <g stroke="rgba(190,165,180,0.4)" stroke-width="1.5">
+        <line x1="-80" y1="290" x2="-80" y2="415" />
+        <line x1="-40" y1="290" x2="-40" y2="415" />
+        <line x1="0" y1="290" x2="0" y2="415" />
+        <line x1="40" y1="290" x2="40" y2="415" />
+        <line x1="80" y1="290" x2="80" y2="415" />
+        <line x1="-115" y1="330" x2="115" y2="330" />
+        <line x1="-115" y1="375" x2="115" y2="375" />
+      </g>
+
+      <!-- 3. FENCED OVAL FLOWERBEDS (BEDS = [45, 135, 225, 315] at r=136px) -->
+      <!-- Bed 1: 45° (South-East, x=96.2, z=96.2, rx=34, rz=20) -->
+      <g transform="translate(96.2, 96.2) rotate(45)">
+        <ellipse cx="0" cy="0" rx="38" ry="24" fill="#f2d2c0" stroke="#ebc4ae" stroke-width="2"/>
+        <ellipse cx="0" cy="0" rx="34" ry="20" fill="#ebc4ae" />
+        <!-- Picket fence border dots -->
+        <ellipse cx="0" cy="0" rx="42" ry="27" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-dasharray="3 5"/>
+        <circle cx="-12" cy="0" r="5" fill="#86c99a" />
+        <circle cx="10" cy="-4" r="6" fill="#a9dcb6" />
+        <circle cx="4" cy="6" r="4.5" fill="#86c99a" />
+      </g>
+      <!-- Bed 2: 135° (South-West, x=-96.2, z=96.2, rx=34, rz=20) -->
+      <g transform="translate(-96.2, 96.2) rotate(-45)">
+        <ellipse cx="0" cy="0" rx="38" ry="24" fill="#f2d2c0" stroke="#ebc4ae" stroke-width="2"/>
+        <ellipse cx="0" cy="0" rx="34" ry="20" fill="#ebc4ae" />
+        <ellipse cx="0" cy="0" rx="42" ry="27" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-dasharray="3 5"/>
+        <circle cx="-8" cy="-5" r="5.5" fill="#86c99a" />
+        <circle cx="8" cy="4" r="5" fill="#a9dcb6" />
+      </g>
+      <!-- Bed 3: 225° (North-West, x=-96.2, z=-96.2, rx=34, rz=20) -->
+      <g transform="translate(-96.2, -96.2) rotate(45)">
+        <ellipse cx="0" cy="0" rx="38" ry="24" fill="#f2d2c0" stroke="#ebc4ae" stroke-width="2"/>
+        <ellipse cx="0" cy="0" rx="34" ry="20" fill="#ebc4ae" />
+        <ellipse cx="0" cy="0" rx="42" ry="27" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-dasharray="3 5"/>
+        <circle cx="-6" cy="5" r="5.5" fill="#86c99a" />
+        <circle cx="10" cy="-3" r="5" fill="#a9dcb6" />
+      </g>
+      <!-- Bed 4: 315° (North-East, x=96.2, z=-96.2, rx=34, rz=20) -->
+      <g transform="translate(96.2, -96.2) rotate(-45)">
+        <ellipse cx="0" cy="0" rx="38" ry="24" fill="#f2d2c0" stroke="#ebc4ae" stroke-width="2"/>
+        <ellipse cx="0" cy="0" rx="34" ry="20" fill="#ebc4ae" />
+        <ellipse cx="0" cy="0" rx="42" ry="27" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-dasharray="3 5"/>
+        <circle cx="-10" cy="-2" r="5" fill="#86c99a" />
+        <circle cx="6" cy="5" r="6" fill="#a9dcb6" />
+      </g>
+
+      <!-- 4. LAWN TEXT DECALS (From kart.js line 1489) -->
+      <g font-family="'Syne', sans-serif" font-weight="800" font-size="11" fill="rgba(42,29,56,0.65)" text-anchor="middle" letter-spacing="-0.02em">
+        <!-- About Lawn -->
+        <text x="-145" y="45">ABOUT</text>
+        <!-- Education Lawn -->
+        <text x="-115" y="-140">EDUCATION</text>
+        <!-- Skills Lawn -->
+        <text x="-45" y="-170">SKILLS</text>
+        <!-- Patchifi Lawn -->
+        <text x="12" y="-172">PATCHIFI</text>
+        <!-- Appify Lawn -->
+        <text x="110" y="-140">APPIFY</text>
+        <!-- Projects Lawn -->
+        <text x="160" y="45">PROJECTS</text>
+        <!-- Contact Lawn -->
+        <text x="135" y="145">CONTACT</text>
+      </g>
+
+      <!-- 5. CENTRAL PLAZA FLOOR TEXT & PROPS -->
+      <!-- Main floor text from kart.js lines 1485-1487 -->
+      <g font-family="'Syne', sans-serif" font-weight="800" text-anchor="middle">
+        <text x="-4" y="-56" font-size="24" fill="rgba(42,29,56,0.95)" letter-spacing="-0.05em">AAYAN</text>
+        <text x="4" y="-32" font-size="24" fill="rgba(42,29,56,0.55)" letter-spacing="-0.05em">DESAI</text>
+        <text x="0" y="-14" font-family="'Space Mono', monospace" font-size="5.5" font-weight="400" fill="rgba(42,29,56,0.6)" letter-spacing="0.16em">QA AUTOMATION · DRIVE IN</text>
+      </g>
+
+      <!-- Standing 3D Alphabet Blocks spelling AAYAN DESAI above the text -->
+      <g filter="url(#dropShadow)" font-family="'Syne', sans-serif" font-weight="800" font-size="7" text-anchor="middle">
+        <!-- AAYAN row (around z=-74) -->
+        <rect x="-38" y="-80" width="12" height="12" rx="2" fill="#ffc4a3" stroke="#2a1d38" stroke-width="1.2"/>
+        <text x="-32" y="-71" fill="#2a1d38">A</text>
+        <rect x="-24" y="-80" width="12" height="12" rx="2" fill="#ffe08f" stroke="#2a1d38" stroke-width="1.2"/>
+        <text x="-18" y="-71" fill="#2a1d38">A</text>
+        <rect x="-10" y="-80" width="12" height="12" rx="2" fill="#a9d4f2" stroke="#2a1d38" stroke-width="1.2"/>
+        <text x="-4" y="-71" fill="#2a1d38">Y</text>
+        <rect x="4" y="-80" width="12" height="12" rx="2" fill="#a9dcb6" stroke="#2a1d38" stroke-width="1.2"/>
+        <text x="10" y="-71" fill="#2a1d38">A</text>
+        <rect x="18" y="-80" width="12" height="12" rx="2" fill="#cdb8f0" stroke="#2a1d38" stroke-width="1.2"/>
+        <text x="24" y="-71" fill="#2a1d38">N</text>
+      </g>
+
+      <!-- Overhead string lights wires (Four corner poles at pp=[25, 115, 205, 295] deg) -->
+      <g stroke="#2a1d38" stroke-width="1" opacity="0.4" fill="none">
+        <line x1="46" y1="-98" x2="98" y2="46"/>
+        <line x1="98" y1="46" x2="-46" y2="98"/>
+        <line x1="-46" y1="98" x2="-98" y2="-46"/>
+        <line x1="-98" y1="-46" x2="46" y2="-98"/>
+        <line x1="46" y1="-98" x2="-46" y2="98"/>
+      </g>
+      <!-- Fairy bulb dots -->
+      <g fill="#ffcf55">
+        <circle cx="0" cy="-98" r="2.5"/><circle cx="72" cy="-26" r="2.5"/><circle cx="26" cy="72" r="2.5"/><circle cx="-72" cy="26" r="2.5"/>
+      </g>
+
+      <!-- Spawn Pad Circle (x=0, z=45px / 4.5m) -->
+      <circle cx="0" cy="45" r="33" fill="none" stroke="#2a1d38" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.35"/>
+      <circle cx="0" cy="45" r="28" fill="#ffd27a" opacity="0.3" filter="url(#softGlow)"/>
+
+      <!-- Coral Red Electric Go-Kart at Spawn -->
+      <g transform="translate(0, 45)" filter="url(#dropShadow)">
+        <!-- Wheels -->
+        <rect x="-14" y="-12" width="6" height="8" rx="2" fill="#2a1d38"/>
+        <rect x="8" y="-12" width="6" height="8" rx="2" fill="#2a1d38"/>
+        <rect x="-14" y="6" width="6" height="8" rx="2" fill="#2a1d38"/>
+        <rect x="8" y="6" width="6" height="8" rx="2" fill="#2a1d38"/>
+        <!-- Chassis -->
+        <rect x="-10" y="-10" width="20" height="22" rx="5" fill="#ff5b3a" stroke="#2a1d38" stroke-width="1.5"/>
+        <rect x="-6" y="-4" width="12" height="10" rx="3" fill="#ffe08f"/>
+        <rect x="-8" y="8" width="16" height="3" fill="#2a1d38"/>
+      </g>
+
+      <!-- Plaza Props: Potted palm (-25, 69), Beach Ball (55, -25), Benches -->
+      <!-- Potted Palm -->
+      <g transform="translate(-25, 69)" filter="url(#dropShadow)">
+        <circle cx="0" cy="0" r="8" fill="#f0a98a" stroke="#2a1d38" stroke-width="1.2"/>
+        <path d="M 0 0 L -12 -8 M 0 0 L -10 10 M 0 0 L 10 10 M 0 0 L 12 -8 M 0 0 L 0 -14" stroke="#86c99a" stroke-width="3.5" stroke-linecap="round"/>
+      </g>
+      <!-- Big Beach ball (55, -25) -->
+      <circle cx="55" cy="-25" r="9" fill="#ffe08f" stroke="#2a1d38" stroke-width="1.2" filter="url(#dropShadow)"/>
+      <path d="M 55 -34 A 9 9 0 0 1 55 -16 Z" fill="#ff5b3a"/>
+
+      <!-- Park Benches around plaza -->
+      <g fill="#e9c79c" stroke="#2a1d38" stroke-width="1" filter="url(#dropShadow)">
+        <rect x="-4" y="-95" width="22" height="6" rx="2" transform="rotate(40 -4 -95)"/>
+        <rect x="80" y="-30" width="22" height="6" rx="2" transform="rotate(140 80 -30)"/>
+        <rect x="30" y="80" width="22" height="6" rx="2" transform="rotate(-40 30 80)"/>
+        <rect x="-95" y="10" width="22" height="6" rx="2" transform="rotate(90 -95 10)"/>
+      </g>
+
+      <!-- 6. SOUTH SPOKE APPROACH & SKATE SLAB STUNT ARENA -->
+      <!-- Yellow Kicker launch ramp on South Spoke (x=0, z=152px) -->
+      <g transform="translate(0, 152)" filter="url(#dropShadow)">
+        <polygon points="-16,14 16,14 16,-10 -16,-10" fill="#ffe08f" stroke="#2a1d38" stroke-width="1.5"/>
+        <line x1="-16" y1="-10" x2="16" y2="-10" stroke="#ff5b3a" stroke-width="3"/>
+        <!-- Signpost: SKATE SLAB / HOP SPACE -->
+        <rect x="22" y="-6" width="3" height="16" fill="#6a5a86"/>
+        <rect x="14" y="-16" width="46" height="12" rx="3" fill="#fff" stroke="#2a1d38" stroke-width="1"/>
+        <text x="37" y="-8" font-family="'Space Mono', monospace" font-size="4" font-weight="700" fill="#2a1d38" text-anchor="middle">SKATE SLAB</text>
+      </g>
+
+      <!-- Skatepark Arena Elements (Inside x=[-120,120], z=[285,420]) -->
+      <!-- "SKATE" floor watermark text -->
+      <text x="0" y="375" font-family="'Syne', sans-serif" font-weight="800" font-size="28" fill="rgba(42,29,56,0.12)" text-anchor="middle">SKATE SLAB</text>
+
+      <!-- Lilac kicker ramp (-60, 335) -->
+      <g transform="translate(-60, 335)" filter="url(#dropShadow)">
+        <rect x="-18" y="-12" width="36" height="24" rx="2" fill="#cdb8f0" stroke="#2a1d38" stroke-width="1.5"/>
+        <line x1="-18" y1="-12" x2="18" y2="-12" stroke="#2a1d38" stroke-width="2.5"/>
+      </g>
+      <!-- Peach kicker ramp (55, 315) -->
+      <g transform="translate(55, 315)" filter="url(#dropShadow)">
+        <rect x="-16" y="-10" width="32" height="20" rx="2" fill="#ffc4a3" stroke="#2a1d38" stroke-width="1.5"/>
+        <line x1="-16" y1="-10" x2="16" y2="-10" stroke="#2a1d38" stroke-width="2.5"/>
+      </g>
+      <!-- Mint Funbox with grind rail (55, 372) -->
+      <g transform="translate(55, 372)" filter="url(#dropShadow)">
+        <rect x="-26" y="-16" width="52" height="32" rx="4" fill="#a9dcb6" stroke="#2a1d38" stroke-width="1.5"/>
+        <line x1="-24" y1="0" x2="24" y2="0" stroke="#2a1d38" stroke-width="3"/>
+      </g>
+      <!-- Halfpipe / Quarterpipe curve (99, 324) -->
+      <g transform="translate(99, 324)" filter="url(#dropShadow)">
+        <rect x="-6" y="-25" width="18" height="50" rx="3" fill="#cdb8f0" stroke="#2a1d38" stroke-width="1.5"/>
+      </g>
+      <!-- Stunt Hoop (0, 386) -->
+      <g transform="translate(0, 386)" filter="url(#dropShadow)">
+        <line x1="-15" y1="0" x2="15" y2="0" stroke="#ff5b3a" stroke-width="4"/>
+        <circle cx="0" cy="0" r="10" fill="none" stroke="#ff5b3a" stroke-width="2.5"/>
+      </g>
+      <!-- Paint Can Pyramid (-60, 392) -->
+      <g transform="translate(-60, 392)">
+        <circle cx="-6" cy="-4" r="3.5" fill="#f6b3c7" stroke="#2a1d38" stroke-width="0.8"/>
+        <circle cx="0" cy="-4" r="3.5" fill="#ffe08f" stroke="#2a1d38" stroke-width="0.8"/>
+        <circle cx="6" cy="-4" r="3.5" fill="#a9dcb6" stroke="#2a1d38" stroke-width="0.8"/>
+        <circle cx="-3" cy="2" r="3.5" fill="#a9d4f2" stroke="#2a1d38" stroke-width="0.8"/>
+        <circle cx="3" cy="2" r="3.5" fill="#ff5b3a" stroke="#2a1d38" stroke-width="0.8"/>
+      </g>
+
+      <!-- 7. THE 7 STANDS & PAVILIONS (Exact Angles & Radius r=292px) -->
+      
+      <!-- STAND 1: ABOUT (angle: -108°, r=302px -> x = -287.2, y = 93.3) -->
+      <g id="stand-about" class="stand-group" tabindex="0" onclick="selectStand('about')">
+        <!-- Driving Pad on Ring Road (r=220, angle=-108° -> x=-209.2, y=68.0) -->
+        <circle cx="-209.2" cy="68.0" r="26" fill="rgba(205,184,240,0.3)" stroke="#cdb8f0" stroke-width="2" stroke-dasharray="4 4"/>
+        <g class="pin-marker" transform="translate(-209.2, 68.0)">
+          <polygon points="0,0 -7,-14 7,-14" fill="#cdb8f0" stroke="#2a1d38" stroke-width="1.2"/>
+          <circle cx="0" cy="-14" r="4" fill="#fff" stroke="#2a1d38" stroke-width="1.2"/>
+        </g>
+        <!-- The Glass Greenhouse Pavilion -->
+        <g transform="translate(-287.2, 93.3)" filter="url(#dropShadow)">
+          <!-- Wood Deck -->
+          <rect x="-38" y="-28" width="76" height="56" rx="6" fill="#fbf3e6" stroke="#2a1d38" stroke-width="2"/>
+          <!-- Greenhouse glass frame -->
+          <rect x="-34" y="-24" width="68" height="48" rx="4" fill="#e9f3ff" fill-opacity="0.6" stroke="#2a1d38" stroke-width="1.5"/>
+          <!-- Rafter grid -->
+          <line x1="-34" y1="0" x2="34" y2="0" stroke="#cdb8f0" stroke-width="2"/>
+          <line x1="-12" y1="-24" x2="-12" y2="24" stroke="#cdb8f0" stroke-width="1.5"/>
+          <line x1="12" y1="-24" x2="12" y2="24" stroke="#cdb8f0" stroke-width="1.5"/>
+          <!-- Desk & Potted plants inside -->
+          <rect x="-18" y="-14" width="22" height="10" rx="2" fill="#e9c79c"/>
+          <circle cx="20" cy="-12" r="5" fill="#f0a98a"/>
+          <circle cx="20" cy="12" r="6" fill="#86c99a"/>
+          <!-- Title Banner -->
+          <rect x="-30" y="-38" width="60" height="14" rx="4" fill="#cdb8f0" stroke="#2a1d38" stroke-width="1.2"/>
+          <text x="0" y="-28" font-family="'Syne', sans-serif" font-weight="800" font-size="7.5" fill="#2a1d38" text-anchor="middle">ABOUT</text>
+        </g>
+      </g>
+
+      <!-- STAND 2: EDUCATION (angle: -72°, r=292px -> x = -277.7, y = -90.2) -->
+      <g id="stand-education" class="stand-group" tabindex="0" onclick="selectStand('education')">
+        <!-- Driving Pad (angle=-72°, r=220 -> x=-209.2, y=-68.0) -->
+        <circle cx="-209.2" cy="-68.0" r="26" fill="rgba(255,224,143,0.3)" stroke="#ffe08f" stroke-width="2" stroke-dasharray="4 4"/>
+        <g class="pin-marker" transform="translate(-209.2, -68.0)">
+          <polygon points="0,0 -7,-14 7,-14" fill="#ffe08f" stroke="#2a1d38" stroke-width="1.2"/>
+          <circle cx="0" cy="-14" r="4" fill="#fff" stroke="#2a1d38" stroke-width="1.2"/>
+        </g>
+        <!-- University Pavilion Stand -->
+        <g transform="translate(-277.7, -90.2)" filter="url(#dropShadow)">
+          <rect x="-35" y="-26" width="70" height="52" rx="6" fill="#fbf3e6" stroke="#2a1d38" stroke-width="2"/>
+          <!-- Butter Yellow Awning Canopy -->
+          <rect x="-35" y="-26" width="70" height="16" rx="4" fill="#ffe08f" stroke="#2a1d38" stroke-width="1.5"/>
+          <!-- Pillar posts & Certificate book props -->
+          <rect x="-26" y="-8" width="6" height="24" fill="#6a5a86"/>
+          <rect x="20" y="-8" width="6" height="24" fill="#6a5a86"/>
+          <!-- Giant Book set piece -->
+          <rect x="-12" y="-4" width="24" height="18" rx="2" fill="#ffc4a3" stroke="#2a1d38" stroke-width="1"/>
+          <!-- Title Banner -->
+          <rect x="-36" y="-36" width="72" height="14" rx="4" fill="#ffe08f" stroke="#2a1d38" stroke-width="1.2"/>
+          <text x="0" y="-26" font-family="'Syne', sans-serif" font-weight="800" font-size="7.5" fill="#2a1d38" text-anchor="middle">EDUCATION</text>
+        </g>
+      </g>
+
+      <!-- STAND 3: SKILLS (angle: -36°, r=292px -> x = -171.6, y = -236.2) -->
+      <g id="stand-skills" class="stand-group" tabindex="0" onclick="selectStand('skills')">
+        <!-- Driving Pad (angle=-36°, r=220 -> x=-129.3, y=-178.0) -->
+        <circle cx="-129.3" cy="-178.0" r="26" fill="rgba(169,212,242,0.3)" stroke="#a9d4f2" stroke-width="2" stroke-dasharray="4 4"/>
+        <g class="pin-marker" transform="translate(-129.3, -178.0)">
+          <polygon points="0,0 -7,-14 7,-14" fill="#a9d4f2" stroke="#2a1d38" stroke-width="1.2"/>
+          <circle cx="0" cy="-14" r="4" fill="#fff" stroke="#2a1d38" stroke-width="1.2"/>
+        </g>
+        <!-- The Lab Gazebo Stand with 4 Workbenches -->
+        <g transform="translate(-171.6, -236.2)" filter="url(#dropShadow)">
+          <rect x="-34" y="-26" width="68" height="52" rx="6" fill="#fbf3e6" stroke="#2a1d38" stroke-width="2"/>
+          <!-- Sky Blue Roof / Awning -->
+          <polygon points="-34,-14 0,-32 34,-14 34,-4 -34,-4" fill="#a9d4f2" stroke="#2a1d38" stroke-width="1.5"/>
+          <!-- 4 Lab Benches -->
+          <rect x="-24" y="2" width="18" height="8" rx="2" fill="#e9c79c"/>
+          <rect x="6" y="2" width="18" height="8" rx="2" fill="#e9c79c"/>
+          <rect x="-24" y="14" width="18" height="8" rx="2" fill="#e9c79c"/>
+          <rect x="6" y="14" width="18" height="8" rx="2" fill="#e9c79c"/>
+          <!-- Title Banner -->
+          <rect x="-26" y="-40" width="52" height="14" rx="4" fill="#a9d4f2" stroke="#2a1d38" stroke-width="1.2"/>
+          <text x="0" y="-30" font-family="'Syne', sans-serif" font-weight="800" font-size="7.5" fill="#2a1d38" text-anchor="middle">SKILLS</text>
+        </g>
+      </g>
+
+      <!-- STAND 4: PATCHIFI (angle: 0°, r=292px -> x = 0, y = -292.0) -->
+      <g id="stand-patchifi" class="stand-group" tabindex="0" onclick="selectStand('patchifi')">
+        <!-- Driving Pad (angle=0°, r=220 -> x=0, y=-220.0) -->
+        <circle cx="0" cy="-220.0" r="26" fill="rgba(255,196,163,0.3)" stroke="#ffc4a3" stroke-width="2" stroke-dasharray="4 4"/>
+        <g class="pin-marker" transform="translate(0, -220.0)">
+          <polygon points="0,0 -7,-14 7,-14" fill="#ffc4a3" stroke="#2a1d38" stroke-width="1.2"/>
+          <circle cx="0" cy="-14" r="4" fill="#fff" stroke="#2a1d38" stroke-width="1.2"/>
+        </g>
+        <!-- Striped Peach Awning Shop on Deck -->
+        <g transform="translate(0, -292.0)" filter="url(#dropShadow)">
+          <rect x="-35" y="-26" width="70" height="52" rx="6" fill="#fbf3e6" stroke="#2a1d38" stroke-width="2"/>
+          <!-- Striped Peach & Cream Awning -->
+          <g>
+            <rect x="-35" y="-26" width="70" height="16" fill="#ffc4a3" stroke="#2a1d38" stroke-width="1.5"/>
+            <rect x="-25" y="-26" width="10" height="16" fill="#ffffff" opacity="0.6"/>
+            <rect x="-5" y="-26" width="10" height="16" fill="#ffffff" opacity="0.6"/>
+            <rect x="15" y="-26" width="10" height="16" fill="#ffffff" opacity="0.6"/>
+          </g>
+          <!-- Billboard Signboard -->
+          <rect x="-28" y="-6" width="56" height="26" rx="3" fill="#ffffff" stroke="#2a1d38" stroke-width="1.2"/>
+          <text x="0" y="6" font-family="'Syne', sans-serif" font-weight="800" font-size="7.5" fill="#2a1d38" text-anchor="middle">PATCHIFI</text>
+          <text x="0" y="14" font-family="'Space Mono', monospace" font-size="3.5" fill="rgba(42,29,56,0.6)" text-anchor="middle">QA &amp; AUTOMATION</text>
+          <!-- Title Banner -->
+          <rect x="-30" y="-38" width="60" height="14" rx="4" fill="#ffc4a3" stroke="#2a1d38" stroke-width="1.2"/>
+          <text x="0" y="-28" font-family="'Syne', sans-serif" font-weight="800" font-size="7.5" fill="#2a1d38" text-anchor="middle">PATCHIFI</text>
+        </g>
+      </g>
+
+      <!-- STAND 5: APPIFY BRANDS (angle: +36°, r=292px -> x = 171.6, y = -236.2) -->
+      <g id="stand-appify" class="stand-group" tabindex="0" onclick="selectStand('appify')">
+        <!-- Driving Pad (angle=+36°, r=220 -> x=129.3, y=-178.0) -->
+        <circle cx="129.3" cy="-178.0" r="26" fill="rgba(255,196,163,0.3)" stroke="#ffc4a3" stroke-width="2" stroke-dasharray="4 4"/>
+        <g class="pin-marker" transform="translate(129.3, -178.0)">
+          <polygon points="0,0 -7,-14 7,-14" fill="#ffc4a3" stroke="#2a1d38" stroke-width="1.2"/>
+          <circle cx="0" cy="-14" r="4" fill="#fff" stroke="#2a1d38" stroke-width="1.2"/>
+        </g>
+        <!-- Matching Striped Peach Shop on Deck -->
+        <g transform="translate(171.6, -236.2)" filter="url(#dropShadow)">
+          <rect x="-35" y="-26" width="70" height="52" rx="6" fill="#fbf3e6" stroke="#2a1d38" stroke-width="2"/>
+          <g>
+            <rect x="-35" y="-26" width="70" height="16" fill="#ffc4a3" stroke="#2a1d38" stroke-width="1.5"/>
+            <rect x="-25" y="-26" width="10" height="16" fill="#ffffff" opacity="0.6"/>
+            <rect x="-5" y="-26" width="10" height="16" fill="#ffffff" opacity="0.6"/>
+            <rect x="15" y="-26" width="10" height="16" fill="#ffffff" opacity="0.6"/>
+          </g>
+          <!-- Billboard -->
+          <rect x="-28" y="-6" width="56" height="26" rx="3" fill="#ffffff" stroke="#2a1d38" stroke-width="1.2"/>
+          <text x="0" y="6" font-family="'Syne', sans-serif" font-weight="800" font-size="7" fill="#2a1d38" text-anchor="middle">APPIFY BRANDS</text>
+          <text x="0" y="14" font-family="'Space Mono', monospace" font-size="3.5" fill="rgba(42,29,56,0.6)" text-anchor="middle">WEB &amp; 3D DEV</text>
+          <!-- Title Banner -->
+          <rect x="-30" y="-38" width="60" height="14" rx="4" fill="#ffc4a3" stroke="#2a1d38" stroke-width="1.2"/>
+          <text x="0" y="-28" font-family="'Syne', sans-serif" font-weight="800" font-size="7.5" fill="#2a1d38" text-anchor="middle">APPIFY</text>
+        </g>
+      </g>
+
+      <!-- STAND 6: PROJECTS (angle: +72°, r=292px -> x = 277.7, y = -90.2) -->
+      <g id="stand-projects" class="stand-group" tabindex="0" onclick="selectStand('projects')">
+        <!-- Driving Pad (angle=+72°, r=220 -> x=209.2, y=-68.0) -->
+        <circle cx="209.2" cy="-68.0" r="26" fill="rgba(169,220,182,0.3)" stroke="#a9dcb6" stroke-width="2" stroke-dasharray="4 4"/>
+        <g class="pin-marker" transform="translate(209.2, -68.0)">
+          <polygon points="0,0 -7,-14 7,-14" fill="#a9dcb6" stroke="#2a1d38" stroke-width="1.2"/>
+          <circle cx="0" cy="-14" r="4" fill="#fff" stroke="#2a1d38" stroke-width="1.2"/>
+        </g>
+        <!-- Striped Mint-Green Canopy Stand -->
+        <g transform="translate(277.7, -90.2)" filter="url(#dropShadow)">
+          <rect x="-35" y="-26" width="70" height="52" rx="6" fill="#fbf3e6" stroke="#2a1d38" stroke-width="2"/>
+          <g>
+            <rect x="-35" y="-26" width="70" height="16" fill="#a9dcb6" stroke="#2a1d38" stroke-width="1.5"/>
+            <rect x="-25" y="-26" width="10" height="16" fill="#ffffff" opacity="0.6"/>
+            <rect x="-5" y="-26" width="10" height="16" fill="#ffffff" opacity="0.6"/>
+            <rect x="15" y="-26" width="10" height="16" fill="#ffffff" opacity="0.6"/>
+          </g>
+          <rect x="-28" y="-6" width="56" height="26" rx="3" fill="#ffffff" stroke="#2a1d38" stroke-width="1.2"/>
+          <text x="0" y="8" font-family="'Syne', sans-serif" font-weight="800" font-size="7.5" fill="#2a1d38" text-anchor="middle">PROJECTS</text>
+          <!-- Title Banner -->
+          <rect x="-32" y="-38" width="64" height="14" rx="4" fill="#a9dcb6" stroke="#2a1d38" stroke-width="1.2"/>
+          <text x="0" y="-28" font-family="'Syne', sans-serif" font-weight="800" font-size="7.5" fill="#2a1d38" text-anchor="middle">PROJECTS</text>
+        </g>
+        <!-- 5 Project Easel Boards curved along the roadway in front (from buildProjectEasels) -->
+        <g filter="url(#dropShadow)">
+          <g transform="translate(242, -135) rotate(20)">
+            <rect x="-7" y="-10" width="14" height="20" rx="2" fill="#fff" stroke="#2a1d38" stroke-width="1"/>
+            <text x="0" y="2" font-family="'Space Mono', monospace" font-size="3.5" font-weight="700" fill="#2a1d38" text-anchor="middle">01</text>
+          </g>
+          <g transform="translate(248, -112) rotate(10)">
+            <rect x="-7" y="-10" width="14" height="20" rx="2" fill="#fff" stroke="#2a1d38" stroke-width="1"/>
+            <text x="0" y="2" font-family="'Space Mono', monospace" font-size="3.5" font-weight="700" fill="#2a1d38" text-anchor="middle">02</text>
+          </g>
+          <g transform="translate(250, -88) rotate(0)">
+            <rect x="-7" y="-10" width="14" height="20" rx="2" fill="#fff" stroke="#2a1d38" stroke-width="1"/>
+            <text x="0" y="2" font-family="'Space Mono', monospace" font-size="3.5" font-weight="700" fill="#2a1d38" text-anchor="middle">03</text>
+          </g>
+          <g transform="translate(248, -64) rotate(-10)">
+            <rect x="-7" y="-10" width="14" height="20" rx="2" fill="#fff" stroke="#2a1d38" stroke-width="1"/>
+            <text x="0" y="2" font-family="'Space Mono', monospace" font-size="3.5" font-weight="700" fill="#2a1d38" text-anchor="middle">04</text>
+          </g>
+          <g transform="translate(242, -40) rotate(-20)">
+            <rect x="-7" y="-10" width="14" height="20" rx="2" fill="#fff" stroke="#2a1d38" stroke-width="1"/>
+            <text x="0" y="2" font-family="'Space Mono', monospace" font-size="3.5" font-weight="700" fill="#2a1d38" text-anchor="middle">05</text>
+          </g>
+        </g>
+      </g>
+
+      <!-- STAND 7: CONTACT (angle: +108°, r=292px -> x = 277.7, y = 90.2) -->
+      <g id="stand-contact" class="stand-group" tabindex="0" onclick="selectStand('contact')">
+        <!-- Driving Pad (angle=+108°, r=220 -> x=209.2, y=68.0) -->
+        <circle cx="209.2" cy="68.0" r="26" fill="rgba(246,179,199,0.3)" stroke="#f6b3c7" stroke-width="2" stroke-dasharray="4 4"/>
+        <g class="pin-marker" transform="translate(209.2, 68.0)">
+          <polygon points="0,0 -7,-14 7,-14" fill="#f6b3c7" stroke="#2a1d38" stroke-width="1.2"/>
+          <circle cx="0" cy="-14" r="4" fill="#fff" stroke="#2a1d38" stroke-width="1.2"/>
+        </g>
+        <!-- Pink SAY HELLO Billboard Stand (from buildSign) -->
+        <g transform="translate(277.7, 90.2)" filter="url(#dropShadow)">
+          <!-- Support Posts -->
+          <line x1="-28" y1="20" x2="-28" y2="-20" stroke="#6a5a86" stroke-width="3"/>
+          <line x1="28" y1="20" x2="28" y2="-20" stroke="#6a5a86" stroke-width="3"/>
+          <!-- Big Billboard Frame -->
+          <rect x="-35" y="-22" width="70" height="38" rx="5" fill="#f6b3c7" stroke="#2a1d38" stroke-width="2"/>
+          <text x="0" y="-4" font-family="'Syne', sans-serif" font-weight="800" font-size="10" fill="#2a1d38" text-anchor="middle">SAY</text>
+          <text x="0" y="8" font-family="'Syne', sans-serif" font-weight="800" font-size="10" fill="#ff5b3a" text-anchor="middle">HELLO</text>
+          <!-- Mailbox prop -->
+          <rect x="36" y="8" width="8" height="12" rx="2" fill="#ffe08f" stroke="#2a1d38" stroke-width="1"/>
+          <!-- Title Banner -->
+          <rect x="-32" y="-36" width="64" height="14" rx="4" fill="#f6b3c7" stroke="#2a1d38" stroke-width="1.2"/>
+          <text x="0" y="-26" font-family="'Syne', sans-serif" font-weight="800" font-size="7.5" fill="#2a1d38" text-anchor="middle">CONTACT</text>
+        </g>
+      </g>
+
+      <!-- 8. WAYFINDING & DIRECTION SIGNS AT JUNCTIONS (from signpost calls) -->
+      <!-- North Junction Sign (3.6, -17.9) -> (36, -179) -->
+      <g transform="translate(36, -179)" filter="url(#dropShadow)">
+        <circle cx="0" cy="0" r="2" fill="#2a1d38"/>
+        <rect x="-24" y="-14" width="48" height="12" rx="3" fill="#fff" stroke="#2a1d38" stroke-width="1"/>
+        <text x="0" y="-6" font-family="'Space Mono', monospace" font-size="4" font-weight="700" fill="#2a1d38" text-anchor="middle">↑ EXPERIENCE</text>
+      </g>
+      <!-- East Junction Sign (17.9, 3.6) -> (179, 36) -->
+      <g transform="translate(179, 36)" filter="url(#dropShadow)">
+        <circle cx="0" cy="0" r="2" fill="#2a1d38"/>
+        <rect x="-22" y="-14" width="44" height="12" rx="3" fill="#fff" stroke="#2a1d38" stroke-width="1"/>
+        <text x="0" y="-6" font-family="'Space Mono', monospace" font-size="4" font-weight="700" fill="#2a1d38" text-anchor="middle">↑ PROJECTS</text>
+      </g>
+      <!-- West Junction Sign (-17.9, 3.6) -> (-179, 36) -->
+      <g transform="translate(-179, 36)" filter="url(#dropShadow)">
+        <circle cx="0" cy="0" r="2" fill="#2a1d38"/>
+        <rect x="-24" y="-14" width="48" height="12" rx="3" fill="#fff" stroke="#2a1d38" stroke-width="1"/>
+        <text x="0" y="-6" font-family="'Space Mono', monospace" font-size="4" font-weight="700" fill="#2a1d38" text-anchor="middle">↑ EDUCATION</text>
+      </g>
+
+      <!-- 9. TRAFFIC CONE SLALOMS (Orange cones on East Spoke) -->
+      <g fill="#ff5b3a" stroke="#2a1d38" stroke-width="0.8">
+        <polygon points="110,-9 114,-9 112,-15"/>
+        <polygon points="126,9 130,9 128,3"/>
+        <polygon points="142,-9 146,-9 144,-15"/>
+        <polygon points="158,9 162,9 160,3"/>
+        <polygon points="174,-9 178,-9 176,-15"/>
+        <polygon points="190,9 194,9 192,3"/>
+      </g>
+
+      <!-- 10. COMPASS ROSE (Bottom-Left) -->
+      <g transform="translate(-460, 430)">
+        <circle cx="0" cy="0" r="32" fill="#fff" stroke="#2a1d38" stroke-width="1.8" filter="url(#dropShadow)"/>
+        <!-- Star points -->
+        <polygon points="0,-24 4,-4 24,0 4,4 0,24 -4,4 -24,0 -4,-4" fill="#ff5b3a"/>
+        <polygon points="0,-24 -4,-4 0,0" fill="#2a1d38"/>
+        <polygon points="24,0 4,-4 0,0" fill="#2a1d38"/>
+        <polygon points="0,24 4,4 0,0" fill="#2a1d38"/>
+        <polygon points="-24,0 -4,4 0,0" fill="#2a1d38"/>
+        <text x="0" y="-27" font-family="'Space Mono', monospace" font-size="7" font-weight="700" fill="#2a1d38" text-anchor="middle">N</text>
+        <text x="0" y="34" font-family="'Space Mono', monospace" font-size="7" font-weight="700" fill="#2a1d38" text-anchor="middle">S</text>
+        <text x="32" y="3" font-family="'Space Mono', monospace" font-size="7" font-weight="700" fill="#2a1d38">E</text>
+        <text x="-37" y="3" font-family="'Space Mono', monospace" font-size="7" font-weight="700" fill="#2a1d38">W</text>
+      </g>
+    </svg>
+
+    <div class="legend-bar">
+      <div class="legend-item"><span class="legend-box" style="background:var(--pave)"></span><span>Road &amp; Plaza</span></div>
+      <div class="legend-item"><span class="legend-box" style="background:var(--lawn)"></span><span>Central Lawn</span></div>
+      <div class="legend-item"><span class="legend-box" style="background:#cdb8f0"></span><span>About</span></div>
+      <div class="legend-item"><span class="legend-box" style="background:#ffe08f"></span><span>Education</span></div>
+      <div class="legend-item"><span class="legend-box" style="background:#a9d4f2"></span><span>Skills</span></div>
+      <div class="legend-item"><span class="legend-box" style="background:#ffc4a3"></span><span>Experience</span></div>
+      <div class="legend-item"><span class="legend-box" style="background:#a9dcb6"></span><span>Projects</span></div>
+      <div class="legend-item"><span class="legend-box" style="background:#f6b3c7"></span><span>Contact</span></div>
+      <div class="legend-item"><span class="legend-box" style="background:var(--skate-pave)"></span><span>Skate Slab</span></div>
+    </div>
+  </div>
+
+  <!-- Interactive Information Sidebar -->
+  <aside class="sidebar">
+    <div class="info-panel" id="infoPanel">
+      <span class="tag" id="sectorTag">SPAWN PLAZA</span>
+      <h2 id="sectorTitle">Central Plaza</h2>
+      <p class="subtitle" id="sectorSubtitle">Spawn Ring &amp; World Center</p>
+      <div class="desc" id="sectorDesc">
+        The departure plaza features a sunlit cobblestone ground with bold typography, floating 3D alphabet blocks spelling AAYAN DESAI, the red electric go-kart, palm planter, and four fenced oval flowerbeds with apricot gravel.
+      </div>
+      <div class="stats">
+        <div class="stat-item"><div class="k">Coordinates</div><div class="v" id="statCoord">(0m, 4.5m)</div></div>
+        <div class="stat-item"><div class="k">Radius</div><div class="v" id="statRadius">r = 10m</div></div>
+      </div>
+    </div>
+
+    <div class="quick-links">
+      <h3>Select Station</h3>
+      <button class="nav-btn" onclick="selectStand('spawn')"><span>Plaza Spawn</span><span class="pill" style="background:#2a1d38"></span></button>
+      <button class="nav-btn" onclick="selectStand('about')"><span>About (Greenhouse)</span><span class="pill" style="background:var(--c-about)"></span></button>
+      <button class="nav-btn" onclick="selectStand('education')"><span>Education (UOWD)</span><span class="pill" style="background:var(--c-edu)"></span></button>
+      <button class="nav-btn" onclick="selectStand('skills')"><span>Skills (The Lab)</span><span class="pill" style="background:var(--c-skills)"></span></button>
+      <button class="nav-btn" onclick="selectStand('patchifi')"><span>Patchifi (QA Intern)</span><span class="pill" style="background:var(--c-patchifi)"></span></button>
+      <button class="nav-btn" onclick="selectStand('appify')"><span>Appify Brands (Web)</span><span class="pill" style="background:var(--c-appify)"></span></button>
+      <button class="nav-btn" onclick="selectStand('projects')"><span>Projects (5 Easels)</span><span class="pill" style="background:var(--c-projects)"></span></button>
+      <button class="nav-btn" onclick="selectStand('contact')"><span>Contact (Say Hello)</span><span class="pill" style="background:var(--c-contact)"></span></button>
+      <button class="nav-btn" onclick="selectStand('skate')"><span>Skate Slab (Stunts)</span><span class="pill" style="background:#ff9f80"></span></button>
+    </div>
+  </aside>
+</div>
+
+<script>
+  const STAND_DATA = {
+    spawn: {
+      tag: "SPAWN PLAZA",
+      title: "Central Plaza",
+      sub: "Aayan Desai · QA Automation · Drive In",
+      desc: "The heart of the park with the spawn circle, the coral-red electric kart, giant 3D toy alphabet blocks, palm tree, park benches, and fairy string lights canopy overhead.",
+      coord: "X: 0m, Z: +4.5m",
+      radius: "Plaza r = 10m",
+      color: "#ff5b3a"
+    },
+    about: {
+      tag: "WEST SECTOR (-108°)",
+      title: "About",
+      sub: "Aayan Irshad Desai · Full-Stack & QA",
+      desc: "A stylized modern glass greenhouse with indoor potted monstera plants, developer desk with dual terminal monitors, wooden door, and lilac lawn surroundings.",
+      coord: "X: -28.7m, Z: +9.3m",
+      radius: "Stand r = 29.2m",
+      color: "#cdb8f0"
+    },
+    education: {
+      tag: "NORTH-WEST SECTOR (-72°)",
+      title: "Education",
+      sub: "University of Wollongong in Dubai",
+      desc: "Bachelor of Computer Science in Cybersecurity (2025–2028). Stand features Coursera professional certificates for Google Cybersecurity, Meta Front-End, and Microsoft Python.",
+      coord: "X: -27.8m, Z: -9.0m",
+      radius: "Stand r = 29.2m",
+      color: "#ffe08f"
+    },
+    skills: {
+      tag: "NORTH SECTOR (-36°)",
+      title: "Skills",
+      sub: "Four Benches · One Inventory",
+      desc: "The sky-blue laboratory gazebo housing dedicated benches for: Languages (Python, JS, TS, C++, SQL), Frameworks (React, Next.js, Playwright, n8n), QA automation, and Security.",
+      coord: "X: -17.2m, Z: -23.6m",
+      radius: "Stand r = 29.2m",
+      color: "#a9d4f2"
+    },
+    patchifi: {
+      tag: "DUE NORTH SECTOR (0°)",
+      title: "Patchifi",
+      sub: "QA & Automation Intern (Apr – Sept 2026)",
+      desc: "Peach-and-white striped awning boutique stand. Highlights: 840+ automated Playwright test cases, OTP session-reuse, n8n AI LinkedIn pipeline, and 22 Azure Bastion remediation scripts.",
+      coord: "X: 0.0m, Z: -29.2m",
+      radius: "Stand r = 29.2m",
+      color: "#ffc4a3"
+    },
+    appify: {
+      tag: "NORTH-EAST SECTOR (+36°)",
+      title: "Appify Brands",
+      sub: "Web Developer · Freelance (Sept 2026)",
+      desc: "Matching peach striped storefront. Developed 2 responsive production landing pages with React, Next.js, Three.js, Framer Motion, GSAP, and Tailwind.",
+      coord: "X: +17.2m, Z: -23.6m",
+      radius: "Stand r = 29.2m",
+      color: "#ffc4a3"
+    },
+    projects: {
+      tag: "EAST SECTOR (+72°)",
+      title: "Projects Gallery",
+      sub: "Five Builds · Gallery Easels",
+      desc: "Mint-green striped pavilion featuring five distinct display easel boards: 01 Internship Management System, 02 AI Resume Analyzer, 03 Voice Scam Shield, 04 AI Object Detection, 05 Hand Snake.",
+      coord: "X: +27.8m, Z: -9.0m",
+      radius: "Stand r = 29.2m",
+      color: "#a9dcb6"
+    },
+    contact: {
+      tag: "SOUTH-EAST SECTOR (+108°)",
+      title: "Contact",
+      sub: "Say Hello · Connect & Reach Out",
+      desc: "Vibrant pink billboard sign reading 'SAY HELLO' with a mailbox and social boards: Email (aayanirshad99@gmail.com), GitHub (Rapid1234-star), and LinkedIn.",
+      coord: "X: +27.8m, Z: +9.0m",
+      radius: "Stand r = 29.2m",
+      color: "#f6b3c7"
+    },
+    skate: {
+      tag: "SOUTH SECTOR (+180°)",
+      title: "Skate Slab",
+      sub: "Stunt Arena & Obstacle Course",
+      desc: "Large stunt park slab reached by the south spoke ramp. Features lilac and peach kicker ramps, a mint funbox, stunt hoop, paint-can bowling pyramid, and knock-over brick walls.",
+      coord: "X: -12m to +12m, Z: 28.5m to 42m",
+      radius: "Length = 13.5m",
+      color: "#ff9f80"
+    }
+  };
+
+  function selectStand(id) {
+    const data = STAND_DATA[id];
+    if (!data) return;
+
+    document.getElementById('sectorTag').textContent = data.tag;
+    document.getElementById('sectorTag').style.backgroundColor = data.color;
+    document.getElementById('sectorTitle').textContent = data.title;
+    document.getElementById('sectorSubtitle').textContent = data.sub;
+    document.getElementById('sectorDesc').textContent = data.desc;
+    document.getElementById('statCoord').textContent = data.coord;
+    document.getElementById('statRadius').textContent = data.radius;
+
+    // Highlight corresponding SVG group if it exists
+    document.querySelectorAll('.stand-group').forEach(el => el.style.transform = '');
+    const activeSvg = document.getElementById('stand-' + id);
+    if (activeSvg) {
+      activeSvg.style.transform = 'scale(1.04)';
+    }
+  }
+</script>
+
+</body>
+</html>

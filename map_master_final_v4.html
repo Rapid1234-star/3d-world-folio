@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aayan Desai — Portfolio Park Master Architecture V8.5 (Definitive Edition)</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #f7efe4;
+  --card: #fdfaf5;
+  --ink: #2a1d38;
+  --sub: rgba(42,29,56,.72);
+  --mut: rgba(42,29,56,.45);
+  --line: rgba(42,29,56,.14);
+  --coral: #ff5b3a;
+  --gold: #ffd27a;
+  --tarmac: #2c203b;
+  --tarmac-edge: #1c1326;
+  --tarmac-groove: #38294c;
+  --lawn: #bfe3bf;
+  --lawn-inner: #cbe9c5;
+  --pave: #ece4ec;
+  --skate-pave: #e3d8ef;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+header {
+  max-width: 1420px;
+  width: 100%;
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+h1 {
+  font-family: Syne, sans-serif;
+  font-weight: 800;
+  font-size: clamp(1.6rem, 3.2vw, 2.5rem);
+  letter-spacing: -.04em;
+  text-transform: uppercase;
+  line-height: 1;
+}
+header p {
+  font-family: 'Space Mono', monospace;
+  font-size: .74rem;
+  color: var(--sub);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  margin-top: 6px;
+}
+.row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.chip {
+  font-family: 'Space Mono', monospace;
+  font-size: .74rem;
+  border: 1.5px solid var(--line);
+  background: #fff;
+  color: var(--ink);
+  border-radius: 99px;
+  padding: 7px 14px;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  transition: all .2s;
+}
+.chip:hover { border-color: var(--ink); }
+.badge {
+  background: var(--ink);
+  color: #fff;
+  font-weight: 700;
+  border-radius: 99px;
+  padding: 7px 16px;
+  font-size: .74rem;
+  font-family: 'Space Mono', monospace;
+}
+
+.grid {
+  max-width: 1420px;
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 22px;
+  align-items: start;
+}
+@media (max-width: 1060px) { .grid { grid-template-columns: 1fr; } }
+
+.card {
+  background: #fff;
+  border: 1.5px solid var(--line);
+  border-radius: 26px;
+  padding: 20px;
+  box-shadow: 0 16px 40px -15px rgba(42,29,56,.12);
+}
+svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 20px;
+  background: #fbf6ee;
+  user-select: none;
+}
+.st { cursor: pointer; outline: none; }
+.st .body { transform-box: fill-box; transform-origin: center; transition: transform .25s cubic-bezier(0.16,1,0.3,1); }
+.st:hover .body, .st:focus .body, .st.on .body { transform: scale(1.08); }
+.ring { opacity: 0; transition: opacity .2s; }
+.st.on .ring { opacity: 1; }
+
+.side { display: flex; flex-direction: column; gap: 14px; }
+.panel {
+  background: var(--card);
+  border: 1.5px solid var(--line);
+  border-radius: 22px;
+  padding: 22px;
+}
+.tag {
+  font-family: 'Space Mono', monospace;
+  font-size: .66rem;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 6px;
+  margin-bottom: 10px;
+  color: var(--ink);
+}
+.panel h2 {
+  font-family: Syne, sans-serif;
+  font-weight: 800;
+  font-size: 1.6rem;
+  letter-spacing: -.03em;
+  line-height: 1.1;
+  margin-bottom: 6px;
+}
+.subt { font-size: .92rem; color: var(--sub); font-weight: 600; margin-bottom: 10px; line-height: 1.4; }
+.desc { font-size: .86rem; line-height: 1.6; color: var(--sub); border-top: 1px solid var(--line); padding-top: 12px; }
+.stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); }
+.k { font-family: 'Space Mono', monospace; font-size: .64rem; color: var(--mut); text-transform: uppercase; }
+.v { font-size: .86rem; font-weight: 700; margin-top: 2px; }
+
+.why h3, .nav h3 { font-family: Syne, sans-serif; font-size: .88rem; text-transform: uppercase; margin-bottom: 8px; }
+.why li { font-size: .82rem; line-height: 1.55; color: var(--sub); margin: 0 0 8px 16px; }
+
+.nav {
+  background: #fff;
+  border: 1.5px solid var(--line);
+  border-radius: 20px;
+  padding: 16px;
+}
+#navList { display: flex; flex-direction: column; gap: 6px; }
+.nav button {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  background: #fbf6ee;
+  color: var(--ink);
+  font: 600 .82rem 'Plus Jakarta Sans', sans-serif;
+  cursor: pointer;
+  transition: all .2s;
+}
+.nav button.on, .nav button:hover { border-color: var(--ink); background: #fff; box-shadow: 0 4px 12px rgba(42,29,56,.08); }
+.nav b { width: 13px; height: 13px; border-radius: 50%; border: 1.5px solid var(--ink); }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>Aayan Desai — Portfolio Park Master Architecture V9</h1>
+    <p>V9 Polish · No Stand Stems · Fixed SE Slipway · Bolder Trees · Proper S/F Line · 1 m = 10 px</p>
+  </div>
+  <div class="row">
+    <span class="badge">Master V9 Polished</span>
+    <label class="chip"><input type="checkbox" id="tDims" checked> Dimensions</label>
+    <label class="chip"><input type="checkbox" id="tTrees" checked> Trees</label>
+    <label class="chip"><input type="checkbox" id="tParterres" checked> Formal Parterres</label>
+  </div>
+</header>
+
+<div class="grid">
+  <!-- Interactive SVG Canvas -->
+  <div class="card">
+    <svg id="map" viewBox="-700 -490 1400 980" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Portfolio park master architecture map v8.5"></svg>
+  </div>
+
+  <!-- Sidebar -->
+  <aside class="side">
+    <div class="panel">
+      <span class="tag" id="pTag"></span>
+      <h2 id="pTitle"></h2>
+      <p class="subt" id="pSub"></p>
+      <div class="desc" id="pDesc"></div>
+      <div class="stats">
+        <div><div class="k">Position</div><div class="v" id="pPos"></div></div>
+        <div><div class="k">From spawn</div><div class="v" id="pDist"></div></div>
+      </div>
+    </div>
+    
+    <div class="panel why">
+      <h3>V8.5 Final Polish Enhancements</h3>
+      <ul>
+        <li><strong>Southwest Speedway Connector Added:</strong> Replaced the dense, awkward tree forest with a high-speed sweeping boulevard connecting About Greenhouse & Skate Slab directly into the Turbo Speedway.</li>
+        <li><strong>Confusing Turnway Removed:</strong> Deleted the ambiguous purple "donut" disc. Replaced with the clean <em>Innovation Forecourt Piazza</em> directly serving Projects Gallery.</li>
+        <li><strong>Kart Parking Stalls [ P ]:</strong> Each career pavilion now features dedicated dashed parking bays for pulling over and inspecting projects.</li>
+        <li><strong>Unified Central Spawn (0, 0):</strong> The kart spawns facing North on the Terrazzo Compass Rose, launching straight toward the <strong>North Crest Airtime Jump</strong>!</li>
+        <li><strong>Say Hello Turnout Plaza:</strong> Kept safely off the track in the Southeast garden, leaving the speedway fully clear.</li>
+      </ul>
+    </div>
+
+    <div class="nav">
+      <h3>Select Station</h3>
+      <div id="navList"></div>
+    </div>
+  </aside>
+</div>
+
+<script>
+const INK = '#2a1d38', NS = 'http://www.w3.org/2000/svg', svg = document.getElementById('map');
+const f = n => Math.round(n * 10) / 10, d = (a, b, c, e) => Math.hypot(a - c, b - e);
+
+const S = {
+  spawn: { 
+    tag: 'START · SPAWN', 
+    title: 'Central Plaza Hub', 
+    sub: 'Geographic Center (0, 0) · North Launch Axis', 
+    desc: 'The ceremonial spawn point of the portfolio: featuring the large AAYAN DESAI stone marquee, 3D toy alphabet blocks, driveable Terrazzo Compass Rose, and coral kart facing North.', 
+    color: '#ffd27a', 
+    icon: '🏁' 
+  },
+  jump: { 
+    tag: 'ACTION · AIRTIME', 
+    title: 'North Crest Jump', 
+    sub: 'Elevation Ramp · High-Speed Airtime Launch', 
+    desc: 'Engineered elevation hump on the Northern straightaway with high-contrast warning chevrons and red apex lip that sends the kart flying airborne.', 
+    color: '#ffd27a', 
+    icon: '🚀' 
+  },
+  about: { 
+    tag: 'STORY 01', 
+    title: 'About (Greenhouse)', 
+    sub: 'Aayan Irshad Desai · Full-Stack & QA', 
+    desc: 'Modern glass greenhouse with dual-monitor developer workstation, potted monsteras, marked kart parking, and botanical garden forecourt.', 
+    color: '#cdb8f0', 
+    icon: '🌿' 
+  },
+  education: { 
+    tag: 'STORY 02', 
+    title: 'Education', 
+    sub: 'University of Wollongong in Dubai', 
+    desc: 'Classical academic colonnade celebrating the Bachelor of Computer Science in Cybersecurity (2025–2028) and Coursera professional certifications.', 
+    color: '#ffe08f', 
+    icon: '🎓' 
+  },
+  skills: { 
+    tag: 'STORY 03', 
+    title: 'Skills Lab', 
+    sub: 'Four Benches · One Inventory', 
+    desc: 'Sky-blue laboratory gazebo housing dedicated benches for: Languages, Frameworks, QA automation, and Cloud Security.', 
+    color: '#a9d4f2', 
+    icon: '🧪' 
+  },
+  patchifi: { 
+    tag: 'STORY 04 · HERO', 
+    title: 'Patchifi', 
+    sub: 'QA & Automation Intern (Apr – Sep 2026)', 
+    desc: 'Flagship striped peach boutique highlighting 840+ automated Playwright test cases, OTP session reuse, and 22 Azure Bastion remediation scripts.', 
+    color: '#ffc4a3', 
+    icon: '🛠️' 
+  },
+  appify: { 
+    tag: 'STORY 05', 
+    title: 'Appify Brands', 
+    sub: 'Web Developer · Freelance (Sep 2026)', 
+    desc: 'Matching peach storefront: developed 2 responsive production landing pages with React, Next.js, Three.js, and GSAP.', 
+    color: '#ffc4a3', 
+    icon: '🛍️' 
+  },
+  projects: { 
+    tag: 'STORY 06', 
+    title: 'Projects Gallery', 
+    sub: 'Five Builds · Innovation Piazza', 
+    desc: 'Mint pavilion with five display easels: Internship Management System, AI Resume Analyzer, Voice Scam Shield, AI Face & Object Detection, Hand Snake.', 
+    color: '#a9dcb6', 
+    icon: '🖼️' 
+  },
+  contact: { 
+    tag: 'FINISH · CONTACT', 
+    title: 'Say Hello Turnout', 
+    sub: 'Dedicated Southeast Garden Plaza', 
+    desc: 'Relocated safely off the racing track to a dedicated scenic garden turnout: features the SAY HELLO billboard, mailbox with coral flag, and social lounge.', 
+    color: '#f6b3c7', 
+    icon: '💌' 
+  },
+  skate: { 
+    tag: 'PLAY ZONE', 
+    title: 'Skate Slab', 
+    sub: 'Stunt Arena & Obstacle Course', 
+    desc: 'Southern stunt arena with kickers, funbox with grind rail, basketball stunt hoop, and direct link to the Southwest Speedway Ramp.', 
+    color: '#ff9f80', 
+    icon: '🛹' 
+  }
+};
+
+const ORDER = ['about', 'education', 'skills', 'patchifi', 'appify', 'projects'];
+
+/* MASTER 360° RECTANGULAR CIRCUIT GEOMETRY (V8.5) */
+const ring = { cx: 0, cy: -50, rx: 345, ry: 175 };
+const hub = { x: 0, y: 0, r: 84 };
+
+const MASTER = {
+  // 360-degree continuous rectangular racetrack: 100% UNOBSTRUCTED!
+  speed: {
+    d: 'M -380 -390 L 380 -390 A 200 200 0 0 1 580 -190 L 580 190 A 200 200 0 0 1 380 390 L -380 390 A 200 200 0 0 1 -580 190 L -580 -190 A 200 200 0 0 1 -380 -390 Z',
+    w: 115
+  },
+  boosts: [0.0424, 0.1725, 0.3235, 0.5368, 0.8263],
+  start: 0.6781,
+  roads: [
+    // Story Ring Promenade
+    { d: `M ${ring.cx - ring.rx} ${ring.cy} A ${ring.rx} ${ring.ry} 0 1 1 ${ring.cx + ring.rx} ${ring.cy} A ${ring.rx} ${ring.ry} 0 1 1 ${ring.cx - ring.rx} ${ring.cy}`, w: 56 },
+    
+    // 1. NORTH GRAND BOULEVARD (Direct Drag-Strip Axis to Airtime Jump!)
+    { d: `M 0 0 L 0 -225`, w: 54 },
+    { d: `M 0 -225 L 0 -332`, w: 52 },
+    
+    // 2. SOUTH STUNT BOULEVARD (Direct Access to Skate Slab)
+    { d: `M 0 0 L 0 195`, w: 52 },
+    
+    // 3. WEST HERITAGE BOULEVARD (Connects to About & Education)
+    { d: `M 0 0 L -345 -50`, w: 52 },
+    
+    // 4. EAST INNOVATION BOULEVARD (Direct Axis to Projects Gallery Piazza)
+    { d: `M 0 0 L 345 -50`, w: 52 },
+    // 5. SOUTHEAST SCENIC PROMENADE — smooth flowing curve from Story Ring to Say Hello Plaza
+    { d: `M 300 46 C 325 88 355 125 385 150`, w: 48 },
+    // 6. SOUTHWEST SPEEDWAY CONNECTOR RAMP (Replaces awkward tree jungle!)
+    { d: `M -310 15 C -365 110 -400 230 -430 390`, w: 52 },
+    // Link from Skate Slab West Gate to Southwest Ramp
+    { d: `M -160 250 C -220 260 -290 260 -365 240`, w: 46 }
+  ],
+  hub: hub,
+  contactPlaza: { x: 420, y: 205, r: 76, isl: 42 },
+  skate: { x: -160, y: 195, w: 320, h: 125 },
+  stands: {},
+  standPads: {},
+  labels: [
+    { x: -10, y: 410, t: '360° TURBO SPEEDWAY', s: 22, c: '#ffd27a' },
+    { x: 592, y: 65, t: 'EAST STRAIGHT', s: 18, c: '#fff', rot: -90 },
+    { x: -592, y: -55, t: 'WEST STRAIGHT', s: 18, c: '#fff', rot: 90 },
+    { x: 0, y: -275, t: 'STORY RING PROMENADE', s: 9, c: '#ff5b3a', m: 1 },
+    { x: 320, y: -298, t: 'EXPERIENCE', s: 9, c: INK, m: 1 },
+    { x: -395, y: 200, t: 'SW SPEEDWAY RAMP', s: 8, c: INK, rot: -70, m: 1 },
+    { x: 455, y: 88, t: 'CONTACT GARDEN', s: 9, c: INK, m: 1 }
+  ]
+};
+
+// Calculate stand positions along the Story Ring
+[185, 147, 109, 71, 33, -5].forEach((deg, i) => {
+  const t = deg * Math.PI / 180, px = ring.cx + ring.rx * Math.cos(t), py = ring.cy - ring.ry * Math.sin(t);
+  let nx = Math.cos(t) / ring.rx, ny = -Math.sin(t) / ring.ry;
+  const l = Math.hypot(nx, ny); nx /= l; ny /= l;
+  const id = ORDER[i], sc = id === 'patchifi' ? 1.1 : 1, off = id === 'skills' ? 66 : id === 'patchifi' ? 68 : 88;
+  MASTER.stands[id] = { x: px + nx * off, y: py + ny * off, nx, ny, sc, pad: [px, py] };
+  MASTER.standPads[id] = [px, py];
+});
+
+function trace(dd, step) {
+  const p = document.createElementNS(NS, 'path'); p.setAttribute('d', dd); svg.appendChild(p);
+  const n = p.getTotalLength(), out = [];
+  for (let l = 0; l <= n; l += step) {
+    const a = p.getPointAtLength(l), b = p.getPointAtLength(Math.min(n, l + 1.5));
+    out.push({ x: a.x, y: a.y, a: Math.atan2(b.y - a.y, b.x - a.x) * 180 / Math.PI });
+  }
+  svg.removeChild(p);
+  return { n, pts: out };
+}
+
+function render() {
+  const L = MASTER, H = L.hub, CP = L.contactPlaza, K = L.skate, W = L.speed.w, o = [];
+  const sp = trace(L.speed.d, 4), at = fr => sp.pts[Math.min(sp.pts.length - 1, Math.round(fr * (sp.pts.length - 1)))];
+  
+  const roadPts = [
+    ...L.roads.map(r => ({ pts: trace(r.d, 14).pts, h: r.w / 2 + 18 })),
+    { pts: sp.pts.filter((_, i) => i % 3 === 0), h: W / 2 + 20 }
+  ];
+
+  // Stand approach connectors
+  const standStems = ORDER.map(id => ({
+    a: MASTER.stands[id].pad,
+    b: [MASTER.stands[id].x, MASTER.stands[id].y]
+  }));
+
+  const blocked = (x, y) => {
+    // 1. Road surfaces
+    for (const r of roadPts) for (const q of r.pts) if (d(x, y, q.x, q.y) < r.h) return true;
+    
+    // 1b. Parterres and fenced beds
+    for (const [px, py] of [[-150, -115], [150, -115]]) if (Math.abs(x - px) < 86 && Math.abs(y - py) < 56) return true;
+    for (const [bx, by] of [[-180, 80], [-400, -180], [140, -180], [360, -110]]) if (d(x, y, bx, by) < 52) return true;
+    // 2. Hub, Roundabout, Skate arena
+    if (d(x, y, H.x, H.y) < H.r + 32) return true;
+    if (d(x, y, CP.x, CP.y) < CP.r + 34) return true;
+    if (x > 360 && x < 520 && y > 70 && y < 175) return true;
+    if (x > K.x - 35 && x < K.x + K.w + 35 && y > K.y - 35 && y < K.y + K.h + 35) return true;
+    
+    // 3. Stands and forecourts
+    for (const id of ORDER) {
+      const st = L.stands[id];
+      if (d(x, y, st.x, st.y) < 85) return true;
+      if (d(x, y, st.pad[0], st.pad[1]) < 48) return true;
+    }
+
+    // 4. Stand connector walkways (Zero tree clipping on paths!)
+    for (const stem of standStems) {
+      const x1 = stem.a[0], y1 = stem.a[1], x2 = stem.b[0], y2 = stem.b[1];
+      const len = Math.hypot(x2 - x1, y2 - y1);
+      const u = Math.max(0, Math.min(1, ((x - x1) * (x2 - x1) + (y - y1) * (y2 - y1)) / (len * len)));
+      const px = x1 + u * (x2 - x1), py = y1 + u * (y2 - y1);
+      if (d(x, y, px, py) < 32) return true;
+    }
+
+    // 5. Formal parterre flowerbeds (Keep trees off formal gardens)
+    if (Math.hypot((x - ring.cx) / 220, (y - ring.cy) / 100) < 1) return true;
+
+    return false;
+  };
+
+  // Sector Fills: Cleanly bounded by roads and outer speedway!
+  // 1. Wedges start strictly at ring.rx/ring.ry so the central garden/infield remains 100% clean green.
+  // 2. The North Grand Boulevard (angle 90°) acts as a clean barrier: Skills Lab stays strictly on the left (West), Patchifi stays strictly on the right (East).
+  // 3. ORDER stands 1 to 5 (education, skills, patchifi, appify, projects) use radial sectors.
+  // 4. About (Greenhouse) uses a dedicated polygon strictly bounded by West Boulevard & the SW Speedway Ramp.
+  // 5. Skate Slab has NO grass color (kept pure clean lawn).
+  // 6. Say Hello sector is cleanly placed east of Skate Slab (x >= 280).
+  const sectorBoundaries = [
+    166, // Education start (halfway between About and Education stands)
+    128, // Education / Skills Lab boundary
+    90,  // Skills Lab / Patchifi boundary (EXACTLY at North Grand Boulevard!)
+    52,  // Patchifi / Appify boundary
+    14,  // Appify / Projects boundary
+    -35  // Projects end (East axis)
+  ];
+  
+  const LAWN = { about: '#c7b0f4', education: '#e6ee7a', skills: '#8fcaf5', patchifi: '#ffa58a', appify: '#ffa58a', projects: '#6fd8c4', contact: '#ffb0cc' };
+  const sectors = ORDER.slice(1).map((id, idx) => {
+    const a1 = sectorBoundaries[idx] * Math.PI / 180;
+    const a2 = sectorBoundaries[idx + 1] * Math.PI / 180;
+    const p1x = ring.cx + (ring.rx + 15) * Math.cos(a1), p1y = ring.cy - (ring.ry + 15) * Math.sin(a1);
+    const p2x = ring.cx + 700 * Math.cos(a1), p2y = ring.cy - 650 * Math.sin(a1);
+    const p3x = ring.cx + 700 * Math.cos(a2), p3y = ring.cy - 650 * Math.sin(a2);
+    const p4x = ring.cx + (ring.rx + 15) * Math.cos(a2), p4y = ring.cy - (ring.ry + 15) * Math.sin(a2);
+    const pathD = `M ${f(p1x)} ${f(p1y)} L ${f(p2x)} ${f(p2y)} L ${f(p3x)} ${f(p3y)} L ${f(p4x)} ${f(p4y)} Z`;
+    return { id, d: pathD, color: LAWN[id] };
+  });
+
+  o.push(`<defs>
+    <filter id="sh" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="2" dy="5" stdDeviation="4" flood-color="${INK}" flood-opacity=".2"/>
+    </filter>
+    <filter id="boostGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+    <pattern id="chk" width="14" height="14" patternUnits="userSpaceOnUse">
+      <rect width="14" height="14" fill="#fff"/>
+      <rect width="7" height="7" fill="${INK}"/>
+      <rect x="7" y="7" width="7" height="7" fill="${INK}"/>
+    </pattern>
+    <pattern id="curb" width="16" height="8" patternUnits="userSpaceOnUse">
+      <rect width="8" height="8" fill="#ff5b3a" />
+      <rect x="8" width="8" height="8" fill="#ffffff" />
+    </pattern>
+    <filter id="softZone" filterUnits="userSpaceOnUse" x="-700" y="-500" width="1400" height="1000"><feGaussianBlur stdDeviation="15"/></filter>
+    <clipPath id="infieldClip"><rect x="-523" y="-333" width="1046" height="666" rx="143"/></clipPath>
+    <clipPath id="lawnClip">
+      <rect x="-680" y="-470" width="1360" height="940" rx="64"/>
+    </clipPath>
+  </defs>
+
+  <!-- 1. BASE PARK LAWN -->
+  <rect x="-680" y="-470" width="1360" height="940" rx="64" fill="#bfe3bf"/>
+  <rect x="-668" y="-458" width="1336" height="916" rx="54" fill="none" stroke="#86c99a" stroke-width="10" stroke-dasharray="2 9" stroke-linecap="round"/>
+
+  <!-- SECTOR-WIDE GRASS TERRITORIES (Full coverage, perfectly clipped inside park lawn) -->
+  <g clip-path="url(#lawnClip)">
+    <g filter="url(#softZone)" opacity="0.30">
+      ${sectors.map(z => `<path d="${z.d}" fill="${z.color}"/>`).join('\n      ')}
+      <path d="M -680 -207 L -349 -96 L -345 -50 L -310 15 C -365 110 -400 230 -430 390 L -680 390 Z" fill="${LAWN.about}"/>
+      <path d="M 240 50 L 680 50 L 680 470 L 240 470 Z" fill="${LAWN.contact}"/>
+    </g>
+    <g clip-path="url(#infieldClip)">
+      <g filter="url(#softZone)" opacity="0.62">
+        ${sectors.map(z => `<path d="${z.d}" fill="${z.color}"/>`).join('\n        ')}
+        <path d="M -680 -207 L -349 -96 L -345 -50 L -310 15 C -365 110 -400 230 -430 390 L -680 390 Z" fill="${LAWN.about}"/>
+        <path d="M 240 50 L 680 50 L 680 470 L 240 470 Z" fill="${LAWN.contact}"/>
+      </g>
+    </g>
+  </g>`);
+
+  // 2. FORMAL INFIELD PARTERRES (ZERO WEIRD BLANK SPACE)
+  o.push(`<g id="parterres">
+    <!-- Infield Inner Meadow Base -->
+    <ellipse cx="${ring.cx}" cy="${ring.cy}" rx="${ring.rx - 55}" ry="${ring.ry - 55}" fill="#c5e7bf" stroke="#a0d499" stroke-width="2"/>
+
+    <!-- Northwest Quadrant Parterre (Academic Heritage Gardens) -->
+    <g transform="translate(-150, -115)" filter="url(#sh)">
+      <rect x="-65" y="-36" width="130" height="72" rx="14" fill="#fcf6ec" stroke="#d5c8be" stroke-width="2"/>
+      <rect x="-56" y="-28" width="112" height="56" rx="10" fill="#a8dbb0" stroke="#72b888" stroke-width="2.5"/>
+      <ellipse cx="-28" cy="0" rx="18" ry="12" fill="#ebc4ae" stroke="#fff" stroke-width="1.5" stroke-dasharray="3 3"/>
+      <ellipse cx="28" cy="0" rx="18" ry="12" fill="#cdb8f0" stroke="#fff" stroke-width="1.5" stroke-dasharray="3 3"/>
+      <circle cx="-28" cy="0" r="4" fill="#ff5b3a"/><circle cx="28" cy="0" r="4" fill="#ffd27a"/>
+    </g>
+
+    <!-- Northeast Quadrant Parterre (Innovation Botanic Gardens) -->
+    <g transform="translate(150, -115)" filter="url(#sh)">
+      <rect x="-65" y="-36" width="130" height="72" rx="14" fill="#fcf6ec" stroke="#d5c8be" stroke-width="2"/>
+      <rect x="-56" y="-28" width="112" height="56" rx="10" fill="#a8dbb0" stroke="#72b888" stroke-width="2.5"/>
+      <ellipse cx="-28" cy="0" rx="18" ry="12" fill="#ffd27a" stroke="#fff" stroke-width="1.5" stroke-dasharray="3 3"/>
+      <ellipse cx="28" cy="0" rx="18" ry="12" fill="#ebc4ae" stroke="#fff" stroke-width="1.5" stroke-dasharray="3 3"/>
+      <circle cx="-28" cy="0" r="4" fill="#ff5b3a"/><circle cx="28" cy="0" r="4" fill="#86c99a"/>
+    </g>
+
+    <!-- Four Authentic Fenced Oval Gardens (Matching live kart.js BEDS) -->
+    <g filter="url(#sh)">
+      <!-- Bed 1: Southwest Infield Lawn -->
+      <g transform="translate(-180, 80) rotate(25)">
+        <ellipse cx="0" cy="0" rx="34" ry="20" fill="#ebc4ae" stroke="#fff" stroke-width="2" stroke-dasharray="3 4"/>
+        <circle cx="-8" cy="0" r="5" fill="#86c99a"/><circle cx="8" cy="0" r="5" fill="#a9dcb6"/>
+      </g>
+      <!-- Bed 2: West Lawn -->
+      <g transform="translate(-400, -180) rotate(-35)">
+        <ellipse cx="0" cy="0" rx="36" ry="20" fill="#ebc4ae" stroke="#fff" stroke-width="2" stroke-dasharray="3 4"/>
+        <circle cx="-6" cy="0" r="5" fill="#86c99a"/><circle cx="8" cy="0" r="5" fill="#a9dcb6"/>
+      </g>
+      <!-- Bed 3: North Terrace -->
+      <g transform="translate(140, -180) rotate(35)">
+        <ellipse cx="0" cy="0" rx="36" ry="20" fill="#ebc4ae" stroke="#fff" stroke-width="2" stroke-dasharray="3 4"/>
+        <circle cx="-6" cy="0" r="5" fill="#86c99a"/><circle cx="8" cy="0" r="5" fill="#a9dcb6"/>
+      </g>
+      <!-- Bed 4: East Courtyard -->
+      <g transform="translate(360, -110) rotate(-45)">
+        <ellipse cx="0" cy="0" rx="34" ry="20" fill="#ebc4ae" stroke="#fff" stroke-width="2" stroke-dasharray="3 4"/>
+        <circle cx="-6" cy="0" r="5" fill="#86c99a"/><circle cx="8" cy="0" r="5" fill="#a9dcb6"/>
+      </g>
+    </g>
+  </g>`);
+
+  // 3. INNER STORY ROADS & HIGHWAY ARTERIES (Warm Sunlit Stone Paving)
+  o.push(`<g fill="none">
+    ${L.roads.map(r => `<path d="${r.d}" stroke="#d2c2d2" stroke-width="${r.w + 8}"/>`).join('')}
+    ${L.roads.map(r => `<path d="${r.d}" stroke="#ece4ec" stroke-width="${r.w}"/>`).join('')}
+    ${L.roads.slice(0, 1).map(r => `<path d="${r.d}" stroke="#fff" stroke-width="2.5" stroke-dasharray="12 12"/>`).join('')}
+  </g>
+`);
+
+  // 4. THE 360° TURBO SPEEDWAY (Harmonious Warm Velvet Plum Tarmac!)
+  // Completely clear, uninterrupted 120m eastern straightaway!
+  o.push(`<g fill="none" filter="url(#sh)">
+    <!-- Road Sub-base Curb Bed -->
+    <path d="${L.speed.d}" stroke="#1c1326" stroke-width="${W + 12}"/>
+    <!-- Red & White FIA Apex Curbs on all 4 corners -->
+    <path d="${L.speed.d}" stroke="url(#curb)" stroke-width="${W + 6}"/>
+    <!-- Velvet Plum Tarmac Surface (#2c203b) -->
+    <path d="${L.speed.d}" stroke="#2c203b" stroke-width="${W}"/>
+    <!-- High-Grip Inner Racing Groove Track -->
+    <path d="${L.speed.d}" stroke="#38294c" stroke-width="${W - 10}"/>
+  </g>
+  <!-- Glowing Gold Centerline Lane Dashes -->
+  <path d="${L.speed.d}" fill="none" stroke="#ffd27a" stroke-width="3.5" stroke-dasharray="24 18"/>`);
+
+  // Chevron Road Speed Guidance
+  const bi = L.boosts.map(b => Math.round(b * (sp.pts.length - 1)));
+  let ch = '';
+  for (let i = 20; i < sp.pts.length - 20; i += 16) {
+    if (bi.some(b => Math.abs(b - i) * 4 < 55) || (L.start && Math.abs(i / (sp.pts.length - 1) - L.start) < .012)) continue;
+    const q = sp.pts[i], r = q.a * Math.PI / 180;
+    [-1, 1].forEach(s => ch += `<path transform="translate(${f(q.x - Math.sin(r) * s * W * .28)},${f(q.y + Math.cos(r) * s * W * .28)}) rotate(${f(q.a)})" d="M -7 -11 L 5 0 L -7 11" fill="none" stroke="#ffd27a" stroke-width="3" opacity=".5"/>`);
+  }
+  o.push(ch);
+
+  // Boost Chevron Pads
+  L.boosts.forEach(b => {
+    const q = at(b);
+    o.push(`<g transform="translate(${f(q.x)},${f(q.y)}) rotate(${f(q.a)})" filter="url(#boostGlow)">
+      <rect x="-34" y="-28" width="68" height="56" rx="8" fill="#ff5b3a" stroke="${INK}" stroke-width="1.5"/>
+      ${[-16, 0, 16].map(k => `<path d="M ${k - 6} -13 L ${k + 4} 0 L ${k - 6} 13" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round"/>`).join('')}
+    </g>`);
+  });
+
+  // Start / Finish Line — proper double-width checkered bar with S/F label
+  if (L.start != null) {
+    const q = at(L.start);
+    o.push(`<g transform="translate(${f(q.x)},${f(q.y)}) rotate(${f(q.a)})">
+      <rect x="-14" y="${-W / 2}" width="28" height="${W}" fill="#1c1326"/>
+      <rect x="-14" y="${-W / 2}" width="28" height="${W}" fill="url(#chk)" opacity="0.85"/>
+      <rect x="-14" y="${-W / 2 - 4}" width="28" height="6" rx="2" fill="#ff5b3a"/>
+      <rect x="-14" y="${W / 2 - 2}" width="28" height="6" rx="2" fill="#ff5b3a"/>
+      <text x="0" y="${-W / 2 - 10}" text-anchor="middle" font-family="Space Mono" font-weight="700" font-size="8" fill="#ffd27a" letter-spacing="0.05em">S/F</text>
+    </g>`);
+  }
+
+  // 5. NORTH CREST AIRTIME JUMP (Engineered Launch Deck on Top Straightaway!)
+  o.push(`<g id="st-jump" class="st" tabindex="0" data-id="jump" transform="translate(0, -390)" filter="url(#sh)">
+    <circle class="ring" cx="0" cy="0" r="70" fill="none" stroke="#ffd27a" stroke-width="2.5" stroke-dasharray="6 5"/>
+    <rect x="-115" y="-44" width="230" height="88" rx="10" fill="#3c2a52" stroke="#ffd27a" stroke-width="2.5"/>
+    <!-- Launch Chevrons -->
+    <path d="M -80 -22 L -65 0 L -80 22 M -40 -22 L -25 0 L -40 22 M 0 -22 L 15 0 L 0 22 M 40 -22 L 55 0 L 40 22 M 80 -22 L 95 0 L 80 22" 
+          fill="none" stroke="#ffd27a" stroke-width="5" stroke-linecap="round"/>
+    <!-- Crest Apex Lip -->
+    <line x1="0" y1="-44" x2="0" y2="44" stroke="#ff5b3a" stroke-width="4.5" stroke-dasharray="6 4"/>
+    <text x="0" y="-30" font-family="Syne" font-weight="800" font-size="7.5" fill="#ffffff" text-anchor="middle" letter-spacing="0.1em">NORTH CREST AIRTIME JUMP</text>
+  </g>`);
+
+  // 6. UNIFIED CENTRAL PLAZA HUB (SPAWN AT 0, 0 — 100% DRIVEABLE TERRAZZO COMPASS!)
+  o.push(`<g id="st-spawn" class="st" tabindex="0" data-id="spawn">
+    <circle class="ring" cx="${H.x}" cy="${H.y}" r="${H.r + 14}" fill="none" stroke="${INK}" stroke-width="2.5" stroke-dasharray="6 5"/>
+    
+    <!-- Stone Base Terrace -->
+    <g filter="url(#sh)">
+      <circle cx="${H.x}" cy="${H.y}" r="${H.r + 6}" fill="#d2c2d2"/>
+      <circle cx="${H.x}" cy="${H.y}" r="${H.r}" fill="#ece4ec"/>
+      <circle cx="${H.x}" cy="${H.y}" r="${H.r - 18}" fill="#fbfaf5" stroke="#d5c8be" stroke-width="2"/>
+    </g>
+
+    <!-- Concentric Engraved Paving Rings -->
+    <g fill="none" stroke="rgba(190,165,180,.5)" stroke-width="1.2">
+      ${[24, 46, 66].map(r => `<circle cx="${H.x}" cy="${H.y}" r="${r}"/>`).join('')}
+    </g>
+
+    <!-- Driveable Terrazzo Compass Rose / Golden "AD" Monogram (NO WATER HAZARDS!) -->
+    <ellipse cx="${H.x}" cy="${H.y}" rx="36" ry="24" fill="#eeddbb" stroke="#ffd27a" stroke-width="2.5"/>
+    <polygon points="${H.x},${H.y - 18} ${H.x + 5},${H.y - 5} ${H.x + 18},${H.y} ${H.x + 5},${H.y + 5} ${H.x},${H.y + 18} ${H.x - 5},${H.y + 5} ${H.x - 18},${H.y} ${H.x - 5},${H.y - 5}" fill="#ffd27a"/>
+    <circle cx="${H.x}" cy="${H.y}" r="4" fill="#ff5b3a"/>
+
+    <!-- AAYAN DESAI Grand Floor Typography (Subtle Terrazzo Inlay) -->
+    <g font-family="Syne" font-weight="800" text-anchor="middle">
+      <text x="${H.x}" y="${H.y - 42}" font-size="16" fill="rgba(42,29,56,.9)" letter-spacing="-0.5">AAYAN</text>
+      <text x="${H.x}" y="${H.y - 28}" font-size="16" fill="rgba(42,29,56,.45)" letter-spacing="-0.5">DESAI</text>
+    </g>
+
+    <!-- 3D Toy Alphabet Blocks -->
+    <g filter="url(#sh)" font-family="Syne" font-weight="800" font-size="7" text-anchor="middle">
+      ${'AAYAN'.split('').map((c, i) => `<rect x="${H.x - 37 + i * 15}" y="${H.y - 68}" width="12" height="12" rx="2" fill="${['#ffc4a3', '#ffe08f', '#a9d4f2', '#a9dcb6', '#cdb8f0'][i]}" stroke="${INK}" stroke-width="1.2"/><text x="${H.x - 31 + i * 15}" y="${H.y - 59}" fill="${INK}">${c}</text>`).join('')}
+    </g>
+
+    <!-- Starting Launch Pad (Facing North!) -->
+    <circle cx="${H.x}" cy="${H.y + 36}" r="22" fill="#ffd27a" opacity=".4"/>
+    <g transform="translate(${H.x},${H.y + 36}) rotate(0)" filter="url(#sh)">
+      <!-- Kart Wheels -->
+      <rect x="-14" y="-12" width="6" height="8" rx="2" fill="${INK}"/>
+      <rect x="8" y="-12" width="6" height="8" rx="2" fill="${INK}"/>
+      <rect x="-14" y="6" width="6" height="8" rx="2" fill="${INK}"/>
+      <rect x="8" y="6" width="6" height="8" rx="2" fill="${INK}"/>
+      <!-- Kart Body (Coral & Gold) -->
+      <rect x="-10" y="-10" width="20" height="22" rx="5" fill="#ff5b3a" stroke="${INK}" stroke-width="1.5"/>
+      <rect x="-6" y="-4" width="12" height="10" rx="3" fill="#ffe08f"/>
+      <rect x="-8" y="8" width="16" height="3" fill="${INK}"/>
+      <!-- North Forward Pointer Arrow -->
+      <path d="M 0 -18 L 4 -12 L -4 -12 Z" fill="#ff5b3a"/>
+    </g>
+    <text x="${H.x}" y="${H.y + 70}" text-anchor="middle" font-family="Space Mono" font-weight="700" font-size="7" fill="rgba(42,29,56,.6)" letter-spacing="0.1em">SPAWN · FACE NORTH</text>
+  </g>`);
+
+  // 7. SAY HELLO GARDEN ROUNDABOUT (off the track, one clear billboard, mailbox, three social pylons)
+  const rm = (CP.r + CP.isl) / 2;
+  const arrows = [20, 110, 200, 290].map(g => `<g transform="translate(${CP.x},${CP.y}) rotate(${g}) translate(${rm},0)"><path d="M -4 -4 L 0 3 L 4 -4" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></g>`).join('');
+  const flowers = Array.from({ length: 10 }, (_, i) => { const g = i * 36 * Math.PI / 180; return `<circle cx="${f(CP.x + 35 * Math.cos(g))}" cy="${f(CP.y + 35 * Math.sin(g))}" r="3.2" fill="${['#ffe08f', '#fff', '#ff9f80', '#cdb8f0', '#a9d4f2'][i % 5]}" stroke="${INK}" stroke-width=".6"/>`; }).join('');
+  const pylons = [[-88, '#ffc4a3', '✉', 12], [-62, '#cdb8f0', 'GH', 8], [-36, '#a9d4f2', 'in', 11]].map(([g, c, t, fs]) => {
+    const px = CP.x + 98 * Math.cos(g * Math.PI / 180), py = CP.y + 98 * Math.sin(g * Math.PI / 180);
+    return `<g transform="translate(${f(px)},${f(py)}) scale(1.2)"><rect x="-9" y="-12" width="18" height="24" rx="4" fill="#fff" stroke="${INK}" stroke-width="1.5"/><rect x="-9" y="-12" width="18" height="7" rx="3" fill="${c}" stroke="${INK}" stroke-width="1.5"/><text y="8" text-anchor="middle" font-family="Syne" font-weight="800" font-size="${fs}" fill="${INK}">${t}</text></g>`;
+  }).join('');
+  o.push(`<g id="st-contact" class="st" tabindex="0" data-id="contact" filter="url(#sh)">
+    <circle class="ring" cx="${CP.x}" cy="${CP.y}" r="${CP.r + 14}" fill="none" stroke="${INK}" stroke-width="2.5" stroke-dasharray="6 5"/>
+    <circle cx="${CP.x}" cy="${CP.y}" r="${CP.r + 6}" fill="#d2c2d2"/>
+    <circle cx="${CP.x}" cy="${CP.y}" r="${CP.r}" fill="#ece4ec"/>
+    <circle cx="${CP.x}" cy="${CP.y}" r="${rm}" fill="none" stroke="#fff" stroke-width="2.5" stroke-dasharray="10 10"/>
+    ${arrows}
+    <circle cx="${CP.x}" cy="${CP.y}" r="${CP.isl + 5}" fill="#d2c2d2"/>
+    <circle cx="${CP.x}" cy="${CP.y}" r="${CP.isl}" fill="#f6b3c7"/>
+    ${flowers}
+    <rect x="${CP.x - 24}" y="${CP.y + 2}" width="4" height="12" fill="${INK}"/>
+    <rect x="${CP.x + 20}" y="${CP.y + 2}" width="4" height="12" fill="${INK}"/>
+    <rect x="${CP.x - 38}" y="${CP.y - 28}" width="76" height="34" rx="5" fill="#fff" stroke="${INK}" stroke-width="2"/>
+    <rect x="${CP.x - 38}" y="${CP.y - 28}" width="76" height="8" rx="4" fill="#ff5b3a" stroke="${INK}" stroke-width="2"/>
+    <g font-family="Syne" font-weight="800" text-anchor="middle">
+      <text x="${CP.x}" y="${CP.y - 9}" font-size="11" fill="${INK}" letter-spacing="1">SAY</text>
+      <text x="${CP.x}" y="${CP.y + 3}" font-size="12" fill="#ff5b3a" letter-spacing="1">HELLO!</text>
+    </g>
+    <rect x="${CP.x + 25}" y="${CP.y + 24}" width="3" height="12" fill="${INK}"/>
+    <rect x="${CP.x + 17}" y="${CP.y + 15}" width="19" height="11" rx="3" fill="#ffe08f" stroke="${INK}" stroke-width="1.2"/>
+    <rect x="${CP.x + 35}" y="${CP.y + 11}" width="2.5" height="9" fill="${INK}"/><rect x="${CP.x + 35}" y="${CP.y + 11}" width="7" height="4.5" fill="#ff5b3a"/>
+    ${pylons}
+  </g>`);
+
+  // 8. SKATE SLAB STUNT ARENA
+  o.push(`<g id="st-skate" class="st" tabindex="0" data-id="skate">
+    <circle class="ring" cx="${K.x + K.w / 2}" cy="${K.y + K.h / 2}" r="${Math.min(K.w, K.h) / 2 + 10}" fill="none" stroke="${INK}" stroke-width="2.5" stroke-dasharray="6 5"/>
+    <g filter="url(#sh)">
+      <rect x="${K.x}" y="${K.y}" width="${K.w}" height="${K.h}" rx="26" fill="#e3d8ef" stroke="#d2c2d2" stroke-width="4"/>
+    </g>
+    <text x="${K.x + K.w / 2}" y="${K.y + K.h / 2 + 9}" text-anchor="middle" font-family="Syne" font-weight="800" font-size="30" fill="rgba(42,29,56,.12)">SKATE SLAB</text>
+    <g filter="url(#sh)" stroke="${INK}" stroke-width="1.5">
+      <rect x="${K.x + 24}" y="${K.y + 22}" width="40" height="26" rx="2" fill="#cdb8f0"/>
+      <rect x="${K.x + 110}" y="${K.y + 18}" width="34" height="22" rx="2" fill="#ffc4a3"/>
+      <rect x="${K.x + K.w - 100}" y="${K.y + K.h - 58}" width="62" height="34" rx="4" fill="#a9dcb6"/>
+      <line x1="${K.x + K.w - 96}" y1="${K.y + K.h - 41}" x2="${K.x + K.w - 42}" y2="${K.y + K.h - 41}" stroke-width="3"/>
+      <rect x="${K.x + K.w - 26}" y="${K.y + 16}" width="16" height="50" rx="3" fill="#cdb8f0"/>
+      <circle cx="${K.x + K.w / 2 - 10}" cy="${K.y + K.h - 30}" r="11" fill="none" stroke="#ff5b3a" stroke-width="3"/>
+    </g>
+    <g stroke="${INK}" stroke-width=".8">
+      <circle cx="${K.x + 36}" cy="${K.y + K.h - 24}" r="4" fill="#f6b3c7"/>
+      <circle cx="${K.x + 44}" cy="${K.y + K.h - 24}" r="4" fill="#ffe08f"/>
+      <circle cx="${K.x + 40}" cy="${K.y + K.h - 31}" r="4" fill="#a9d4f2"/>
+    </g>
+  </g>`);
+
+  // 9. TREES (BALANCED DENSITY: 75 TREES WITH AIRTIGHT CORRIDOR CLEARANCES)
+  let a = 19;
+  const rng = () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+  let tr = '<g id="trees">';
+  for (let i = 0, n = 0; i < 3000 && n < 75; i++) {
+    const x = -640 + rng() * 1280, y = -430 + rng() * 860;
+    if (blocked(x, y)) continue;
+    n++;
+    const r = 9 + rng() * 7;
+    tr += `<circle cx="${f(x + 3)}" cy="${f(y + 4)}" r="${f(r)}" fill="${INK}" opacity=".18"/>
+           <circle cx="${f(x)}" cy="${f(y)}" r="${f(r)}" fill="${['#86c99a', '#74bb8a', '#9bd5aa'][n % 3]}" stroke="#5aa478" stroke-width="1.2" opacity="0.92"/>
+           <circle cx="${f(x - r * .3)}" cy="${f(y - r * .3)}" r="${f(r * .4)}" fill="#fff" opacity=".32"/>`;
+  }
+  o.push(tr + '</g>');
+
+  // 10. STANDS ALONG STORY RING PROMENADE — CLEAN MAP-PIN STYLE (no stems)
+  ORDER.forEach(id => {
+    const s = S[id], p = L.stands[id], phi = Math.atan2(p.nx, -p.ny) * 180 / Math.PI, k = p.sc;
+    o.push(`<g class="st" id="st-${id}" tabindex="0" data-id="${id}">
+      <circle class="ring" cx="${f(p.pad[0])}" cy="${f(p.pad[1])}" r="44" fill="none" stroke="${INK}" stroke-width="2" stroke-dasharray="5 4"/>
+      <!-- Road-side stop apron (colour pool on ring) -->
+      <circle cx="${f(p.pad[0])}" cy="${f(p.pad[1])}" r="28" fill="${s.color}" opacity=".35" stroke="${s.color}" stroke-width="1.5" stroke-dasharray="4 4"/>
+      <!-- Kart Parking Bays [ P ] on road apron -->
+      <g stroke="#ffffff" stroke-width="1.2" stroke-dasharray="2 2" fill="none">
+        <rect x="${f(p.pad[0] - 16)}" y="${f(p.pad[1] - 12)}" width="12" height="18" rx="2"/>
+        <rect x="${f(p.pad[0] + 4)}" y="${f(p.pad[1] - 12)}" width="12" height="18" rx="2"/>
+      </g>
+      <g font-family="Space Mono" font-size="6.5" font-weight="700" fill="#ffffff" text-anchor="middle">
+        <text x="${f(p.pad[0] - 10)}" y="${f(p.pad[1] + 1)}">P</text>
+        <text x="${f(p.pad[0] + 10)}" y="${f(p.pad[1] + 1)}">P</text>
+      </g>
+      <!-- Stand building — floats directly, NO stem connector -->
+      <g class="body" filter="url(#sh)">
+        <g transform="translate(${f(p.x)},${f(p.y)}) rotate(${f(phi)}) scale(${k})">
+          <rect x="-38" y="-28" width="76" height="56" rx="6" fill="#fbf3e6" stroke="${INK}" stroke-width="2"/>
+          <rect x="-38" y="12" width="76" height="16" rx="4" fill="${s.color}" stroke="${INK}" stroke-width="1.5"/>
+          <rect x="-30" y="-20" width="60" height="26" rx="3" fill="#fff" fill-opacity=".5" stroke="${INK}" stroke-dasharray="3 3"/>
+        </g>
+        <rect x="${f(p.x - Math.max(60, s.title.length * 5.4 + 14) / 2)}" y="${f(p.y - 8)}" width="${f(Math.max(60, s.title.length * 5.4 + 14))}" height="16" rx="5" fill="#fff" stroke="${INK}" stroke-width="1.2"/>
+        <text x="${f(p.x)}" y="${f(p.y + 3)}" text-anchor="middle" font-family="Syne" font-weight="800" font-size="7.5" fill="${INK}">${s.title.toUpperCase()}</text>
+      </g>
+      <text x="${f(p.x)}" y="${f(p.y + p.ny * -44 * k)}" text-anchor="middle" font-size="14">${s.icon}</text>
+    </g>`);
+  });
+
+  // 11. LABELS, COMPASS & DIMENSIONS
+  o.push(`<g id="dims">
+    ${L.labels.map(t => `<text transform="translate(${t.x},${t.y})${t.rot ? ` rotate(${t.rot})` : ''}" text-anchor="middle" font-family="${t.m ? 'Space Mono' : 'Syne'}" font-weight="800" font-size="${t.s}" letter-spacing="${t.m ? 0 : 6}" fill="${t.c}" ${t.m ? '' : 'opacity=".85"'}>${t.t}</text>`).join('')}
+    <g transform="translate(0, 440)">
+      <rect x="-170" y="-11" width="340" height="20" rx="10" fill="#fff" stroke="#ff5b3a"/>
+      <text text-anchor="middle" y="3" font-family="Space Mono" font-weight="700" font-size="10" fill="#ff5b3a">${Math.round(sp.n / 10)} m continuous speedway · ${W / 10} m wide</text>
+    </g>
+  </g>
+  <!-- Compass -->
+  <g transform="translate(-625, 415)">
+    <circle r="30" fill="#fff" stroke="${INK}" stroke-width="1.8" filter="url(#sh)"/>
+    <polygon points="0,-22 4,-4 22,0 4,4 0,22 -4,4 -22,0 -4,-4" fill="#ff5b3a"/>
+    <g font-family="Space Mono" font-size="7" font-weight="700" fill="${INK}" text-anchor="middle"><text y="-25">N</text></g>
+  </g>
+  <!-- Scale bar -->
+  <g transform="translate(540, -445)">
+    <rect width="100" height="6" fill="${INK}"/>
+    <rect x="50" width="50" height="6" fill="#fff" stroke="${INK}"/>
+    <text y="-6" font-family="Space Mono" font-size="9" font-weight="700" fill="${INK}">0</text>
+    <text x="100" y="-6" font-family="Space Mono" font-size="9" font-weight="700" fill="${INK}" text-anchor="end">10 m</text>
+  </g>`);
+
+  svg.innerHTML = o.join('');
+  document.getElementById('tDims').dispatchEvent(new Event('change'));
+  document.getElementById('tTrees').dispatchEvent(new Event('change'));
+  document.getElementById('tParterres').dispatchEvent(new Event('change'));
+  bind();
+  pick('spawn');
+}
+
+function pos(id) {
+  const L = MASTER;
+  if (id === 'spawn') return [L.hub.x, L.hub.y];
+  if (id === 'jump') return [0, -390];
+  if (id === 'contact') return [L.contactPlaza.x, L.contactPlaza.y];
+  if (id === 'skate') return [L.skate.x + L.skate.w / 2, L.skate.y + L.skate.h / 2];
+  return [L.stands[id].x, L.stands[id].y];
+}
+
+function pick(id) {
+  const s = S[id], [x, y] = pos(id), H = MASTER.hub, t = document.getElementById('pTag');
+  t.textContent = s.tag; t.style.background = s.color;
+  pTitle.textContent = s.title; pSub.textContent = s.sub; pDesc.textContent = s.desc;
+  pPos.textContent = `X ${(x / 10).toFixed(1)}m · Z ${(y / 10).toFixed(1)}m`;
+  pDist.textContent = `${(d(x, y, H.x, H.y) / 10).toFixed(0)} m`;
+  document.querySelectorAll('.st').forEach(e => e.classList.toggle('on', e.dataset.id === id));
+  document.querySelectorAll('.nav button').forEach(e => e.classList.toggle('on', e.dataset.id === id));
+}
+
+function bind() {
+  document.querySelectorAll('.st').forEach(e => {
+    e.onclick = () => pick(e.dataset.id);
+    e.onkeydown = ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); pick(e.dataset.id); } };
+  });
+}
+
+const nav = document.getElementById('navList');
+['spawn', 'jump', ...ORDER, 'contact', 'skate'].forEach(id => {
+  const b = document.createElement('button');
+  b.dataset.id = id;
+  b.innerHTML = `<span>${S[id].title}</span><b style="background:${S[id].color}"></b>`;
+  b.onclick = () => pick(id);
+  nav.appendChild(b);
+});
+
+[['tDims', 'dims'], ['tTrees', 'trees'], ['tParterres', 'parterres']].forEach(([c, g]) => {
+  document.getElementById(c).onchange = () => {
+    const e = document.getElementById(g);
+    if (e) e.style.display = document.getElementById(c).checked ? '' : 'none';
+  };
+});
+
+render();
+</script>
+
+</body>
+</html>
