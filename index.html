@@ -22,14 +22,12 @@
 } }
 </script>
 <style>
-/* ---------- root ladder (board 1440) ---------- */
 html { font-size: 16px; }
 @media (min-width: 641px)  { html { font-size: 1.5625vw; } }
 @media (min-width: 1025px) { html { font-size: 1.111111vw; } }
 @media (min-width: 1600px) { html { font-size: 17.8px; } }
 
 :root {
-  /* the light: a warm late-morning sun over a lilac-blue sky */
   --paper: #f7efe4;          /* the unrevealed ground, warm cream */
   --paper-2: #fbf6ee;        /* sheets */
   --ink: #2a1d38;            /* deep plum â€” the outline colour of the world */
@@ -48,7 +46,6 @@ html { font-size: 16px; }
   --f-mono: "Space Mono", ui-monospace, Menlo, monospace;
   --gutter: clamp(16px, 1.5rem, 32px);
 }
-* { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; overflow: hidden; background: var(--paper); color: var(--ink); }
 body { font-family: var(--f-text); -webkit-font-smoothing: antialiased; overscroll-behavior: none; touch-action: none; }
 button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
@@ -59,11 +56,10 @@ a { color: inherit; }
 
 #gl { position: fixed; inset: 0; width: 100%; height: 100%; display: block; outline: none; }
 
-/* ---------- loader ---------- */
 #loader { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; background: radial-gradient(ellipse at 50% 45%, #fbeed6 0%, #f6e2c4 55%, #efd3ad 100%); perspective: 900px; overflow: hidden;
   transition: opacity 900ms var(--ease), visibility 0s linear 900ms; }
 #loader.out { opacity: 0; visibility: hidden; }
-#loader .frame { position: relative; width: min(78vw, 30rem); aspect-ratio: 16/9; display: grid; place-items: center; transform: rotateX(54deg) rotateZ(-42deg); transform-style: preserve-3d; animation: ldFloat 3.2s ease-in-out infinite alternate; }
+#loader .makeFrame { position: relative; width: min(78vw, 30rem); aspect-ratio: 16/9; display: grid; place-items: center; transform: rotateX(54deg) rotateZ(-42deg); transform-style: preserve-3d; animation: ldFloat 3.2s ease-in-out infinite alternate; }
 @keyframes ldFloat { to { transform: rotateX(54deg) rotateZ(-42deg) translateZ(14px); } }
 #loader .lp { position: absolute; inset: 0; border-radius: 10px; }
 #loader .p3 { transform: translateZ(-46px); background: rgba(42,26,51,.28); filter: blur(9px); }
@@ -78,7 +74,6 @@ a { color: inherit; }
 #loader .pct i { font-style: normal; font-size: .5em; color: #ff5b3a; vertical-align: .55em; margin-left: .06em; }
 #loader .arc { position: absolute; width: 0; height: 0; overflow: hidden; }
 
-/* ---------- click to start ---------- */
 #start { position: fixed; z-index: 20; left: 0; top: 0; pointer-events: none; opacity: 0; transition: opacity 700ms var(--ease); }
 #start.on { opacity: 1; }
 #start:not(.on) { transition-duration: 250ms; }
@@ -90,7 +85,6 @@ a { color: inherit; }
 #start small { display: block; margin-top: .45rem; color: var(--ink-62); }
 #start .word { display: inline-block; }
 
-/* ---------- HUD ---------- */
 .hud { position: fixed; z-index: 10; }
 .chip { display: inline-flex; align-items: center; gap: .5rem; height: 2.5rem; min-height: 40px; padding: 0 1rem; border-radius: 99px;
   background: rgba(251,246,238,.94); box-shadow: inset 0 0 0 1px var(--ink-16), 0 6px 18px -10px rgba(42,29,56,.35);
@@ -131,18 +125,15 @@ a { color: inherit; }
 #toast .t { font-family: var(--f-display); font-weight: 700; font-size: 1rem; letter-spacing: -.01em; }
 #toast .s { color: rgba(251,246,238,.6); }
 
-/* hud entrance: each element starts displaced, a class lifts the gate */
 .gate { opacity: 0; transition: opacity 900ms var(--ease), transform 1100ms var(--ease), filter 900ms var(--ease); }
 #nav.gate { transform: translateY(-1.2rem); }
 #hint.gate { transform: translateY(1.2rem); }
 #stamps.gate { transform: translateX(1.5rem); }
-/* the id'd offsets above outrank a bare .gate.in, so the landed state names them too */
 .gate.in, #nav.gate.in, #hint.gate.in, #stamps.gate.in { opacity: 1; transform: none; }
 .blr { display: inline-block; opacity: 0; transform: translateY(.42em); filter: blur(10px);
   transition: opacity 700ms var(--ease), transform 900ms var(--ease), filter 700ms var(--ease); }
 .in .blr, .blr.in { opacity: 1; transform: none; filter: blur(0); }
 
-/* ---------- project sheet ---------- */
 #panel { position: fixed; z-index: 30; top: var(--gutter); right: var(--gutter); bottom: var(--gutter); width: 31rem; max-width: calc(100vw - 2 * var(--gutter));
   background: var(--paper-2); border-radius: 1.5rem; box-shadow: inset 0 0 0 1px var(--ink-16), 0 30px 60px -30px rgba(42,29,56,.55);
   display: flex; flex-direction: column; overflow: hidden; transform: translateX(calc(100% + 3rem)) rotate(2deg); transition: transform 1000ms var(--ease); visibility: hidden; }
@@ -186,7 +177,6 @@ a { color: inherit; }
 #panel .contact a { font-family: var(--f-display); font-weight: 700; font-size: 1.35rem; letter-spacing: -.03em; text-decoration: none; border-bottom: 2px solid var(--coral); }
 #panel .contact a { font-family: var(--f-display); font-weight: 700; font-size: 1.6rem; letter-spacing: -.03em; text-decoration: none; display: inline-block; margin-top: 1rem; border-bottom: 2px solid var(--coral); }
 
-/* ---------- project list (keyboard-free, accessible) ---------- */
 #list { position: fixed; inset: 0; z-index: 40; display: grid; place-items: center; padding: var(--gutter); background: rgba(42,29,56,.28);
   opacity: 0; visibility: hidden; transition: opacity 500ms var(--ease), visibility 0s linear 500ms; }
 #list.on { opacity: 1; visibility: visible; transition: opacity 500ms var(--ease); }
@@ -207,7 +197,6 @@ a { color: inherit; }
 #list .go { color: var(--ink-62); }
 #list .tourbtn { margin-top: 1rem; }
 
-/* ---------- touch controls ---------- */
 #touch { display: none; }
 .touch.driving #touch { display: block; }
 #joy { position: fixed; z-index: 12; left: var(--gutter); bottom: calc(var(--gutter) + env(safe-area-inset-bottom)); width: 8.4rem; height: 8.4rem; border-radius: 50%;
@@ -222,7 +211,6 @@ a { color: inherit; }
 #tbtns button.on { background: var(--ink); color: var(--paper-2); }
 #tbtns .mono { font-size: 10px; letter-spacing: .12em; }
 
-/* ---------- no WebGL, or the park script never booted: the stands as a plain page ---------- */
 #fallback { display: none; }
 .nogl, .nogl body { height: auto; overflow: auto; }
 .nogl body { touch-action: auto; overscroll-behavior: auto; }
@@ -253,7 +241,6 @@ a { color: inherit; }
 #fallback .meta dt { color: var(--ink-40); }
 #fallback .meta dd { font-size: .9375rem; margin-top: .2rem; }
 
-/* ---------- phone: designed, not squeezed ---------- */
 @media (max-width: 640px) {
   :root { --gutter: 16px; }
   #brand h1 { font-size: 1.4rem; }
@@ -261,7 +248,6 @@ a { color: inherit; }
   #brand p { display: none; }
   #nav { gap: .35rem; }
   #nav .chip { padding: 0 .8rem; }
-  /* icon-only chips on phone (the labels stay for screen readers), so the nav clears the name plate */
   #nav .chip .lbl { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   #hint { display: none; }
   #stamps { right: auto; left: 50%; bottom: auto; top: calc(var(--gutter) + 4.6rem); transform: translateX(-50%); min-width: 0; padding: .5rem .7rem; border-radius: 99px; display: flex; gap: .7rem; align-items: center; }
@@ -287,13 +273,11 @@ a { color: inherit; }
   #fallback .lede { font-size: 1.15rem; }
 }
 
-/* tablet: the toast drops below the name plate instead of running into it */
 @media (min-width: 641px) and (max-width: 1279px) {
   #toast { top: calc(var(--gutter) + 7.8rem); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { transition-duration: 1ms !important; }
 }
 </style>
 </head>
@@ -301,10 +285,10 @@ a { color: inherit; }
 <canvas id="gl" tabindex="0" aria-label="A sunlit park with an electric go-kart. Use the arrow keys or WASD to drive up to each section."></canvas>
 
 <div id="loader" role="status" aria-live="polite">
-  <div class="frame">
+  <div class="makeFrame">
     <span class="lp p3"></span><span class="lp p2"></span><span class="lp p1"></span><span class="lp p0"></span>
     <div class="txt">
-      <div class="load">LOADING…</div>
+      <div class="load">LOADINGï¿½</div>
       <div class="pct"><span id="pctn">0</span><i>%</i></div>
     </div>
   </div>
@@ -450,7 +434,6 @@ a { color: inherit; }
 </div>
 
 <script>
-/* failsafe outside the module: without WebGL, or if the park script never boots, the curtain still lifts and the stands show as a list */
 (function () {
   var root = document.documentElement;
   try { var c = document.createElement('canvas'); if (!(c.getContext('webgl2') || c.getContext('webgl'))) root.classList.add('nogl'); } catch (e) { root.classList.add('nogl'); }

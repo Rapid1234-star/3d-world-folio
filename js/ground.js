@@ -2,7 +2,6 @@ import * as THREE from 'three';
 import * as CANNON from 'cannon-es';
 export async function installGround(S) {
 S.GW = 160;
-// lawn outside the ring, one wedge per section. The south gap stays the base green.
 S.LAWN_SECTIONS = [
   { a0: -126, a1: -90, color: '#cdb8f0' },
   { a0: -90, a1: -54, color: '#ffe08f' },
@@ -11,15 +10,14 @@ S.LAWN_SECTIONS = [
   { a0: 54, a1: 90, color: '#a9dcb6' },
   { a0: 90, a1: 126, color: '#f6b3c7' },
 ];
-function paintGround(res) {
+function paintTerrain(res) {
   const c = document.createElement('canvas'); c.width = c.height = res;
   const x = c.getContext('2d');
   const s = res / S.GW;
   x.setTransform(s, 0, 0, s, res / 2, res / 2);
   const lawn = '#bfe3bf';
   x.fillStyle = lawn; x.fillRect(-80, -80, 160, 160);
-  // mown variation only in the south gap, so it cannot bleed between two section colors
-  const r2 = S.mulberry32(99);
+  const r2 = S.rngFromSeed(99);
   x.filter = `blur(${Math.round(res / 340)}px)`;
   for (let i = 0; i < 700; i++) {
     const px = -58 + r2() * 116, pz = -58 + r2() * 116;
@@ -29,7 +27,6 @@ function paintGround(res) {
     x.beginPath(); x.arc(px, pz, 0.8 + r2() * 3.4, 0, 6.29); x.fill();
   }
   x.filter = 'none'; x.globalAlpha = 1;
-  // section lawns outside the story ring. The infield stays green.
   const sectorOf = (px, pz) => {
     const ang = S.mapDeg(px, pz);
     const ell = Math.hypot(px / S.RING.rx, (pz - S.RING.cz) / S.RING.ry);
@@ -50,18 +47,15 @@ function paintGround(res) {
     const p = s.pos; if (!p) continue;
     x.fillStyle = s.color; x.beginPath(); x.arc(p.x, p.z, 7.2, 0, 6.29); x.fill();
   }
-  // mower stripes inside the ring
   x.save(); x.beginPath(); x.ellipse(0, S.RING.cz, S.RING.rx * 0.82, S.RING.ry * 0.82, 0, 0, 6.29); x.clip();
   x.rotate(-S.CAM_YAW); x.globalAlpha = 0.07; x.fillStyle = '#ffffff';
   for (let i = -30; i < 30; i += 2) x.fillRect(i * 1.6, -30, 1.6, 60);
   x.restore(); x.globalAlpha = 1;
-  // soil beds
   for (const b of S.BEDS) {
     x.save(); x.translate(b.c.x, b.c.z); x.rotate(Math.atan2(b.c.z, b.c.x) + Math.PI / 2);
     x.fillStyle = '#f2d2c0'; x.beginPath(); x.ellipse(0, 0, b.rx + 0.35, b.rz + 0.35, 0, 0, 6.29); x.fill();
     x.fillStyle = '#ebc4ae'; x.beginPath(); x.ellipse(0, 0, b.rx, b.rz, 0, 0, 6.29); x.fill(); x.restore();
   }
-  // paving
   const pave = '#e7deea', curb = '#cbbccf', tarmac = '#2c203b';
   const fillBand = (pts, half, color, closed) => {
     const n = pts.length; if (n < 2) return;
@@ -81,19 +75,10 @@ function paintGround(res) {
     x.closePath(); x.fill();
   };
 
-  // Where a straight spoke meets the speedway's outer edge? Returns where to stop
-  // the road so it never paints onto the black tarmac, or null if it stays off.
-  // The band is 6.6 wide (curb half 3.3), so an angled crossing needs the whole
-  // end edge checked — probing only the centreline lets the corners swing past
-  // the stop point and paint onto the track.
   const segHitsSpeed = (ax, az, bx, bz) => {
     const dx = bx - ax, dz = bz - az, L = Math.hypot(dx, dz);
     if (L < 1e-4) return null;
     const ux = dx / L, uz = dz / L;
-    // Stop at the tarmac's NEAR edge so the road hands off to the track instead of
-    // crossing it. onSpeed measures distance to the track centreline and the tarmac
-    // is S.SPEED_HW wide, so a 0.32 pad stops the band exactly at the orange kerb's
-    // outer edge. (A negative pad would push the stop point past the far edge — onto grass.)
     const STEP = 0.05, MARGIN = 0.32, HALF = 3.3;
     const sx = -uz * HALF, sz = ux * HALF;
     const clear = (px, pz) => !(
@@ -114,9 +99,6 @@ function paintGround(res) {
     return { x: ax + ux * last, z: az + uz * last, ux, uz };
   };
 
-  // Spoke band that hands off to the speedway: each point across the band's width
-  // stops on its own at the orange kerb's outer edge, so the end edge follows the
-  // curve instead of one straight cut (no green notch, no paint on the track).
   const fillSpoke = (ax, az, bx, bz, half, color) => {
     const dx = bx - ax, dz = bz - az, L = Math.hypot(dx, dz);
     if (L < 1e-4) return;
@@ -257,18 +239,15 @@ function paintGround(res) {
     x.beginPath(); x.roundRect(-1.4, HW - 0.26, 2.8, 0.38, 0.1); x.fill();
     x.restore();
   }
-  // spawn ring on the plaza
   x.save(); x.strokeStyle = 'rgba(42,29,56,.18)'; x.lineWidth = 0.08; x.setLineDash([0.4, 0.3]);
   x.beginPath(); x.arc(S.SPAWN.x, S.SPAWN.z, 3.3, 0, 6.29); x.stroke(); x.restore();
-  // concrete speckle
-  const r3 = S.mulberry32(5);
+  const r3 = S.rngFromSeed(5);
   for (let i = 0; i < 9000; i++) {
     const px = -50 + r3() * 100, pz = -50 + r3() * 100;
     if (!S.onPaved(px, pz, -0.3)) continue;
     x.fillStyle = r3() < 0.5 ? 'rgba(200,180,195,.35)' : 'rgba(255,255,255,.6)';
     x.fillRect(px, pz, 0.06, 0.06);
   }
-  // painted words, set square to the camera
   const word = (str, px, pz, size, color, font = '800', ls = -0.04) => {
     x.save(); x.translate(px, pz); x.rotate(-S.CAM_YAW);
     x.font = `${font} ${size * 10}px ${font === '400' ? '"Space Mono"' : 'Syne'}`; x.scale(0.1, 0.1);
@@ -287,17 +266,14 @@ function paintGround(res) {
     word('P', p.x - tx * 2.1, p.z - tz * 2.1, 0.62, 'rgba(42,29,56,.55)', '700', 0);
   }
   word('SKATE', 0, 26, 1.4, 'rgba(42,29,56,.2)');
-  // skate slab coral arrows (the spark, painted on the ground)
   x.save(); x.fillStyle = 'rgba(255,91,58,.85)';
   for (const [px, pz] of [[-6, 30.6], [5.5, 28.95]]) { x.beginPath(); x.moveTo(px - 0.6, pz - 0.5); x.lineTo(px + 0.6, pz - 0.5); x.lineTo(px, pz + 0.4); x.fill(); }
   x.restore();
-  // baked AO under everything that stands on the ground
   for (const [px, pz, r, a] of S.aoSpots) {
     const g = x.createRadialGradient(px, pz, 0, px, pz, r);
     g.addColorStop(0, `rgba(96,70,110,${a})`); g.addColorStop(0.55, `rgba(96,70,110,${a * 0.45})`); g.addColorStop(1, 'rgba(96,70,110,0)');
     x.fillStyle = g; x.beginPath(); x.arc(px, pz, r, 0, 6.29); x.fill();
   }
-  // island edge: lawn fades back to paper
   x.globalCompositeOperation = 'destination-in';
   const fade = x.createRadialGradient(0, 0, 62, 0, 0, 78);
   fade.addColorStop(0, 'rgba(0,0,0,1)'); fade.addColorStop(1, 'rgba(0,0,0,0)');
@@ -307,7 +283,7 @@ function paintGround(res) {
   return t;
 }
 
-function buildGround(groundTex) {
+function formTerrain(groundTex) {
   const m = new THREE.MeshLambertMaterial({ color: 0xffffff });
   S.patch(m, {
     key: 'ground', noClip: true, noGlow: true,
@@ -332,8 +308,7 @@ function buildGround(groundTex) {
   g.rotation.x = -Math.PI / 2; g.receiveShadow = true; S.scene.add(g);
 }
 
-/* --- grass tufts, with the kart parting them --- */
-function buildGrass(n) {
+function seedTurf(n) {
   const blade = [];
   for (let b = 0; b < 3; b++) {
     const a = b / 3 * Math.PI + S.R(0, 0.5), h = S.R(0.32, 0.5), w = 0.07, ox = S.R(-0.08, 0.08), oz = S.R(-0.08, 0.08), lean = S.R(-0.08, 0.08);
@@ -393,7 +368,7 @@ function buildGrass(n) {
   });
   const im = new THREE.InstancedMesh(geo, mat, n);
   let k = 0;
-  const r2 = S.mulberry32(31);
+  const r2 = S.rngFromSeed(31);
   const cl = (x, z) => Math.sin(x * 0.21) * Math.cos(z * 0.17) + Math.sin(x * 0.07 + z * 0.11);
   for (let i = 0; i < n * 8 && k < n; i++) {
     const x = -66 + r2() * 132, z = -48 + r2() * 96;
@@ -405,8 +380,7 @@ function buildGrass(n) {
   im.count = k; im.frustumCulled = false; S.scene.add(im);
 }
 
-/* --- flowers in the beds --- */
-function buildFlowers() {
+function sowFlowers() {
   const cols = ['#f6a9c0', '#ffe08f', '#cdb8f0', '#fff6ea', '#ffb79a'].map(c => new THREE.Color(c));
   const n = 260, im = new THREE.InstancedMesh(S.G.ico(0.11, 0), S.toon('#ffffff'), n);
   im.castShadow = false; let k = 0;
@@ -423,9 +397,8 @@ function buildFlowers() {
   im.count = k; S.scene.add(im);
 }
 
-/* --- petals drifting through the light --- */
 S.petals = undefined;
-function buildPetals(n) {
+function driftPetals(n) {
   const geo = new THREE.PlaneGeometry(0.16, 0.11);
   const mat = new THREE.MeshBasicMaterial({ color: '#f7b9ca', side: THREE.DoubleSide });
   S.patch(mat, { key: 'petal', noGlow: true });
@@ -433,10 +406,10 @@ function buildPetals(n) {
   S.petals.userData.p = Array.from({ length: n }, () => ({ x: S.R(-28, 28), y: S.R(0, 9), z: S.R(-28, 28), s: S.R(0.4, 1), r: S.R(0, 6.28), sp: S.R(0.6, 1.6) }));
   S.scene.add(S.petals);
 }
-S.paintGround = paintGround;
-S.buildGround = buildGround;
-S.buildGrass = buildGrass;
-S.buildFlowers = buildFlowers;
-S.buildPetals = buildPetals;
+S.paintTerrain = paintTerrain;
+S.formTerrain = formTerrain;
+S.seedTurf = seedTurf;
+S.sowFlowers = sowFlowers;
+S.driftPetals = driftPetals;
 
 }

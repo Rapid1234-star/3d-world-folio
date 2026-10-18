@@ -2,7 +2,6 @@ import * as THREE from 'three';
 import * as CANNON from 'cannon-es';
 export async function installLayout(S) {
 S.RING_R = 22, S.RING_W = 5, S.PLAZA_R = 10, S.STAND_R = 29.2, S.SPAWN = new THREE.Vector3(0, 0, 0);
-// master map, 1 m = 10 px. SVG y-down becomes world +z.
 S.RING = { cx: 0, cz: -5, rx: 34.5, ry: 17.5, hw: 2.8 };
 S.HUB_R = 8.4;
 S.SKATE = { x0: -16, x1: 16, z0: 19.5, z1: 32 };

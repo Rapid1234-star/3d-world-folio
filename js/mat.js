@@ -71,7 +71,7 @@ function toon(color, o = {}) {
 }
 S.OUTLINE_W = { value: 0.034 };
 S.hullMats = new Map();
-function hullMat(sway) {
+function bodyMat(sway) {
   const k = sway ? 's' : 'n';
   if (S.hullMats.has(k)) return S.hullMats.get(k);
   const m = new THREE.MeshBasicMaterial({ color: S.C.ink, side: THREE.BackSide });
@@ -79,7 +79,7 @@ function hullMat(sway) {
   S.hullMats.set(k, m); return m;
 }
 S.hullCache = new WeakMap();
-function hullGeo(geo) {
+function bodyGeo(geo) {
   if (S.hullCache.has(geo)) return S.hullCache.get(geo);
   let g = geo.clone(); g.deleteAttribute('normal'); if (g.attributes.uv) g.deleteAttribute('uv');
   g = mergeVertices(g, 1e-3); g.computeVertexNormals(); g = g.toNonIndexed();
@@ -89,11 +89,10 @@ function flat(geo) { let g = geo.index ? geo.toNonIndexed() : geo.clone(); if (g
 function mesh(geo, color, o = {}) {
   const m = new THREE.Mesh(geo, o.mat || toon(color, o));
   m.castShadow = o.cast !== false; m.receiveShadow = true;
-  if (o.outline !== false) { const h = new THREE.Mesh(hullGeo(geo), hullMat(false)); m.add(h); }
+  if (o.outline !== false) { const h = new THREE.Mesh(bodyGeo(geo), bodyMat(false)); m.add(h); }
   return m;
 }
 
-/* --- static batcher: one draw call per colour --- */
 S.batch = new Map();
 S._m = new THREE.Matrix4(), S._q = new THREE.Quaternion(), S._e = new THREE.Euler(), S._v = new THREE.Vector3(), S._s = new THREE.Vector3();
 function M(x = 0, y = 0, z = 0, rx = 0, ry = 0, rz = 0, sx = 1, sy = sx, sz = sx) {
@@ -104,9 +103,9 @@ function add(geo, matrix, color, o = {}) {
   let b = S.batch.get(key);
   if (!b) { b = { color, o, geos: [], hulls: [] }; S.batch.set(key, b); }
   const g = flat(geo); g.applyMatrix4(matrix); b.geos.push(g);
-  if (o.outline !== false) { const h = hullGeo(geo).clone(); h.applyMatrix4(matrix); b.hulls.push(h); }
+  if (o.outline !== false) { const h = bodyGeo(geo).clone(); h.applyMatrix4(matrix); b.hulls.push(h); }
 }
-function buildBatch() {
+function bakeStatics() {
   const hullsBySway = { n: [], s: [] };
   for (const b of S.batch.values()) {
     const m = new THREE.Mesh(mergeGeometries(b.geos), toon(b.color, { sway: b.o.sway, emissive: b.o.emissive, ei: b.o.ei }));
@@ -114,7 +113,7 @@ function buildBatch() {
     hullsBySway[b.o.sway ? 's' : 'n'].push(...b.hulls);
   }
   for (const k of ['n', 's']) if (hullsBySway[k].length) {
-    const h = new THREE.Mesh(mergeGeometries(hullsBySway[k]), hullMat(k === 's'));
+    const h = new THREE.Mesh(mergeGeometries(hullsBySway[k]), bodyMat(k === 's'));
     S.scene.add(h);
   }
 }
@@ -128,12 +127,12 @@ S.G = {
 };
 S.patch = patch;
 S.toon = toon;
-S.hullMat = hullMat;
-S.hullGeo = hullGeo;
+S.bodyMat = bodyMat;
+S.bodyGeo = bodyGeo;
 S.flat = flat;
 S.mesh = mesh;
 S.M = M;
 S.add = add;
-S.buildBatch = buildBatch;
+S.bakeStatics = bakeStatics;
 
 }

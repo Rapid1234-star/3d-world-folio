@@ -4,8 +4,8 @@ export async function installTour(S) {
 S.goal = null; // { pts: [[x,z]...], i, stand, onArrive }
 S.tour = { on: false, i: 0, wait: 0 };
 S.TOUR_ORDER = ['about', 'education', 'skills', 'patchifi', 'appify', 'projects', 'contact'].map(id => S.STANDS.find(s => s.id === id));
-function angOf(x, z) { return Math.atan2(x, -z) / S.DEG; }
-function routeTo(s) {
+function angleOf(x, z) { return Math.atan2(x, -z) / S.DEG; }
+function pathTo(s) {
   const pts = [];
   const px = S.chassis.position.x, pz = S.chassis.position.z;
   if (Math.hypot(px, pz) > 4) pts.push([0, 0]);
@@ -17,10 +17,10 @@ function routeTo(s) {
   if (s.pad) pts.push([s.pad.x, s.pad.z]);
   return pts;
 }
-function goTo(s, onArrive) { S.goal = { pts: routeTo(s), i: 0, stand: s, onArrive, stuck: 0, back: 0 }; }
-function startTour() {
-  if (S.state === 'intro') S.beginDrive();
-  S.closePanel();
+function seekTo(s, onArrive) { S.goal = { pts: pathTo(s), i: 0, stand: s, onArrive, stuck: 0, back: 0 }; }
+function runTour() {
+  if (S.state === 'intro') S.startDrive();
+  S.hidePanel();
   S.tour.on = true;
   const hx = S.chassis.position.x, hz = S.chassis.position.z;
   S.tour.i = S.TOUR_ORDER.reduce((b, s, i) => {
@@ -30,27 +30,27 @@ function startTour() {
   }, 0);
   S.$('btnTour').querySelector('.lbl').textContent = 'Stop tour';
   S.toast('Auto-tour', 'press any arrow to take the wheel');
-  nextTourStop();
+  nextStop();
 }
-function nextTourStop() {
+function nextStop() {
   const s = S.TOUR_ORDER[S.tour.i % S.TOUR_ORDER.length];
-  goTo(s, () => {
+  seekTo(s, () => {
     S.tour.wait = 6.5;
     const bar = S.$('pBar'); bar.style.transition = 'none'; bar.style.transform = 'scaleX(0)';
     requestAnimationFrame(() => { bar.style.transition = 'transform 6.5s linear'; bar.style.transform = 'scaleX(1)'; });
   });
 }
-function stopTour(msg) {
+function haltTour(msg) {
   S.tour.on = false; S.goal = null; S.tour.wait = 0;
   S.$('btnTour').querySelector('.lbl').textContent = 'Auto-tour';
   S.$('pBar').style.transition = 'none'; S.$('pBar').style.transform = 'scaleX(0)';
   if (msg) S.toast(msg, 'arrows or WASD to drive');
 }
-S.angOf = angOf;
-S.routeTo = routeTo;
-S.goTo = goTo;
-S.startTour = startTour;
-S.nextTourStop = nextTourStop;
-S.stopTour = stopTour;
+S.angleOf = angleOf;
+S.pathTo = pathTo;
+S.seekTo = seekTo;
+S.runTour = runTour;
+S.nextStop = nextStop;
+S.haltTour = haltTour;
 
 }

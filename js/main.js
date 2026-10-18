@@ -19,7 +19,7 @@ await installPalette(S);
 S.canvas = S.$('gl');
 S.renderer = undefined;
 try { S.renderer = new THREE.WebGLRenderer({ canvas: S.canvas, antialias: false, powerPreference: 'high-performance' }); }
-catch (e) { S.noPark(); await new Promise(() => {}); } // a context that will not open goes to the list too
+catch (e) { S.parkFallback(); await new Promise(() => {}); } // a context that will not open goes to the list too
 S.DPR = Math.min(devicePixelRatio, S.phone() ? 1.6 : 1.5);
 window.__booted = true;
 S.renderer.setPixelRatio(S.DPR);
@@ -48,7 +48,6 @@ Object.assign(S.sun.shadow.camera, { left: -S.SH, right: S.SH, top: S.SH, bottom
 S.sun.shadow.bias = -0.0005; S.sun.shadow.normalBias = 0.04; S.sun.shadow.radius = S.phone() ? 3 : 4.5;
 S.scene.add(S.sun, S.sun.target);
 
-// shared uniforms: the lit-circle reveal + time
 S.RU = {
   uReveal: { value: 0 }, uCenter: { value: new THREE.Vector2(0, 4.5) }, uTime: { value: 0 },
   uRingOn: { value: 1 }, uRingCol: { value: S.RING_COL.clone().multiplyScalar(1.6) }, uDim: { value: 1 }, uKart: { value: new THREE.Vector2(0, 4.5) },
@@ -104,15 +103,15 @@ S.lap = { n: 0, t: 0, armed: true, cool: 0, best: null };
 S.KEYMAP = { ArrowUp: 'f', KeyW: 'f', ArrowDown: 'b', KeyS: 'b', ArrowLeft: 'l', KeyA: 'l', ArrowRight: 'r', KeyD: 'r', ShiftLeft: 'boost', ShiftRight: 'boost' };
 S.state = 'loading'; // loading → intro → drive
 addEventListener('keydown', e => {
-  if (S.list.classList.contains('on')) { if (e.code === 'Escape') S.closeList(); return; }
-  if (S.state === 'intro') { if (!['Tab'].includes(e.code)) S.beginDrive(); return; }
+  if (S.list.classList.contains('on')) { if (e.code === 'Escape') S.hideList(); return; }
+  if (S.state === 'intro') { if (!['Tab'].includes(e.code)) S.startDrive(); return; }
   if (S.state !== 'drive') return;
   const k = S.KEYMAP[e.code];
-  if (k) { S.keys[k] = 1; e.preventDefault(); if (S.tour.on && k !== 'boost') S.stopTour('You have the wheel'); S.goal = null; }
+  if (k) { S.keys[k] = 1; e.preventDefault(); if (S.tour.on && k !== 'boost') S.haltTour('You have the wheel'); S.goal = null; }
   if (e.code === 'Space') { e.preventDefault(); S.hop(); }
-  if (e.code === 'KeyR') S.resetKart(false);
-  if (e.code === 'Escape') { S.closePanel(); if (S.tour.on) S.stopTour('Tour stopped'); }
-  if (e.code === 'KeyT') S.tour.on ? S.stopTour('Tour stopped') : S.startTour();
+  if (e.code === 'KeyR') S.resetRig(false);
+  if (e.code === 'Escape') { S.hidePanel(); if (S.tour.on) S.haltTour('Tour stopped'); }
+  if (e.code === 'KeyT') S.tour.on ? S.haltTour('Tour stopped') : S.runTour();
 });
 addEventListener('keyup', e => { const k = S.KEYMAP[e.code]; if (k) S.keys[k] = 0; });
 addEventListener('blur', () => { for (const k in S.keys) S.keys[k] = 0; });
@@ -125,7 +124,7 @@ S.joy = { on: false, x: 0, y: 0, id: null };
     let dx = e.clientX - cx, dy = e.clientY - cy; const d = Math.hypot(dx, dy); if (d > max) { dx *= max / d; dy *= max / d; }
     S.joy.x = dx / max; S.joy.y = dy / max; nub.style.transform = `translate(${dx}px, ${dy}px)`;
   };
-  el.addEventListener('pointerdown', e => { if (S.state === 'intro') S.beginDrive(); S.joy.on = true; S.joy.id = e.pointerId; el.setPointerCapture(e.pointerId); move(e); if (S.tour.on) S.stopTour('You have the wheel'); S.goal = null; });
+  el.addEventListener('pointerdown', e => { if (S.state === 'intro') S.startDrive(); S.joy.on = true; S.joy.id = e.pointerId; el.setPointerCapture(e.pointerId); move(e); if (S.tour.on) S.haltTour('You have the wheel'); S.goal = null; });
   el.addEventListener('pointermove', e => { if (S.joy.on && e.pointerId === S.joy.id) move(e); });
   const end = () => { S.joy.on = false; S.joy.x = S.joy.y = 0; nub.style.transform = ''; };
   el.addEventListener('pointerup', end); el.addEventListener('pointercancel', end);
@@ -133,15 +132,14 @@ S.joy = { on: false, x: 0, y: 0, id: null };
   hold('tHop', () => S.hop());
   hold('tBoost', () => S.keys.boost = 1, () => S.keys.boost = 0);
 }
-S.$('btnJump').addEventListener('pointerdown', e => { e.preventDefault(); if (S.state === 'intro') S.beginDrive(); S.hop(); });
+S.$('btnJump').addEventListener('pointerdown', e => { e.preventDefault(); if (S.state === 'intro') S.startDrive(); S.hop(); });
 
-// click the world: start, or click a stand to open it
 S.ray = new THREE.Raycaster(), S.ndc = new THREE.Vector2();
 S.downAt = null;
 S.canvas.addEventListener('pointerdown', e => { S.downAt = [e.clientX, e.clientY]; });
 S.canvas.addEventListener('pointerup', e => {
   if (!S.downAt || Math.hypot(e.clientX - S.downAt[0], e.clientY - S.downAt[1]) > 8) return;
-  if (S.state === 'intro') { S.beginDrive(); return; }
+  if (S.state === 'intro') { S.startDrive(); return; }
   if (S.state !== 'drive') return;
   S.ndc.set(e.clientX / innerWidth * 2 - 1, -(e.clientY / innerHeight) * 2 + 1);
   S.ray.setFromCamera(S.ndc, S.camera);
@@ -150,13 +148,13 @@ S.canvas.addEventListener('pointerup', e => {
     let o = cardHits[0].object;
     while (o && o.userData.projectIndex == null && !o.userData.contact) o = o.parent;
     if (o && o.userData.projectIndex != null) { S.openProject(o.userData.projectIndex); return; }
-    if (o && o.userData.contact) { S.openPanel(S.STANDS.find(s => s.id === 'contact'), 'click'); return; }
+    if (o && o.userData.contact) { S.showPanel(S.STANDS.find(s => s.id === 'contact'), 'click'); return; }
   }
   const hit = new THREE.Vector3();
   if (S.ray.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), hit)) {
     for (const p of S.pads) {
       const st = p.stand.pos || p.stand.pad;
-      if (hit.distanceTo(p.pos) < 4 || (st && Math.hypot(hit.x - st.x, hit.z - st.z) < 7)) { S.openPanel(p.stand, 'click'); S.goTo(p.stand); return; }
+      if (hit.distanceTo(p.pos) < 4 || (st && Math.hypot(hit.x - st.x, hit.z - st.z) < 7)) { S.showPanel(p.stand, 'click'); S.seekTo(p.stand); return; }
     }
   }
 });
@@ -168,7 +166,7 @@ S.qSteer = new THREE.Quaternion(), S.yAxis = new THREE.Vector3(0, 1, 0);
 S.tmp = new THREE.Vector3(), S.tmpQ = new THREE.Quaternion(), S.camLead = new THREE.Vector3();
 S.updaters = [];
 S.revealAnim = null;
-function baseDist() { const a = innerWidth / innerHeight; return a < 0.8 ? 28.5 : a < 1.2 ? 22.5 : 19; }
+function distToBase() { const a = innerWidth / innerHeight; return a < 0.8 ? 28.5 : a < 1.2 ? 22.5 : 19; }
 
 function pastWall(x, z) {
   let best = 1e9, bx = 0, bz = 0;
@@ -180,13 +178,12 @@ function pastWall(x, z) {
   return Math.sqrt(best) > S.SPEED_HW + 2.5 || Math.hypot(x, z) > 72;
 }
 
-function frame() {
+function makeFrame() {
   try {
   const dt = Math.min(S.clock.getDelta(), 1 / 30);
   const t = S.clock.elapsedTime;
   S.RU.uTime.value = t; S.grade.uniforms.uTime.value = t;
 
-  // reveal animation
   if (S.revealAnim) {
     const k = S.clamp((performance.now() - S.revealAnim.t0) / S.revealAnim.dur, 0, 1);
     const e = S.revealAnim.ease(k);
@@ -233,13 +230,11 @@ function frame() {
     }
   }
 
-  // sync kart
   S.kart.position.copy(S.chassis.position); S.kart.quaternion.copy(S.chassis.quaternion);
   for (let i = 0; i < 4; i++) {
     S.vehicle.updateWheelTransform(i);
     const wi = S.vehicle.wheelInfos[i], wm = S.wheelMeshes[i];
     wm.position.copy(wi.worldTransform.position);
-    // chassis orientation plus steering only; the roll is spun on the inner group so it always turns with the road
     wm.quaternion.copy(S.kart.quaternion);
     if (i < 2) wm.quaternion.multiply(S.qSteer.setFromAxisAngle(S.yAxis, wi.steering));
     let w = info.vF / (0.3 * S.KS);                                  // rolling speed, rad/s
@@ -248,7 +243,6 @@ function frame() {
     S.wheelAngle[i] -= w * dt;
     wm.userData.spin.rotation.x = S.wheelAngle[i];
   }
-  // two lights left in the world behind the rear corners: only while Shift is held and the car is moving forward
   S.updateBoostTrails(dt, S.state === 'drive' && info.boosting && info.vF > 8);
   if (info.drifting && Math.random() < dt * 16) {
     const s = S.smokes[S.smokeI++ % S.smokes.length];
@@ -266,9 +260,9 @@ function frame() {
   S.kartParts.wheel.rotation.z = -S.steerVal * 2.2;
   S.kartParts.head.rotation.y = S.damp(S.kartParts.head.rotation.y, S.steerVal * 0.9, 6, dt);
   S.kartParts.flag.rotation.y = Math.sin(t * 9) * 0.25 - Math.min(info.speed, 14) * 0.02;
-  S.animateKart(dt, t, info);
+  S.animateRig(dt, t, info);
   const lampOn = !!S.keys.boost;
-  for (const lamp of S.kartParts.lamps || []) lamp.material.emissiveIntensity = lampOn ? 0.45 : 0.12;
+  for (const streetLamp of S.kartParts.lamps || []) streetLamp.material.emissiveIntensity = lampOn ? 0.45 : 0.12;
   S.kartParts.strip.material.emissiveIntensity = lampOn ? 1.6 : 0.35;
   for (const h of S.kartParts.halos) h.material.opacity = S.damp(h.material.opacity, lampOn ? 0.05 : 0, 9, dt);
   for (const h of S.kartParts.brakeHalos) h.material.opacity = S.damp(h.material.opacity, (info.throttle < 0 || (S.keys.b && info.vF > 1)) ? 0.9 : (lampOn && info.vF > 8 ? 0.35 : 0.0), 12, dt);
@@ -305,7 +299,6 @@ function frame() {
     for (const g of S.projectCards) if (S.chassis.position.distanceTo(g.position) < 9) { S.projectsHint = true; S.toast('Five builds', 'click a sign to read it'); break; }
   }
 
-  // sideways or upside down: hop, then roll back onto the wheels over a short beat
   S.chassis.quaternion.vmult(new CANNON.Vec3(0, 1, 0), S.upV);
   if (S.recover) {
     S.recover.t += dt;
@@ -320,7 +313,7 @@ function frame() {
     S.flipT += dt;
     if (S.flipT > 0.8) {
       S.flipT = 0; S.recoverN++;
-      if (S.recoverN > 2) { S.recoverN = 0; S.resetKart(true); }
+      if (S.recoverN > 2) { S.recoverN = 0; S.resetRig(true); }
       else {
         S.chassis.velocity.y = Math.max(S.chassis.velocity.y, 6);
         S.chassis.quaternion.vmult(new CANNON.Vec3(0, 0, -1), S.fwdV);
@@ -332,21 +325,19 @@ function frame() {
       }
     }
   } else { S.flipT = 0; if (S.upV.y > 0.85) S.recoverN = 0; }
-  if (pastWall(S.chassis.position.x, S.chassis.position.z) || S.chassis.position.y < -5) S.resetKart(true);
+  if (pastWall(S.chassis.position.x, S.chassis.position.z) || S.chassis.position.y < -5) S.resetRig(true);
 
-  // airtime
-  const gnd = S.grounded();
+  const gnd = S.onGround();
   if (gnd === 0 && S.state === 'drive') S.airT += dt; else { if (S.airT > 0.55) S.toast('Big air', `${S.airT.toFixed(2)} s off the ground`); S.airT = 0; }
 
-  // dust
   if (S.state === 'drive' && gnd > 2 && info.speed > 2 && (info.force && info.speed < 9 || Math.abs(S.steerVal) > 0.35 && info.speed > 7) && Math.random() < 0.5) {
-    const wi = S.vehicle.wheelInfos[2 + (Math.random() < 0.5 ? 0 : 1)]; S.puff(new THREE.Vector3().copy(wi.worldTransform.position));
+    const wi = S.vehicle.wheelInfos[2 + (Math.random() < 0.5 ? 0 : 1)]; S.emitPuff(new THREE.Vector3().copy(wi.worldTransform.position));
   }
   S.chassis.quaternion.vmult(new CANNON.Vec3(1, 0, 0), S.rightV);
   const lat = Math.abs(S.chassis.velocity.dot(S.rightV));
   const skid = S.state === 'drive' && gnd > 2 && (info.drifting || lat > 1.8 || (info.speed > 4 && Math.abs(info.vF) > 2 && info.throttle !== 0 && Math.sign(info.throttle) !== Math.sign(info.vF)));
   for (let w = 0; w < 2; w++) {
-    if (skid) { const wp = S.vehicle.wheelInfos[2 + w].worldTransform.position; S.trailPush(w, new THREE.Vector3(wp.x, 0, wp.z), t); if (Math.random() < 0.35) S.puff(new THREE.Vector3(wp.x, 0, wp.z), 1.3); }
+    if (skid) { const wp = S.vehicle.wheelInfos[2 + w].worldTransform.position; S.pushTrail(w, new THREE.Vector3(wp.x, 0, wp.z), t); if (Math.random() < 0.35) S.emitPuff(new THREE.Vector3(wp.x, 0, wp.z), 1.3); }
     else S.trail.last[w] = null;
   }
   for (const d of S.dust) if (d.m.visible) {
@@ -361,7 +352,6 @@ function frame() {
     s.m.material.opacity = 1 - k;
   }
 
-  // props
   for (const p of S.props) {
     p.mesh.position.copy(p.body.position); p.mesh.quaternion.copy(p.body.quaternion);
     if (!p.down && S.state === 'drive') {
@@ -376,20 +366,19 @@ function frame() {
           if (p.tag === 'crate' && S.counts.crate === 3) S.toast('Delivery refused', 'crates everywhere');
           if (p.tag === 'pot' && S.counts.pot === 1) S.toast('Sorry, ferns', 'they will grow back');
           if (p.tag === 'aframe' && !S.counts.af) { S.counts.af = 1; S.toast('Mind the signs', 'they are only cardboard'); }
-          if (p.tag === 'barrel' && !S.counts.br) { S.counts.br = 1; S.toast('Barrel roll', 'the skate slab is yours'); }
+          if (p.tag === 'oilBarrel' && !S.counts.br) { S.counts.br = 1; S.toast('Barrel roll', 'the skate slab is yours'); }
         }
       }
     }
   }
 
-  // pads: drive on to open, drive away to close
   for (const p of S.pads) {
     const d = Math.hypot(S.chassis.position.x - p.pos.x, S.chassis.position.z - p.pos.z);
     const inside = d < 2.6 && S.state === 'drive';
-    if (inside && !p.inside) { S.stamp(p.stand); if (!S.goal || S.goal.stand === p.stand) S.openPanel(p.stand, 'pad'); }   // a pad crossed on the way to another stand stamps but does not take the sheet
+    if (inside && !p.inside) { S.stamp(p.stand); if (!S.goal || S.goal.stand === p.stand) S.showPanel(p.stand, 'pad'); }   // a pad crossed on the way to another stand stamps but does not take the sheet
     if (!inside && p.inside && S.openStand === p.stand && S.openVia === 'pad' && !S.tour.on) { /* closes once far away */ }
     p.inside = inside;
-    if (S.openStand === p.stand && S.openVia === 'pad' && d > 8 && !S.tour.on) S.closePanel();
+    if (S.openStand === p.stand && S.openVia === 'pad' && d > 8 && !S.tour.on) S.hidePanel();
     p.on = S.damp(p.on, inside ? 1 : 0, 6, dt);
     p.mesh.material.uniforms.uOn.value = p.on;
     p.pin.position.y = 2.4 + Math.sin(t * 2 + p.stand.angle) * 0.18 + p.on * 0.6;
@@ -397,10 +386,8 @@ function frame() {
     p.pin.scale.setScalar(1 - p.on * 0.25);
   }
 
-  // tour: hold at a stand, then roll on
-  if (S.tour.on && !S.goal && S.tour.wait > 0) { S.tour.wait -= dt; if (S.tour.wait <= 0) { S.tour.i++; if (S.tour.i % S.TOUR_ORDER.length === 0 && S.stamped.size >= S.STANDS.length) { S.stopTour(null); S.closePanel(); S.toast('Tour done', 'the park is yours'); } else { S.closePanel(); S.nextTourStop(); } } }
+  if (S.tour.on && !S.goal && S.tour.wait > 0) { S.tour.wait -= dt; if (S.tour.wait <= 0) { S.tour.i++; if (S.tour.i % S.TOUR_ORDER.length === 0 && S.stamped.size >= S.STANDS.length) { S.haltTour(null); S.hidePanel(); S.toast('Tour done', 'the park is yours'); } else { S.hidePanel(); S.nextStop(); } } }
 
-  // petals
   if (S.petals) {
     const P = S.petals.userData.p;
     for (let i = 0; i < P.length; i++) {
@@ -416,7 +403,6 @@ function frame() {
 
   for (const u of S.updaters) u(dt, t, info);
 
-  // camera: eases after the kart and looks ahead of it, makes room for the sheet
   S.tmp.set(S.chassis.velocity.x, 0, S.chassis.velocity.z).multiplyScalar(0.48);
   if (S.tmp.length() > 7) S.tmp.setLength(7);
   S.camLead.x = S.damp(S.camLead.x, S.tmp.x, 1.8, dt); S.camLead.z = S.damp(S.camLead.z, S.tmp.z, 1.8, dt);
@@ -424,7 +410,6 @@ function frame() {
   if (S.state !== 'drive') desired.set(S.SPAWN.x, 0, S.SPAWN.z);
   if (S.openVia === 'project' && S.focusPoint) desired.lerp(S.focusPoint, 0.62);
   else if (S.openStand && S.openVia !== 'list') {
-    // aim at where the board appears on screen: its base pushed up-screen by its height
     const sp = new THREE.Vector3(S.openStand.pos.x, 0, S.openStand.pos.z).addScaledVector(S.camUp, 2.2);
     desired.lerp(sp, 0.34);
   }
@@ -444,7 +429,6 @@ function frame() {
   S.sun.position.copy(S.camTarget).addScaledVector(S.SUN_DIR, 60); S.sun.target.position.copy(S.camTarget);
   S.scene.fog.near = S.camDistNow * 2.6; S.scene.fog.far = S.camDistNow * 8.5;
 
-  // the start tag follows the lit circle
   if (S.state === 'intro') {
     const tagP = new THREE.Vector3(S.SPAWN.x + 2.1 * S.camRight.x, 0, S.SPAWN.z + 2.1 * S.camRight.z).project(S.camera);
     const el = S.$('start');
@@ -458,49 +442,41 @@ function frame() {
 
   S.composer.render(dt);
   } catch (e) { window.__frameErr = (e && e.stack) || String(e); }
-  requestAnimationFrame(frame);
+  requestAnimationFrame(makeFrame);
 }
 
-/* =====================================================================
-   intro: the lit circle, then the world
-   ===================================================================== */
-function brandIn() {
+function introBrand() {
   const w1 = S.$('brand').querySelector('.w1'), w2 = S.$('brand').querySelector('.w2');
   const letters = (el, str, base) => { el.innerHTML = [...str].map((c, i) => `<span class="l blr" style="transition-delay:${base + i * 30}ms">${c}</span>`).join(''); };
   letters(w1, 'Aayan', 0); letters(w2, 'Desai', 160);
   requestAnimationFrame(() => requestAnimationFrame(() => S.$('brand').querySelectorAll('.blr').forEach(e => e.classList.add('in'))));
 }
-function showStart() {
+function showCurtain() {
   S.state = 'intro';
-  S.resetKart(true);
+  S.resetRig(true);
   S.chassis.position.y += 1.4; // drop the kart onto its springs as the circle lights
-  // the ring draws, the spawn island lights up inside it
   S.revealAnim = { from: 0, to: 10.5, dur: S.reduced ? 1 : 1500, t0: performance.now(), ease: S.expoOut, ring: () => 1, done: () => {
     S.$('start').classList.add('on');
   } };
-  brandIn();
+  introBrand();
 }
-function beginDrive() {
+function startDrive() {
   if (S.state !== 'intro') return;
   S.state = 'drive';
   document.documentElement.classList.add('driving');
-  S.initAudio(); if (S.audio.ctx && S.audio.ctx.state === 'suspended') S.audio.ctx.resume();
+  S.setupAudio(); if (S.audio.ctx && S.audio.ctx.state === 'suspended') S.audio.ctx.resume();
   S.tone(523, 0.2, 'triangle', 0.1); S.tone(784, 0.35, 'triangle', 0.08, 0.1);
   S.$('start').classList.remove('on');
-  S.camDistTarget = baseDist();
+  S.camDistTarget = distToBase();
   S.revealAnim = { from: S.RU.uReveal.value, to: 80, dur: S.reduced ? 1 : 2700, t0: performance.now(), ease: k => 0.35 * k + 0.65 * Math.pow(k, 2.2), ring: k => { S.RU.uDim.value = 1 - S.clamp(k / 0.75, 0, 1); return 1 - S.clamp((k - 0.6) / 0.38, 0, 1); }, done: () => { S.RU.uReveal.value = 500; S.RU.uRingOn.value = 0; S.RU.uDim.value = 0; } };
-  // HUD enters as one timeline, from different sides
   const seq = [['role', 250], ['nav', 450], ['hint', 700], ['stamps', 850]];
   for (const [id, ms] of seq) setTimeout(() => S.$(id).classList.add('in'), S.reduced ? 0 : ms);
   S.canvas.focus({ preventScroll: true });
 }
 
-/* =====================================================================
-   loading: real milestones, a minimum, a hold, a failsafe
-   ===================================================================== */
 S.prog = { v: 0, shown: 0, done: false };
 S.t0 = performance.now();
-function setWhat(s) { const el = S.$('what'); if (el) el.textContent = s; }
+function genericPiece(s) { const el = S.$('what'); if (el) el.textContent = s; }
 (function tick() {
   const cap = S.prog.done ? 1 : Math.min(S.prog.v, 0.92);
   S.prog.shown = Math.min(cap, S.prog.shown + 0.018);
@@ -509,7 +485,7 @@ function setWhat(s) { const el = S.$('what'); if (el) el.textContent = s; }
   S.$('loader').style.setProperty('--p', pct + '%');
   if (S.prog.done && S.prog.shown >= 1 && performance.now() - S.t0 > 1500) {
     S.$('loader').classList.add('out'); window.__booted = true;
-    setTimeout(showStart, S.reduced ? 0 : 350);
+    setTimeout(showCurtain, S.reduced ? 0 : 350);
     return;
   }
   requestAnimationFrame(tick);
@@ -518,36 +494,35 @@ function setWhat(s) { const el = S.$('what'); if (el) el.textContent = s; }
 async function boot() {
   try {
   window.__stage = 'fonts';
-  setWhat('setting the type');
+  genericPiece('setting the type');
   try {
     await Promise.race([Promise.all([
       document.fonts.load('800 100px Syne'), document.fonts.load('700 100px Syne'), document.fonts.load('400 20px "Space Mono"'), document.fonts.load('400 16px "General Sans"'),
     ]), new Promise(r => setTimeout(r, 4000))]);
   } catch (e) { }
   window.__stage = 'park';
-  S.prog.v = 0.4; setWhat('planting the garden');
+  S.prog.v = 0.4; genericPiece('planting the garden');
   const images = { badges: {} };
   await new Promise(r => setTimeout(r, 16));
-  S.buildKart();
-  S.buildPark(images);
-  S.buildFlowers();
-  S.buildBulbs();
-  S.buildLeaves(S.phone() ? 320 : 650);
-  if (!S.reduced) { S.buildBirds(); S.buildButterflies(); }
-  S.buildGrass(S.phone() ? 5000 : 11000);
-  if (!S.reduced) S.buildPetals(S.phone() ? 70 : 140);
+  S.constructRig();
+  S.assemblePark(images);
+  S.sowFlowers();
+  S.hangBulbs();
+  S.driftLeaves(S.phone() ? 320 : 650);
+  if (!S.reduced) { S.scatterBirds(); S.releaseButterflies(); }
+  S.seedTurf(S.phone() ? 5000 : 11000);
+  if (!S.reduced) S.driftPetals(S.phone() ? 70 : 140);
   window.__stage = 'ground';
-  S.prog.v = 0.55; setWhat('painting the paths');
+  S.prog.v = 0.55; genericPiece('painting the paths');
   await new Promise(r => setTimeout(r, 16));
-  S.buildGround(S.paintGround(S.phone() ? 2048 : 4096));
-  S.prog.v = 0.68; setWhat('Aayan Desai');
+  S.formTerrain(S.paintTerrain(S.phone() ? 2048 : 4096));
+  S.prog.v = 0.68; genericPiece('Aayan Desai');
   try { await S.renderer.compileAsync(S.scene, S.camera); } catch (e) { }
   window.__stage = 'settle';
   S.prog.v = 0.9;
-  // settle the physics so the kart sits on its springs before anyone sees it
   for (let i = 0; i < 90; i++) { S.drive(1 / 60); S.world.step(1 / 60); }
-  window.__stage = 'frame';
-  frame();
+  window.__stage = 'makeFrame';
+  makeFrame();
   window.__stage = 'done';
   requestAnimationFrame(() => { S.prog.v = 1; S.prog.done = true; });
   } catch (e) { window.__bootErr = (window.__stage || '') + '\n' + ((e && e.stack) || String(e)); S.prog.done = true; }
@@ -559,22 +534,21 @@ addEventListener('resize', () => {
   const w = innerWidth, h = innerHeight;
   S.renderer.setSize(w, h); S.composer.setSize(w, h);
   S.camera.aspect = w / h; S.camera.fov = w / h < 0.8 ? 44 : 34; S.camera.updateProjectionMatrix();
-  if (S.state === 'drive') S.camDistTarget = baseDist();
+  if (S.state === 'drive') S.camDistTarget = distToBase();
   S.tiltH.uniforms.uDir.value.set(1 / (w * S.DPR), 0); S.tiltV.uniforms.uDir.value.set(0, 1 / (h * S.DPR));
   S.grade.uniforms.uRes.value.set(w * S.DPR, h * S.DPR);
 });
 dispatchEvent(new Event('resize'));
 
-// for the capture scripts
 window.__kp = { revealProbe(k) { // capture hook: pose the intro→world reveal at progress k (0..1)
-    if (S.state === 'intro') beginDrive(); S.revealAnim = null;
+    if (S.state === 'intro') startDrive(); S.revealAnim = null;
     const e = 0.35 * k + 0.65 * Math.pow(k, 2.2); S.RU.uReveal.value = 4.6 + (80 - 4.6) * e;
-    S.RU.uDim.value = 1 - S.clamp(k / 0.75, 0, 1); S.RU.uRingOn.value = 1 - S.clamp((k - 0.6) / 0.38, 0, 1); }, renderer: S.renderer, pitch(d) { S.CAM_PITCH = d * S.DEG; }, get cam() { return [S.camDistTarget, S.camDistNow]; }, dist(d) { S.camDistTarget = d; }, teleport(x, z, yaw = 0) { S.chassis.position.set(x, 0.6, z); S.chassis.velocity.setZero(); S.chassis.angularVelocity.setZero(); S.chassis.quaternion.setFromEuler(0, yaw, 0); S.camTarget.set(x, 0, z); }, STANDS: S.STANDS, chassis: S.chassis, vehicle: S.vehicle, openPanel: S.openPanel, closePanel: S.closePanel, startTour: S.startTour, beginDrive, get state() { return S.state; }, keys: S.keys, resetKart: S.resetKart, camera: S.camera, RU: S.RU, toast: S.toast, goTo: S.goTo, stamped: S.stamped };
-S.baseDist = baseDist;
-S.frame = frame;
-S.brandIn = brandIn;
-S.showStart = showStart;
-S.beginDrive = beginDrive;
-S.setWhat = setWhat;
+    S.RU.uDim.value = 1 - S.clamp(k / 0.75, 0, 1); S.RU.uRingOn.value = 1 - S.clamp((k - 0.6) / 0.38, 0, 1); }, renderer: S.renderer, pitch(d) { S.CAM_PITCH = d * S.DEG; }, get cam() { return [S.camDistTarget, S.camDistNow]; }, dist(d) { S.camDistTarget = d; }, teleport(x, z, yaw = 0) { S.chassis.position.set(x, 0.6, z); S.chassis.velocity.setZero(); S.chassis.angularVelocity.setZero(); S.chassis.quaternion.setFromEuler(0, yaw, 0); S.camTarget.set(x, 0, z); }, STANDS: S.STANDS, chassis: S.chassis, vehicle: S.vehicle, showPanel: S.showPanel, hidePanel: S.hidePanel, runTour: S.runTour, startDrive, get state() { return S.state; }, keys: S.keys, resetRig: S.resetRig, camera: S.camera, RU: S.RU, toast: S.toast, seekTo: S.seekTo, stamped: S.stamped };
+S.distToBase = distToBase;
+S.makeFrame = makeFrame;
+S.introBrand = introBrand;
+S.showCurtain = showCurtain;
+S.startDrive = startDrive;
+S.genericPiece = genericPiece;
 S.boot = boot;
 

@@ -20,7 +20,7 @@ function stamp(s) {
 
 S.panel = S.$('panel');
 S.openStand = null, S.openVia = null, S.projectFocus = null, S.focusPoint = null;
-function wordsHTML(str, base = 0, step = 40) {
+function listHTML(str, base = 0, step = 40) {
   return String(str || '').split(' ').filter(Boolean).map((w, i) => `<span class="blr" style="transition-delay:${base + i * step}ms">${w}</span>`).join(' ');
 }
 function esc(s) { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
@@ -43,7 +43,7 @@ function openProject(i) {
   img.alt = b.h; img.parentElement.style.display = '';
   S.$('pIdx').textContent = String(i + 1).padStart(2, '0');
   let html = `<p class="mono" style="color:var(--ink-62)">Project ${i + 1} of ${blocks.length}</p>`;
-  html += `<h2 id="pTitle">${wordsHTML(b.h, 80, 40)}</h2>`;
+  html += `<h2 id="pTitle">${listHTML(b.h, 80, 40)}</h2>`;
   if (b.s) html += `<p class="mono dim">${esc(b.s)}</p>`;
   if (b.items) html += `<ul class="bul">${b.items.map(t => `<li>${esc(t)}</li>`).join('')}</ul>`;
   if (b.scam) html += `<div class="scam"><button type="button" data-r="SAFE">Safe</button><button type="button" data-r="SUSPICIOUS">Suspicious</button><button type="button" data-r="SCAM">Scam</button><p class="scam-out"></p></div>`;
@@ -52,7 +52,7 @@ function openProject(i) {
   S.focusPoint = S.projectCards[i] ? S.projectCards[i].position.clone() : null;
   showSheet();
 }
-function openPanel(s, via = 'pad') {
+function showPanel(s, via = 'pad') {
   if (S.openStand === s && S.openVia !== 'project' && S.panel.classList.contains('on')) return;
   S.projectFocus = null; S.focusPoint = null;
   S.openStand = s; S.openVia = via;
@@ -64,8 +64,8 @@ function openPanel(s, via = 'pad') {
   S.$('pIdx').textContent = s.badge || s.kind.toUpperCase();
   const head = s.h || s.title;
   let html = `<p class="mono" style="color:var(--ink-62)">${esc(s.kicker || s.badge || '')}</p>`;
-  html += `<h2 id="pTitle">${wordsHTML(head, 120, 70)}</h2>`;
-  html += `<p class="lede">${wordsHTML(s.lede[0], 300, 22)} <span class="dim">${wordsHTML(s.lede[1] || '', 420, 22)}</span></p>`;
+  html += `<h2 id="pTitle">${listHTML(head, 120, 70)}</h2>`;
+  html += `<p class="lede">${listHTML(s.lede[0], 300, 22)} <span class="dim">${listHTML(s.lede[1] || '', 420, 22)}</span></p>`;
   if (s.highlights) html += `<ul class="bul">${s.highlights.map(t => `<li>${esc(t)}</li>`).join('')}</ul>`;
   if (s.chips) html += `<div class="chips">${s.chips.map(c => `<span class="mono">${esc(c)}</span>`).join('')}</div>`;
   if (s.links) html += `<div class="chips">${s.links.map(([label, href]) => `<a class="mono" href="${esc(href)}" target="_blank" rel="noopener">${esc(label)}</a>`).join('')}</div>`;
@@ -94,14 +94,14 @@ function posterData(s) {
   const fill = s.color || '#cdb8f0';
   return 'data:image/svg+xml;utf8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"><rect width="400" height="300" fill="${fill}"/><rect x="28" y="28" width="344" height="244" rx="16" fill="#fbf3e6"/><text x="48" y="78" font-family="Space Mono, monospace" font-size="16" fill="#2a1d38">${badge}</text><text x="48" y="160" font-family="Syne, sans-serif" font-size="42" font-weight="800" fill="#2a1d38">${title}</text></svg>`);
 }
-function closePanel() {
+function hidePanel() {
   if (!S.openStand) return;
   S.openStand = null; S.openVia = null; S.projectFocus = null; S.focusPoint = null;
   S.panel.classList.remove('on'); S.panel.classList.add('closing'); S.$('pBody').classList.remove('in'); S.panel.setAttribute('aria-hidden', 'true');
   setTimeout(() => S.panel.classList.remove('closing'), 1000);
   S.$('pBar').style.transition = 'none'; S.$('pBar').style.transform = 'scaleX(0)';
 }
-S.$('pClose').addEventListener('click', () => { closePanel(); if (S.tour.on) S.stopTour('Tour stopped'); });
+S.$('pClose').addEventListener('click', () => { hidePanel(); if (S.tour.on) S.haltTour('Tour stopped'); });
 S.$('pBody').addEventListener('click', e => {
   const b = e.target.closest('[data-r]');
   if (!b) return;
@@ -112,35 +112,35 @@ S.$('pBody').addEventListener('click', e => {
 S.$('pCta').addEventListener('click', () => {});
 S.stepStand = d => {
   if (S.openVia === 'project' && S.projectFocus != null) { openProject(S.projectFocus + d); return; }
-  const i = S.STANDS.indexOf(S.openStand); const s = S.STANDS[(i + d + S.STANDS.length) % S.STANDS.length]; closePanel(); setTimeout(() => { openPanel(s, 'list'); S.goTo(s); }, 60);
+  const i = S.STANDS.indexOf(S.openStand); const s = S.STANDS[(i + d + S.STANDS.length) % S.STANDS.length]; hidePanel(); setTimeout(() => { showPanel(s, 'list'); S.seekTo(s); }, 60);
 };
 S.$('pPrev').addEventListener('click', () => S.stepStand(-1));
 S.$('pNext').addEventListener('click', () => S.stepStand(1));
 
 S.list = S.$('list');
 S.lastFocus = undefined;
-function openList() { S.lastFocus = document.activeElement; S.list.classList.add('on'); setTimeout(() => S.list.querySelector('li button')?.focus(), 50); }
-function closeList() { S.list.classList.remove('on'); S.lastFocus?.focus?.(); }
-S.buildListInto(S.$('lItems'), s => { closeList(); openPanel(s, 'list'); S.goTo(s); });
-S.$('btnList').addEventListener('click', openList);
-S.$('lClose').addEventListener('click', closeList);
-S.list.addEventListener('click', e => { if (e.target === S.list) closeList(); });
-S.$('lTour').addEventListener('click', () => { closeList(); S.startTour(); });
-S.$('btnTour').addEventListener('click', () => S.tour.on ? S.stopTour('Tour stopped') : S.startTour());
+function showList() { S.lastFocus = document.activeElement; S.list.classList.add('on'); setTimeout(() => S.list.querySelector('li button')?.focus(), 50); }
+function hideList() { S.list.classList.remove('on'); S.lastFocus?.focus?.(); }
+S.renderList(S.$('lItems'), s => { hideList(); showPanel(s, 'list'); S.seekTo(s); });
+S.$('btnList').addEventListener('click', showList);
+S.$('lClose').addEventListener('click', hideList);
+S.list.addEventListener('click', e => { if (e.target === S.list) hideList(); });
+S.$('lTour').addEventListener('click', () => { hideList(); S.runTour(); });
+S.$('btnTour').addEventListener('click', () => S.tour.on ? S.haltTour('Tour stopped') : S.runTour());
 S.$('btnSound').addEventListener('click', () => {
   S.audio.on = !S.audio.on; S.$('btnSound').setAttribute('aria-pressed', S.audio.on); S.$('btnSound').querySelector('.wv').style.opacity = S.audio.on ? 1 : 0.15;
   if (S.audio.master) S.audio.master.gain.value = S.audio.on ? 0.5 : 0;
 });
 S.toast = toast;
 S.stamp = stamp;
-S.wordsHTML = wordsHTML;
+S.listHTML = listHTML;
 S.esc = esc;
 S.showSheet = showSheet;
 S.openProject = openProject;
-S.openPanel = openPanel;
+S.showPanel = showPanel;
 S.posterData = posterData;
-S.closePanel = closePanel;
-S.openList = openList;
-S.closeList = closeList;
+S.hidePanel = hidePanel;
+S.showList = showList;
+S.hideList = hideList;
 
 }

@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import * as CANNON from 'cannon-es';
 export async function installFx(S) {
 S.audio = { on: true, ctx: null };
-function initAudio() {
+function setupAudio() {
   if (S.audio.ctx) return;
   try {
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -20,7 +20,7 @@ function tone(freq, dur, type = 'sine', vol = 0.2, when = 0) {
   o.type = type; o.frequency.setValueAtTime(freq, t); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
   o.connect(g); g.connect(S.audio.master); o.start(t); o.stop(t + dur + 0.05);
 }
-function thud(v) {
+function thudSfx(v) {
   if (!S.audio.ctx || !S.audio.on) return;
   const ctx = S.audio.ctx, n = ctx.sampleRate * 0.12, buf = ctx.createBuffer(1, n, ctx.sampleRate), d = buf.getChannelData(0);
   for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 3);
@@ -37,7 +37,7 @@ S.dust = [];
   }
 }
 S.dustI = 0;
-function puff(p, s = 1) {
+function emitPuff(p, s = 1) {
   const d = S.dust[S.dustI++ % S.dust.length];
   d.m.position.copy(p); d.m.position.y = 0.2; d.t = 0; d.life = S.R(0.5, 0.9); d.s = s; d.m.visible = true;
   d.v.set(S.R(-0.6, 0.6), S.R(0.6, 1.4), S.R(-0.6, 0.6));
@@ -124,9 +124,6 @@ S.smokes = [];
 S.smokeI = 0;
 S.blastKick = new CANNON.Vec3();
   S.camKick = 0, S.boostHum = 0;
-/* boost trails: two pooled ribbons (a wide amber one and a thin white core, per rear corner).
-   Points are dropped in the world and left there, drift back a little, and fade. The head is
-   the live lamp while Shift is held and the car is moving forward. Nothing is created per frame. */
 S.boostTrails = [];
 {
   const N = 48, LIFE = 1.25, STEP = 0.022;
@@ -166,7 +163,6 @@ function updateBoostTrails(dt, emitting) {
         r.n = Math.min(r.n + 1, N);
       }
     } else r.acc = STEP;
-    // age every point, and age them three times faster once the trail is cut so nothing lingers
     const rate = emitting ? 1 : 3.2;
     let alive = 0;
     for (let k = 0; k < r.n; k++) {
@@ -179,7 +175,6 @@ function updateBoostTrails(dt, emitting) {
     if (!alive && !emitting) { r.mesh.visible = false; continue; }
     r.mesh.visible = true;
     const pos = r.geo.attributes.position.array, col = r.geo.attributes.color.array;
-    // vertex 0..1 is the live lamp (or the newest point when cut), then the pooled points
     let m = 0;
     const put = (x, y, z, dx, dz, u, w) => {
       const l = Math.hypot(dx, dz) || 1, nx = -dz / l, nz = dx / l;
@@ -187,7 +182,6 @@ function updateBoostTrails(dt, emitting) {
       for (let s = -1; s <= 1; s += 2) {
         const o = m * 3;
         pos[o] = x + nx * w * s; pos[o + 1] = y; pos[o + 2] = z + nz * w * s;
-        // cool palette: ice-white head, electric blue body, violet tail; the thin core stays white-cyan
         let cr, cg, cb;
         if (r.wScale < 0.5) { cr = 1 - u * 0.45; cg = 1 - u * 0.1; cb = 1; }
         else if (u < 0.35) { const k = u / 0.35; cr = 0.55 - 0.4 * k; cg = 0.95 - 0.4 * k; cb = 1; }
@@ -209,7 +203,6 @@ function updateBoostTrails(dt, emitting) {
       const w = (0.07 * Math.pow(1 - u, 1.1) + 0.004) * r.wScale;
       put(x, y, z, ax - bx, az - bz, u, w);
     }
-    // collapse the unused tail
     const lx = pos[(m - 2) * 3], ly = pos[(m - 2) * 3 + 1], lz = pos[(m - 2) * 3 + 2];
     for (; m < (N + 1) * 2; m++) { const o = m * 3; pos[o] = lx; pos[o + 1] = ly; pos[o + 2] = lz; col[o] = col[o + 1] = col[o + 2] = 0; }
     r.geo.attributes.position.needsUpdate = true; r.geo.attributes.color.needsUpdate = true;
@@ -252,9 +245,6 @@ function blast(pos) {
   S.toast(lines[(Math.random() * lines.length) | 0], 'boom');
 }
 
-/* =====================================================================
-   tyre trails: fading marks wherever the kart slides
-   ===================================================================== */
 S.TRAIL_N = 1000;
 S.trail = (() => {
   const pos = new Float32Array(S.TRAIL_N * 6 * 3), birth = new Float32Array(S.TRAIL_N * 6).fill(-99);
@@ -269,7 +259,7 @@ S.trail = (() => {
   const m = new THREE.Mesh(geo, mat); m.frustumCulled = false; m.renderOrder = 1; S.scene.add(m);
   return { pos, birth, geo, i: 0, last: [null, null] };
 })();
-function trailPush(w, p, now) {
+function pushTrail(w, p, now) {
   const prev = S.trail.last[w];
   S.trail.last[w] = p.clone();
   if (!prev || prev.distanceTo(p) > 1.2) return;
@@ -281,12 +271,12 @@ function trailPush(w, p, now) {
   S.trail.geo.attributes.position.needsUpdate = true; S.trail.geo.attributes.birth.needsUpdate = true;
 }
 S.rightV = new CANNON.Vec3();
-S.initAudio = initAudio;
+S.setupAudio = setupAudio;
 S.tone = tone;
-S.thud = thud;
-S.puff = puff;
+S.thudSfx = thudSfx;
+S.emitPuff = emitPuff;
 S.burstAt = burstAt;
 S.blast = blast;
-S.trailPush = trailPush;
+S.pushTrail = pushTrail;
 
 }

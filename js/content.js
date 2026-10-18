@@ -100,9 +100,6 @@ S.STANDS = [
     email: S.LINKS.email, cta: ['Write an email', 'mailto:' + S.LINKS.email] },
 ];
 
-/* =====================================================================
-   environment + capability
-   ===================================================================== */
 S.$ = id => document.getElementById(id);
 S.isTouch = matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window;
 if (S.isTouch) {
@@ -116,14 +113,13 @@ S.DEG = Math.PI / 180;
 S.clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 S.damp = (a, b, k, dt) => a + (b - a) * (1 - Math.exp(-k * dt));
 S.expoOut = t => t >= 1 ? 1 : 1 - Math.pow(2, -10 * t);
-function mulberry32(a) { return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
-S.rand = mulberry32(20261009);
+function rngFromSeed(a) { return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+S.rand = rngFromSeed(20261009);
 S.R = (a, b) => a + S.rand() * (b - a);
 S.polar = (aDeg, r) => new THREE.Vector3(Math.sin(aDeg * S.DEG) * r, 0, -Math.cos(aDeg * S.DEG) * r);
-// stands face a blend of the plaza and the camera, so every board reads from the default view
 S.faceY = (p, w = 1.1) => { const l = Math.hypot(p.x, p.z); const dx = -p.x / l + Math.sin(22 * S.DEG) * w, dz = -p.z / l + Math.cos(22 * S.DEG) * w; return Math.atan2(dx, dz); };
 
-function buildListInto(ol, onPick) {
+function renderList(ol, onPick) {
   ol.innerHTML = '';
   S.STANDS.forEach((s, i) => {
     const li = document.createElement('li');
@@ -137,11 +133,10 @@ function buildListInto(ol, onPick) {
   });
 }
 
-// no WebGL (checked by the watchdog in index.html) or the watchdog already gave up: the static list is the page
-function noPark() { document.documentElement.classList.add('nogl'); S.$('loader').classList.add('out'); }
-if (document.documentElement.classList.contains('nogl')) { noPark(); await new Promise(() => {}); } // stop here quietly
-S.mulberry32 = mulberry32;
-S.buildListInto = buildListInto;
-S.noPark = noPark;
+function parkFallback() { document.documentElement.classList.add('nogl'); S.$('loader').classList.add('out'); }
+if (document.documentElement.classList.contains('nogl')) { parkFallback(); await new Promise(() => {}); } // stop here quietly
+S.rngFromSeed = rngFromSeed;
+S.renderList = renderList;
+S.parkFallback = parkFallback;
 
 }
