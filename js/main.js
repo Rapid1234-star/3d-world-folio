@@ -19,7 +19,7 @@ await installPalette(S);
 S.canvas = S.$('gl');
 S.renderer = undefined;
 try { S.renderer = new THREE.WebGLRenderer({ canvas: S.canvas, antialias: false, powerPreference: 'high-performance' }); }
-catch (e) { S.parkFallback(); await new Promise(() => {}); } // a context that will not open goes to the list too
+catch (e) { S.parkFallback(); await new Promise(() => {}); } 
 S.DPR = Math.min(devicePixelRatio, S.phone() ? 1.6 : 1.5);
 window.__booted = true;
 S.renderer.setPixelRatio(S.DPR);
@@ -27,7 +27,7 @@ S.renderer.setSize(innerWidth, innerHeight);
 S.renderer.toneMapping = THREE.NeutralToneMapping;
 S.renderer.toneMappingExposure = 1.16;
 S.renderer.shadowMap.enabled = true;
-S.renderer.shadowMap.type = THREE.PCFShadowMap; // PCF honours shadow.radius → soft, long shadows
+S.renderer.shadowMap.type = THREE.PCFShadowMap; 
 
 S.scene = new THREE.Scene();
 S.scene.background = S.HAZE.clone();
@@ -35,12 +35,12 @@ S.scene.fog = new THREE.Fog(S.HAZE, 30, 95);
 S.camera = new THREE.PerspectiveCamera(34, innerWidth / innerHeight, 0.5, 400);
 S.CAM_YAW = 22 * S.DEG; S.CAM_PITCH = 40 * S.DEG;
 S.camRight = new THREE.Vector3(Math.cos(S.CAM_YAW), 0, -Math.sin(S.CAM_YAW));
-S.camUp = new THREE.Vector3(-Math.sin(S.CAM_YAW), 0, -Math.cos(S.CAM_YAW)); // "screen up" on the ground
+S.camUp = new THREE.Vector3(-Math.sin(S.CAM_YAW), 0, -Math.cos(S.CAM_YAW)); 
 
 S.hemi = new THREE.HemisphereLight(S.SKYFILL, S.GROUNDFILL, 1.08);
 S.scene.add(S.hemi);
 S.sun = new THREE.DirectionalLight(S.SUN, 3.7);
-S.SUN_DIR = new THREE.Vector3(-0.84, 0.56, 0.44).normalize(); // ~34° high: long shadows up-screen
+S.SUN_DIR = new THREE.Vector3(-0.84, 0.56, 0.44).normalize(); 
 S.sun.castShadow = true;
 S.sun.shadow.mapSize.set(S.phone() ? 1024 : 2048, S.phone() ? 1024 : 2048);
 S.SH = S.phone() ? 34 : 30;
@@ -101,7 +101,7 @@ await installTour(S);
 S.keys = { f: 0, b: 0, l: 0, r: 0, boost: 0 };
 S.lap = { n: 0, t: 0, armed: true, cool: 0, best: null };
 S.KEYMAP = { ArrowUp: 'f', KeyW: 'f', ArrowDown: 'b', KeyS: 'b', ArrowLeft: 'l', KeyA: 'l', ArrowRight: 'r', KeyD: 'r', ShiftLeft: 'boost', ShiftRight: 'boost' };
-S.state = 'loading'; // loading → intro → drive
+S.state = 'loading'; 
 addEventListener('keydown', e => {
   if (S.list.classList.contains('on')) { if (e.code === 'Escape') S.hideList(); return; }
   if (S.state === 'intro') { if (!['Tab'].includes(e.code)) S.startDrive(); return; }
@@ -168,7 +168,7 @@ S.updaters = [];
 S.revealAnim = null;
 function distToBase() { const a = innerWidth / innerHeight; return a < 0.8 ? 28.5 : a < 1.2 ? 22.5 : 19; }
 
-function pastWall(x, z) {
+function beyondWall(x, z) {
   let best = 1e9, bx = 0, bz = 0;
   for (const p of S.SPEED_PTS) {
     const d = (x - p[0]) * (x - p[0]) + (z - p[1]) * (z - p[1]);
@@ -178,7 +178,7 @@ function pastWall(x, z) {
   return Math.sqrt(best) > S.SPEED_HW + 2.5 || Math.hypot(x, z) > 72;
 }
 
-function makeFrame() {
+function renderFrame() {
   try {
   const dt = Math.min(S.clock.getDelta(), 1 / 30);
   const t = S.clock.elapsedTime;
@@ -237,8 +237,8 @@ function makeFrame() {
     wm.position.copy(wi.worldTransform.position);
     wm.quaternion.copy(S.kart.quaternion);
     if (i < 2) wm.quaternion.multiply(S.qSteer.setFromAxisAngle(S.yAxis, wi.steering));
-    let w = info.vF / (0.3 * S.KS);                                  // rolling speed, rad/s
-    if (info.force > 0 && Math.abs(info.vF) < 7) w += Math.sign(info.throttle || 1) * (S.keys.boost ? 16 : 10) * (1 - Math.abs(info.vF) / 7); // wheelspin off the line
+    let w = info.vF / (0.3 * S.KS);                                  
+    if (info.force > 0 && Math.abs(info.vF) < 7) w += Math.sign(info.throttle || 1) * (S.keys.boost ? 16 : 10) * (1 - Math.abs(info.vF) / 7); 
     if (info.drifting && i >= 2) w += Math.sign(info.vF || 1) * 14;
     S.wheelAngle[i] -= w * dt;
     wm.userData.spin.rotation.x = S.wheelAngle[i];
@@ -325,7 +325,7 @@ function makeFrame() {
       }
     }
   } else { S.flipT = 0; if (S.upV.y > 0.85) S.recoverN = 0; }
-  if (pastWall(S.chassis.position.x, S.chassis.position.z) || S.chassis.position.y < -5) S.resetRig(true);
+  if (beyondWall(S.chassis.position.x, S.chassis.position.z) || S.chassis.position.y < -5) S.resetRig(true);
 
   const gnd = S.onGround();
   if (gnd === 0 && S.state === 'drive') S.airT += dt; else { if (S.airT > 0.55) S.toast('Big air', `${S.airT.toFixed(2)} s off the ground`); S.airT = 0; }
@@ -375,8 +375,8 @@ function makeFrame() {
   for (const p of S.pads) {
     const d = Math.hypot(S.chassis.position.x - p.pos.x, S.chassis.position.z - p.pos.z);
     const inside = d < 2.6 && S.state === 'drive';
-    if (inside && !p.inside) { S.stamp(p.stand); if (!S.goal || S.goal.stand === p.stand) S.showPanel(p.stand, 'pad'); }   // a pad crossed on the way to another stand stamps but does not take the sheet
-    if (!inside && p.inside && S.openStand === p.stand && S.openVia === 'pad' && !S.tour.on) { /* closes once far away */ }
+    if (inside && !p.inside) { S.stamp(p.stand); if (!S.goal || S.goal.stand === p.stand) S.showPanel(p.stand, 'pad'); }   
+    if (!inside && p.inside && S.openStand === p.stand && S.openVia === 'pad' && !S.tour.on) {  }
     p.inside = inside;
     if (S.openStand === p.stand && S.openVia === 'pad' && d > 8 && !S.tour.on) S.hidePanel();
     p.on = S.damp(p.on, inside ? 1 : 0, 6, dt);
@@ -442,7 +442,7 @@ function makeFrame() {
 
   S.composer.render(dt);
   } catch (e) { window.__frameErr = (e && e.stack) || String(e); }
-  requestAnimationFrame(makeFrame);
+  requestAnimationFrame(renderFrame);
 }
 
 function introBrand() {
@@ -454,7 +454,7 @@ function introBrand() {
 function showCurtain() {
   S.state = 'intro';
   S.resetRig(true);
-  S.chassis.position.y += 1.4; // drop the kart onto its springs as the circle lights
+  S.chassis.position.y += 1.4; 
   S.revealAnim = { from: 0, to: 10.5, dur: S.reduced ? 1 : 1500, t0: performance.now(), ease: S.expoOut, ring: () => 1, done: () => {
     S.$('start').classList.add('on');
   } };
@@ -497,7 +497,7 @@ async function boot() {
   genericPiece('setting the type');
   try {
     await Promise.race([Promise.all([
-      document.fonts.load('800 100px Syne'), document.fonts.load('700 100px Syne'), document.fonts.load('400 20px "Space Mono"'), document.fonts.load('400 16px "General Sans"'),
+      document.fonts.load('800 100px Fraunces'), document.fonts.load('700 100px Fraunces'), document.fonts.load('400 20px "DM Mono"'), document.fonts.load('400 16px "Plus Jakarta Sans"'),
     ]), new Promise(r => setTimeout(r, 4000))]);
   } catch (e) { }
   window.__stage = 'park';
@@ -521,8 +521,8 @@ async function boot() {
   window.__stage = 'settle';
   S.prog.v = 0.9;
   for (let i = 0; i < 90; i++) { S.drive(1 / 60); S.world.step(1 / 60); }
-  window.__stage = 'makeFrame';
-  makeFrame();
+  window.__stage = 'renderFrame';
+  renderFrame();
   window.__stage = 'done';
   requestAnimationFrame(() => { S.prog.v = 1; S.prog.done = true; });
   } catch (e) { window.__bootErr = (window.__stage || '') + '\n' + ((e && e.stack) || String(e)); S.prog.done = true; }
@@ -540,12 +540,12 @@ addEventListener('resize', () => {
 });
 dispatchEvent(new Event('resize'));
 
-window.__kp = { revealProbe(k) { // capture hook: pose the intro→world reveal at progress k (0..1)
+window.__kp = { revealProbe(k) { 
     if (S.state === 'intro') startDrive(); S.revealAnim = null;
     const e = 0.35 * k + 0.65 * Math.pow(k, 2.2); S.RU.uReveal.value = 4.6 + (80 - 4.6) * e;
     S.RU.uDim.value = 1 - S.clamp(k / 0.75, 0, 1); S.RU.uRingOn.value = 1 - S.clamp((k - 0.6) / 0.38, 0, 1); }, renderer: S.renderer, pitch(d) { S.CAM_PITCH = d * S.DEG; }, get cam() { return [S.camDistTarget, S.camDistNow]; }, dist(d) { S.camDistTarget = d; }, teleport(x, z, yaw = 0) { S.chassis.position.set(x, 0.6, z); S.chassis.velocity.setZero(); S.chassis.angularVelocity.setZero(); S.chassis.quaternion.setFromEuler(0, yaw, 0); S.camTarget.set(x, 0, z); }, STANDS: S.STANDS, chassis: S.chassis, vehicle: S.vehicle, showPanel: S.showPanel, hidePanel: S.hidePanel, runTour: S.runTour, startDrive, get state() { return S.state; }, keys: S.keys, resetRig: S.resetRig, camera: S.camera, RU: S.RU, toast: S.toast, seekTo: S.seekTo, stamped: S.stamped };
 S.distToBase = distToBase;
-S.makeFrame = makeFrame;
+S.renderFrame = renderFrame;
 S.introBrand = introBrand;
 S.showCurtain = showCurtain;
 S.startDrive = startDrive;

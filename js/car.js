@@ -3,7 +3,7 @@ import * as CANNON from 'cannon-es';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 export async function installCar(S) {
 S.kart = new THREE.Group();
-S.KS = 0.98; // the whole rig (visual + physics) scales together, a notch smaller than before
+S.KS = 0.98; 
 S.wheelMeshes = [];
 S.kartParts = {};
 function constructRig() {
@@ -13,7 +13,7 @@ function constructRig() {
   const GLASS = '#1f1a36', SHINE = '#8f86c9', ALLOY = '#a79cc2', RUBBER = '#2a2140';
   const PI = Math.PI;
 
-  const baker = () => {
+  const collector = () => {
     const geos = [], hulls = [], tmp = new THREE.Color();
     return {
       add(geo, x, y, z, rx, ry, rz, color, outline = true) {
@@ -28,16 +28,16 @@ function constructRig() {
       hull() { return hulls.length ? mergeGeometries(hulls) : null; },
     };
   };
-  const bakedMat = S.patch(new THREE.MeshToonMaterial({ color: 0xffffff, vertexColors: true, gradientMap: S.gradientMap }), { ao: true, key: 'kartbake' });
-  const mountBaked = (b, parent) => {
-    const m = new THREE.Mesh(b.geometry(), bakedMat); m.castShadow = true; m.receiveShadow = true; parent.add(m);
+  const bakeMat = S.patch(new THREE.MeshToonMaterial({ color: 0xffffff, vertexColors: true, gradientMap: S.gradientMap }), { ao: true, key: 'kartbake' });
+  const attachBake = (b, parent) => {
+    const m = new THREE.Mesh(b.geometry(), bakeMat); m.castShadow = true; m.receiveShadow = true; parent.add(m);
     const h = b.hull(); if (h) parent.add(new THREE.Mesh(h, S.bodyMat(false)));
     return m;
   };
 
-  const B = baker();
+  const B = collector();
   const bx = (w, h, d, x, y, z, color, rx = 0, ry = 0, rz = 0, outline = true) => B.add(S.G.box(w, h, d), x, y, z, rx, ry, rz, color, outline);
-  const cy = (r, h, x, y, z, color, rx = 0, ry = 0, rz = 0, spanBox = 12, outline = true) => B.add(S.G.cyl(r, r, h, spanBox), x, y, z, rx, ry, rz, color, outline);
+  const cy = (r, h, x, y, z, color, rx = 0, ry = 0, rz = 0, knot = 12, outline = true) => B.add(S.G.cyl(r, r, h, knot), x, y, z, rx, ry, rz, color, outline);
 
   bx(0.72, 0.07, 1.8, 0, -0.02, 0, INK);
   bx(0.62, 0.035, 0.42, 0, -0.07, -0.74, INKS, 0, 0, 0, false);
@@ -49,24 +49,24 @@ function constructRig() {
   for (let i = 0; i < 4; i++) bx(0.36, 0.012, 0.03, 0, 0.462 - i * 0.004, -0.62 + i * 0.075, INK, -0.06, 0, 0, false);
   bx(0.84, 0.012, 0.02, 0, 0.405, -0.915, CREAM, -0.06, 0, 0, false);
   bx(0.84, 0.035, 0.12, 0, 0.405, -0.2, INK, 0, 0, 0, false);
-  for (const sx of [-1, 1]) bx(0.2, 0.01, 0.02, sx * 0.2, 0.41, -0.185, INKS, 0, sx * 0.55, 0, false);   // wipers
+  for (const sx of [-1, 1]) bx(0.2, 0.01, 0.02, sx * 0.2, 0.41, -0.185, INKS, 0, sx * 0.55, 0, false);   
   for (const sx of [-1, 1]) {
     bx(0.06, 0.28, 0.98, sx * 0.4, 0.51, 0.31, CORAL);
-    bx(0.07, 0.04, 0.98, sx * 0.4, 0.665, 0.31, CREAM, 0, 0, 0, false);       // door cap
-    bx(0.05, 0.36, 0.05, sx * 0.4, 0.55, -0.17, INK, 0.42);                     // A pillar
-    bx(0.06, 0.4, 0.06, sx * 0.4, 0.57, 0.32, INK);                             // roll hoop post
+    bx(0.07, 0.04, 0.98, sx * 0.4, 0.665, 0.31, CREAM, 0, 0, 0, false);       
+    bx(0.05, 0.36, 0.05, sx * 0.4, 0.55, -0.17, INK, 0.42);                     
+    bx(0.06, 0.4, 0.06, sx * 0.4, 0.57, 0.32, INK);                             
   }
   bx(0.74, 0.02, 0.96, 0, 0.378, 0.31, INK, 0, 0, 0, false);
-  bx(0.7, 0.09, 0.14, 0, 0.43, -0.12, INKS);                                    // dash
-  bx(0.34, 0.06, 0.3, 0, 0.405, 0.2, INK);                                      // seat base
-  bx(0.32, 0.36, 0.07, 0, 0.54, 0.37, INK);                                     // seat back
-  bx(0.2, 0.08, 0.06, 0, 0.74, 0.37, INKS);                                     // headrest
-  bx(0.1, 0.12, 0.22, 0, 0.42, 0.1, INKS, 0, 0, 0, false);                      // console
+  bx(0.7, 0.09, 0.14, 0, 0.43, -0.12, INKS);                                    
+  bx(0.34, 0.06, 0.3, 0, 0.405, 0.2, INK);                                      
+  bx(0.32, 0.36, 0.07, 0, 0.54, 0.37, INK);                                     
+  bx(0.2, 0.08, 0.06, 0, 0.74, 0.37, INKS);                                     
+  bx(0.1, 0.12, 0.22, 0, 0.42, 0.1, INKS, 0, 0, 0, false);                      
   bx(0.8, 0.3, 0.05, 0, 0.52, 0.8, CORAL);
-  bx(0.62, 0.17, 0.012, 0, 0.55, 0.832, GLASS, 0, 0, 0, false);                 // rear window
-  bx(0.76, 0.3, 0.025, 0, 0.53, -0.2, GLASS, 0.45, 0, 0, false);                 // windscreen
+  bx(0.62, 0.17, 0.012, 0, 0.55, 0.832, GLASS, 0, 0, 0, false);                 
+  bx(0.76, 0.3, 0.025, 0, 0.53, -0.2, GLASS, 0.45, 0, 0, false);                 
   bx(0.7, 0.05, 0.012, 0, 0.5, -0.215, SHINE, 0.45, 0, 0.0, false);
-  bx(0.8, 0.045, 0.05, 0, 0.675, -0.12, INK, 0.0);                                // header
+  bx(0.8, 0.045, 0.05, 0, 0.675, -0.12, INK, 0.0);                                
   bx(0.88, 0.05, 0.52, 0, 0.715, 0.6, CREAM);
   bx(0.1, 0.012, 0.52, -0.14, 0.743, 0.6, CORAL, 0, 0, 0, false);
   bx(0.1, 0.012, 0.52, 0.14, 0.743, 0.6, CORAL, 0, 0, 0, false);
@@ -84,11 +84,11 @@ function constructRig() {
   bx(0.09, 0.045, 0.012, 0, 0.31, -0.89, BUTTER, 0, 0, 0, false);
   bx(0.96, 0.12, 0.17, 0, 0.1, -0.95, INK);
   bx(0.7, 0.06, 0.1, 0, 0.035, -0.99, INKS, 0, 0, 0, false);
-  bx(0.34, 0.05, 0.02, 0, 0.12, -1.04, BUTTER, 0, 0, 0, false);                   // plate
-  cy(0.045, 0.3, 0, 0.1, -1.03, INKS, 0, 0, PI / 2, 8, false);                    // winch drum
+  bx(0.34, 0.05, 0.02, 0, 0.12, -1.04, BUTTER, 0, 0, 0, false);                   
+  cy(0.045, 0.3, 0, 0.1, -1.03, INKS, 0, 0, PI / 2, 8, false);                    
   for (const sx of [-1, 1]) {
     bx(0.045, 0.3, 0.045, sx * 0.34, 0.25, -1.0, INK);
-    bx(0.07, 0.05, 0.07, sx * 0.4, 0.075, -1.0, CORAL, 0, 0, 0, false);           // tow points
+    bx(0.07, 0.05, 0.07, sx * 0.4, 0.075, -1.0, CORAL, 0, 0, 0, false);           
   }
   bx(0.76, 0.045, 0.045, 0, 0.4, -1.0, INK);
   bx(0.96, 0.12, 0.17, 0, 0.1, 0.94, INK);
@@ -108,55 +108,55 @@ function constructRig() {
     }
     bx(0.1, 0.04, 0.56, sx * 0.5, 0.03, -0.02, INK);
     bx(0.07, 0.015, 0.5, sx * 0.5, 0.055, -0.02, INKS, 0, 0, 0, false);
-    bx(0.1, 0.16, 0.02, sx * 0.58, 0.02, 1.0, INKS, 0, 0, 0, false);               // mud flap
+    bx(0.1, 0.16, 0.02, sx * 0.58, 0.02, 1.0, INKS, 0, 0, 0, false);               
     bx(0.1, 0.14, 0.02, sx * 0.58, 0.04, -0.98, INKS, 0, 0, 0, false);
-    bx(0.1, 0.02, 0.02, sx * 0.5, 0.5, -0.14, INK, 0, 0, 0, false);                // mirror arm
+    bx(0.1, 0.02, 0.02, sx * 0.5, 0.5, -0.14, INK, 0, 0, 0, false);                
     bx(0.05, 0.07, 0.1, sx * 0.55, 0.5, -0.14, CORAL);
-    bx(0.012, 0.3, 0.012, sx * 0.452, 0.3, -0.17, INK, 0, 0, 0, false);            // door cuts
+    bx(0.012, 0.3, 0.012, sx * 0.452, 0.3, -0.17, INK, 0, 0, 0, false);            
     bx(0.012, 0.3, 0.012, sx * 0.452, 0.3, 0.3, INK, 0, 0, 0, false);
     bx(0.012, 0.3, 0.012, sx * 0.452, 0.3, 0.77, INK, 0, 0, 0, false);
-    bx(0.016, 0.02, 0.09, sx * 0.456, 0.34, 0.17, CREAM, 0, 0, 0, false);          // handles
+    bx(0.016, 0.02, 0.09, sx * 0.456, 0.34, 0.17, CREAM, 0, 0, 0, false);          
     bx(0.016, 0.02, 0.09, sx * 0.456, 0.34, 0.64, CREAM, 0, 0, 0, false);
-    bx(0.012, 0.012, 1.5, sx * 0.452, 0.37, 0.0, CREAM, 0, 0, 0, false);           // belt line
-    bx(0.012, 0.04, 1.3, sx * 0.452, 0.17, 0.0, BUTTER, 0, 0, 0, false);           // side stripe
-    bx(0.012, 0.17, 0.4, sx * 0.405, 0.555, 0.0, GLASS, 0, 0, 0, false);           // side glass
+    bx(0.012, 0.012, 1.5, sx * 0.452, 0.37, 0.0, CREAM, 0, 0, 0, false);           
+    bx(0.012, 0.04, 1.3, sx * 0.452, 0.17, 0.0, BUTTER, 0, 0, 0, false);           
+    bx(0.012, 0.17, 0.4, sx * 0.405, 0.555, 0.0, GLASS, 0, 0, 0, false);           
     bx(0.012, 0.17, 0.3, sx * 0.405, 0.555, 0.62, GLASS, 0, 0, 0, false);
     bx(0.008, 0.02, 0.2, sx * 0.409, 0.6, 0.0, SHINE, 0, 0, 0.0, false);
   }
-  bx(0.012, 0.05, 0.07, -0.456, 0.3, 0.74, S.C.mint, 0, 0, 0, false);              // charge port
-  bx(0.05, 0.5, 0.05, 0.43, 0.55, -0.12, INK);                                      // snorkel
+  bx(0.012, 0.05, 0.07, -0.456, 0.3, 0.74, S.C.mint, 0, 0, 0, false);              
+  bx(0.05, 0.5, 0.05, 0.43, 0.55, -0.12, INK);                                      
   bx(0.05, 0.06, 0.1, 0.43, 0.82, -0.14, INKS, 0.0);
   for (const sx of [-1, 1]) {
-    for (let i = 0; i < 3; i++) bx(0.012, 0.012, 0.16, sx * 0.452, 0.27 + i * 0.03, -0.45, INK, 0, 0, 0, false);   // gills
-    bx(0.04, 0.04, 0.04, sx * 0.3, 0.435, -0.84, CREAM, 0, 0, 0, false);            // bonnet pins
-    bx(0.014, 0.012, 0.5, sx * 0.452, 0.22, 0.0, INKS, 0, 0, 0, false);             // rocker trim
-    bx(0.03, 0.06, 0.03, sx * 0.49, 0.075, -0.28, INKS, 0, 0, 0, false);            // rock-light brackets
+    for (let i = 0; i < 3; i++) bx(0.012, 0.012, 0.16, sx * 0.452, 0.27 + i * 0.03, -0.45, INK, 0, 0, 0, false);   
+    bx(0.04, 0.04, 0.04, sx * 0.3, 0.435, -0.84, CREAM, 0, 0, 0, false);            
+    bx(0.014, 0.012, 0.5, sx * 0.452, 0.22, 0.0, INKS, 0, 0, 0, false);             
+    bx(0.03, 0.06, 0.03, sx * 0.49, 0.075, -0.28, INKS, 0, 0, 0, false);            
     bx(0.03, 0.06, 0.03, sx * 0.49, 0.075, 0.24, INKS, 0, 0, 0, false);
   }
-  for (const sx of [-1, 1]) {                                                       // boost nozzles at the rear corners
+  for (const sx of [-1, 1]) {                                                       
     cy(0.065, 0.14, sx * 0.42, 0.04, 1.02, INK, PI / 2, 0, 0, 10);
     cy(0.085, 0.03, sx * 0.42, 0.04, 0.95, INKS, PI / 2, 0, 0, 10, false);
     bx(0.03, 0.03, 0.03, sx * 0.42, 0.1, 0.96, INKS, 0, 0, 0, false);
   }
-  bx(0.2, 0.09, 0.012, 0.0, 0.2, 1.027, CREAM, 0, 0, 0, false);                     // rear plate
+  bx(0.2, 0.09, 0.012, 0.0, 0.2, 1.027, CREAM, 0, 0, 0, false);                     
   bx(0.16, 0.012, 0.014, 0.0, 0.2, 1.036, INK, 0, 0, 0, false);
-  bx(0.028, 0.34, 0.07, 0.456, 0.33, 0.45, INKS, 0, 0, 0.0, false);                 // shovel handle
-  bx(0.02, 0.1, 0.12, 0.456, 0.18, 0.45, INKS, 0, 0, 0, false);                     // shovel blade
-  bx(0.04, 0.04, 0.12, 0, 0.2, -1.08, CORAL, 0, 0, 0, false);                       // tow loop
-  bx(0.02, 0.1, 0.34, 0.456, 0.55, 0.0, SHINE, 0, 0, 0.0, false);                    // second glass shine
+  bx(0.028, 0.34, 0.07, 0.456, 0.33, 0.45, INKS, 0, 0, 0.0, false);                 
+  bx(0.02, 0.1, 0.12, 0.456, 0.18, 0.45, INKS, 0, 0, 0, false);                     
+  bx(0.04, 0.04, 0.12, 0, 0.2, -1.08, CORAL, 0, 0, 0, false);                       
+  bx(0.02, 0.1, 0.34, 0.456, 0.55, 0.0, SHINE, 0, 0, 0.0, false);                    
   for (const z of [-0.2, 0.0, 0.2]) bx(0.04, 0.012, 0.012, 0.0, 0.795, 0.4 + z + 0.2, CREAM, 0, 0, 0, false);
-  const bodyMesh = mountBaked(B, body);
+  const bodyMesh = attachBake(B, body);
 
-  const roundelTex = S.canvasTexture(128, 128, (x, w, h) => {
+  const badgeTex = S.canvasTexture(128, 128, (x, w, h) => {
     x.fillStyle = '#fbf3e6'; x.fillRect(0, 0, w, h);
-    x.strokeStyle = '#ff5b3a'; x.lineWidth = 9;
+    x.strokeStyle = '#d98a63'; x.lineWidth = 9;
     x.beginPath(); x.arc(w / 2, h / 2, w / 2 - 7, 0, 6.3); x.stroke();
-    x.fillStyle = '#ff5b3a'; x.font = 'bold 66px "Space Mono", monospace';
+    x.fillStyle = '#d98a63'; x.font = 'bold 66px "DM Mono", monospace';
     x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText('07', w / 2, h / 2 + 3);
   });
-  const roundel = new THREE.Mesh(new THREE.CircleGeometry(0.145, 20),
-    S.patch(new THREE.MeshBasicMaterial({ map: roundelTex }), { key: 'roundel', noGlow: true }));
-  roundel.rotation.x = -Math.PI / 2 - 0.06; roundel.position.set(0, 0.468, -0.55); body.add(roundel);
+  const badge = new THREE.Mesh(new THREE.CircleGeometry(0.145, 20),
+    S.patch(new THREE.MeshBasicMaterial({ map: badgeTex }), { key: 'badge', noGlow: true }));
+  badge.rotation.x = -Math.PI / 2 - 0.06; badge.position.set(0, 0.468, -0.55); body.add(badge);
 
   S.kartParts.lamps = [];
   S.kartParts.brakes = [];
@@ -164,63 +164,63 @@ function constructRig() {
   const put = (geo, color, x, y, z, o) => {
     const m = S.mesh(geo, color, o); m.position.set(x, y, z); body.add(m); return m;
   };
-  const lampMat = (color, ei) => ({ emissive: color, ei, outline: false, noAO: true });
-  const streetLamp = (w, h, d, color, emis, ei, x, y, z, list, rx = 0) => {
-    const m = put(S.G.box(w, h, d), color, x, y, z, lampMat(emis, ei)); m.rotation.x = rx;
+  const glowMat = (color, ei) => ({ emissive: color, ei, outline: false, noAO: true });
+  const glowBox = (w, h, d, color, emis, ei, x, y, z, list, rx = 0) => {
+    const m = put(S.G.box(w, h, d), color, x, y, z, glowMat(emis, ei)); m.rotation.x = rx;
     m.material = m.material.clone(); m.castShadow = false; if (list) list.push(m); return m;
   };
-  streetLamp(0.38, 0.035, 0.03, '#fff1c9', '#ffe9a8', 0.35, 0, 0.335, -0.88, S.kartParts.lamps);
+  glowBox(0.38, 0.035, 0.03, '#fff1c9', '#ffe9a8', 0.35, 0, 0.335, -0.88, S.kartParts.lamps);
   for (const sx of [-1, 1]) {
-    streetLamp(0.16, 0.075, 0.03, '#fff6d8', '#ffe9a8', 0.35, sx * 0.3, 0.31, -0.885, S.kartParts.lamps);
-    streetLamp(0.1, 0.035, 0.02, '#fff6d8', '#ffe9a8', 0.3, sx * 0.27, 0.1, -1.04, S.kartParts.lamps);
-    streetLamp(0.04, 0.012, 0.3, '#fff6d8', '#ffe9a8', 0.3, sx * 0.43, 0.345, -0.72, S.kartParts.lamps);
+    glowBox(0.16, 0.075, 0.03, '#fff6d8', '#ffe9a8', 0.35, sx * 0.3, 0.31, -0.885, S.kartParts.lamps);
+    glowBox(0.1, 0.035, 0.02, '#fff6d8', '#ffe9a8', 0.3, sx * 0.27, 0.1, -1.04, S.kartParts.lamps);
+    glowBox(0.04, 0.012, 0.3, '#fff6d8', '#ffe9a8', 0.3, sx * 0.43, 0.345, -0.72, S.kartParts.lamps);
   }
-  for (const sx of [-0.27, -0.09, 0.09, 0.27]) streetLamp(0.09, 0.05, 0.05, '#fff6d8', '#ffe9a8', 0.2, sx, 0.715, -0.15, S.kartParts.lamps);
+  for (const sx of [-0.27, -0.09, 0.09, 0.27]) glowBox(0.09, 0.05, 0.05, '#fff6d8', '#ffe9a8', 0.2, sx, 0.715, -0.15, S.kartParts.lamps);
   for (const sx of [-1, 1]) {
-    const bl = streetLamp(0.04, 0.045, 0.07, '#ffb15a', '#ff9a3a', 0.15, sx * 0.456, 0.255, -0.9);
+    const bl = glowBox(0.04, 0.045, 0.07, '#ffb15a', '#ff9a3a', 0.15, sx * 0.456, 0.255, -0.9);
     if (sx < 0) S.kartParts.blinkL = bl; else S.kartParts.blinkR = bl;
-    streetLamp(0.1, 0.22, 0.03, '#ff5b3a', '#ff5b3a', 0.35, sx * 0.38, 0.34, 0.89, S.kartParts.brakes);
-    streetLamp(0.09, 0.09, 0.02, '#aef0ff', '#52d8ff', 0.5, sx * 0.42, 0.04, 1.09, S.kartParts.glow);   // nozzle cores
-    streetLamp(0.03, 0.018, 0.5, '#9fe8ff', '#52d8ff', 0.5, sx * 0.53, 0.0, -0.02, S.kartParts.glow);   // under-glow
+    glowBox(0.1, 0.22, 0.03, '#d98a63', '#d98a63', 0.35, sx * 0.38, 0.34, 0.89, S.kartParts.brakes);
+    glowBox(0.09, 0.09, 0.02, '#aef0ff', '#52d8ff', 0.5, sx * 0.42, 0.04, 1.09, S.kartParts.glow);   
+    glowBox(0.03, 0.018, 0.5, '#9fe8ff', '#52d8ff', 0.5, sx * 0.53, 0.0, -0.02, S.kartParts.glow);   
   }
-  streetLamp(0.4, 0.028, 0.028, '#ff5b3a', '#ff5b3a', 0.35, 0, 0.7, 0.868, S.kartParts.brakes);
-  S.kartParts.strip = streetLamp(0.3, 0.024, 0.03, '#ffb15a', '#ff9a3a', 0.45, 0, 0.745, 0.866);
+  glowBox(0.4, 0.028, 0.028, '#d98a63', '#d98a63', 0.35, 0, 0.7, 0.868, S.kartParts.brakes);
+  S.kartParts.strip = glowBox(0.3, 0.024, 0.03, '#ffb15a', '#ff9a3a', 0.45, 0, 0.745, 0.866);
 
-  const wheelS = new THREE.Group(); wheelS.position.set(0, 0.47, -0.03); wheelS.rotation.x = 0.5;
-  wheelS.add(S.mesh(new THREE.TorusGeometry(0.075, 0.015, 6, 12), INK, { outline: false }));
-  wheelS.add(S.mesh(S.G.box(0.15, 0.014, 0.014), INKS, { outline: false }));
-  body.add(wheelS); S.kartParts.wheel = wheelS;
-  const column = S.mesh(S.G.box(0.04, 0.04, 0.12), INKS, { outline: false }); column.position.set(0, 0.43, -0.07); body.add(column);
+  const steerRing = new THREE.Group(); steerRing.position.set(0, 0.47, -0.03); steerRing.rotation.x = 0.5;
+  steerRing.add(S.mesh(new THREE.TorusGeometry(0.075, 0.015, 6, 12), INK, { outline: false }));
+  steerRing.add(S.mesh(S.G.box(0.15, 0.014, 0.014), INKS, { outline: false }));
+  body.add(steerRing); S.kartParts.wheel = steerRing;
+  const shaft = S.mesh(S.G.box(0.04, 0.04, 0.12), INKS, { outline: false }); shaft.position.set(0, 0.43, -0.07); body.add(shaft);
 
-  const drv = new THREE.Group(); drv.position.set(0, 0.34, 0.18); body.add(drv); S.kartParts.drv = drv;
-  const dm = (geo, color, x, y, z, rx = 0, ry = 0, rz = 0, o) => { const m = S.mesh(geo, color, o); m.position.set(x, y, z); m.rotation.set(rx, ry, rz); drv.add(m); return m; };
-  dm(S.G.box(0.26, 0.26, 0.15), BUTTER, 0, 0.17, 0.0);                       // jacket
-  dm(S.G.box(0.28, 0.05, 0.16), CORAL, 0, 0.3, 0.0, 0, 0, 0, { outline: false }); // collar
+  const pilot = new THREE.Group(); pilot.position.set(0, 0.34, 0.18); body.add(pilot); S.kartParts.drv = pilot;
+  const torso = (geo, color, x, y, z, rx = 0, ry = 0, rz = 0, o) => { const m = S.mesh(geo, color, o); m.position.set(x, y, z); m.rotation.set(rx, ry, rz); pilot.add(m); return m; };
+  torso(S.G.box(0.26, 0.26, 0.15), BUTTER, 0, 0.17, 0.0);                       
+  torso(S.G.box(0.28, 0.05, 0.16), CORAL, 0, 0.3, 0.0, 0, 0, 0, { outline: false }); 
   for (const sx of [-1, 1]) {
-    dm(S.G.box(0.065, 0.065, 0.26), BUTTER, sx * 0.15, 0.2, -0.11, 0.55, sx * -0.28, 0);
-    dm(S.G.box(0.07, 0.07, 0.07), INK, sx * 0.08, 0.1, -0.23, 0, 0, 0, { outline: false }); // gloves
-    dm(S.G.box(0.08, 0.2, 0.2), INKS, sx * 0.07, 0.05, -0.08, -0.3, 0, 0, { outline: false }); // legs
+    torso(S.G.box(0.065, 0.065, 0.26), BUTTER, sx * 0.15, 0.2, -0.11, 0.55, sx * -0.28, 0);
+    torso(S.G.box(0.07, 0.07, 0.07), INK, sx * 0.08, 0.1, -0.23, 0, 0, 0, { outline: false }); 
+    torso(S.G.box(0.08, 0.2, 0.2), INKS, sx * 0.07, 0.05, -0.08, -0.3, 0, 0, { outline: false }); 
   }
-  const head = new THREE.Group(); head.position.set(0, 0.37, 0); drv.add(head); S.kartParts.head = head;
-  const hm = (geo, color, x, y, z, o) => { const m = S.mesh(geo, color, o); m.position.set(x, y, z); head.add(m); return m; };
-  hm(new THREE.SphereGeometry(0.095, 10, 8), '#f2c6a8', 0, -0.01, 0, { outline: false });
-  hm(new THREE.SphereGeometry(0.128, 12, 9, 0, PI * 2, 0, PI * 0.62), CREAM, 0, 0.0, 0.0);
-  hm(S.G.box(0.05, 0.02, 0.22), CORAL, 0, 0.125, 0, { outline: false });
-  hm(S.G.box(0.15, 0.055, 0.05), INK, 0, 0.01, -0.105, { outline: false });          // visor
-  hm(S.G.box(0.12, 0.012, 0.012), '#9ff5d6', 0, 0.012, -0.132, { outline: false });
+  const head = new THREE.Group(); head.position.set(0, 0.37, 0); pilot.add(head); S.kartParts.head = head;
+  const headPart = (geo, color, x, y, z, o) => { const m = S.mesh(geo, color, o); m.position.set(x, y, z); head.add(m); return m; };
+  headPart(new THREE.SphereGeometry(0.095, 10, 8), '#f2c6a8', 0, -0.01, 0, { outline: false });
+  headPart(new THREE.SphereGeometry(0.128, 12, 9, 0, PI * 2, 0, PI * 0.62), CREAM, 0, 0.0, 0.0);
+  headPart(S.G.box(0.05, 0.02, 0.22), CORAL, 0, 0.125, 0, { outline: false });
+  headPart(S.G.box(0.15, 0.055, 0.05), INK, 0, 0.01, -0.105, { outline: false });          
+  headPart(S.G.box(0.12, 0.012, 0.012), '#9ff5d6', 0, 0.012, -0.132, { outline: false });
   S.kartParts.scarf = [];
   const SC = [[-0.05, CORAL, 0.12], [0, BUTTER, 0.19], [0.05, CORAL, 0.14]];
   for (const [sx, col, len] of SC) {
-    const spanBox = new THREE.Group(); spanBox.position.set(sx, 0.3, 0.05); drv.add(spanBox);
-    const m = S.mesh(S.G.box(0.05, 0.02, len), col, { outline: false }); m.position.z = len / 2; spanBox.add(m);
-    S.kartParts.scarf.push(spanBox);
+    const knot = new THREE.Group(); knot.position.set(sx, 0.3, 0.05); pilot.add(knot);
+    const m = S.mesh(S.G.box(0.05, 0.02, len), col, { outline: false }); m.position.z = len / 2; knot.add(m);
+    S.kartParts.scarf.push(knot);
   }
-  const makePost = S.mesh(S.G.cyl(0.008, 0.012, 0.5, 5), INKS, { outline: false }); makePost.position.set(-0.37, 1.04, 0.84); body.add(makePost);
+  const flagPole = S.mesh(S.G.cyl(0.008, 0.012, 0.5, 5), INKS, { outline: false }); flagPole.position.set(-0.37, 1.04, 0.84); body.add(flagPole);
   const flag = new THREE.Group(); flag.position.set(-0.37, 1.26, 0.84); body.add(flag); S.kartParts.flag = flag;
   const pen = S.mesh(S.G.box(0.012, 0.09, 0.2), CORAL, { outline: false }); pen.position.z = 0.1; flag.add(pen);
   const tip = S.mesh(S.G.box(0.012, 0.05, 0.07), BUTTER, { outline: false }); tip.position.z = 0.23; flag.add(tip);
 
-  const W = baker();
+  const W = collector();
   W.add(S.G.cyl(0.34, 0.34, 0.22, 22), 0, 0, 0, 0, 0, PI / 2, RUBBER, true);
   for (let i = 0; i < 14; i++) {
     const a = (i / 14) * PI * 2;
@@ -228,48 +228,48 @@ function constructRig() {
   }
   const GUN = '#4c4660', GUNL = '#6c6684', STEEL = '#b9b4c8';
   for (const sx of [-1, 1]) {
-    W.add(new THREE.TorusGeometry(0.215, 0.018, 5, 18), sx * 0.118, 0, 0, 0, PI / 2, 0, GUNL, false);       // lip
-    W.add(new THREE.TorusGeometry(0.29, 0.008, 4, 22), sx * 0.112, 0, 0, 0, PI / 2, 0, '#3a3350', false);    // sidewall line
+    W.add(new THREE.TorusGeometry(0.215, 0.018, 5, 18), sx * 0.118, 0, 0, 0, PI / 2, 0, GUNL, false);       
+    W.add(new THREE.TorusGeometry(0.29, 0.008, 4, 22), sx * 0.112, 0, 0, 0, PI / 2, 0, '#3a3350', false);    
     for (let k = 0; k < 6; k++) W.add(S.G.box(0.03, 0.4, 0.07), sx * 0.115, 0, 0, (k / 6) * PI, 0, 0, GUN, false);
-    W.add(S.G.cyl(0.095, 0.095, 0.04, 10), sx * 0.125, 0, 0, 0, 0, PI / 2, GUNL, false);                      // centre cap
+    W.add(S.G.cyl(0.095, 0.095, 0.04, 10), sx * 0.125, 0, 0, 0, 0, PI / 2, GUNL, false);                      
     for (let k = 0; k < 6; k++) { const a = (k / 6) * PI * 2 + 0.2; W.add(S.G.cyl(0.013, 0.013, 0.03, 5), sx * 0.14, Math.cos(a) * 0.063, Math.sin(a) * 0.063, 0, 0, PI / 2, STEEL, false); }
   }
   W.add(S.G.cyl(0.2, 0.2, 0.235, 16), 0, 0, 0, 0, 0, PI / 2, '#2f2a42', false);
-  W.add(S.G.cyl(0.17, 0.17, 0.2, 14), 0, 0, 0, 0, 0, PI / 2, STEEL, false);                                  // brake disc
+  W.add(S.G.cyl(0.17, 0.17, 0.2, 14), 0, 0, 0, 0, 0, PI / 2, STEEL, false);                                  
   W.add(S.G.cyl(0.07, 0.07, 0.27, 10), 0, 0, 0, 0, 0, PI / 2, '#3a3350', false);
   const wheelGeo = W.geometry(), wheelHull = W.hull();
   for (let i = 0; i < 4; i++) {
     const w = new THREE.Group(); w.scale.setScalar(S.KS);
     const spin = new THREE.Group(); w.add(spin); w.userData.spin = spin;
-    const m = new THREE.Mesh(wheelGeo, bakedMat); m.castShadow = true; m.receiveShadow = true; spin.add(m);
+    const m = new THREE.Mesh(wheelGeo, bakeMat); m.castShadow = true; m.receiveShadow = true; spin.add(m);
     if (wheelHull) spin.add(new THREE.Mesh(wheelHull, S.bodyMat(false)));
     S.scene.add(w); S.wheelMeshes.push(w);
   }
   S.wheelAngle = [0, 0, 0, 0];
 
-  const halo = S.canvasTexture(64, 64, (x, w, h) => {
+  const bloom = S.canvasTexture(64, 64, (x, w, h) => {
     const g = x.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, w / 2);
     g.addColorStop(0, 'rgba(255,255,255,1)'); g.addColorStop(0.25, 'rgba(255,255,255,.55)'); g.addColorStop(1, 'rgba(255,255,255,0)');
     x.fillStyle = g; x.fillRect(0, 0, w, h);
   });
-  const sprite = (color, size, x, y, z) => {
-    const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: halo, color, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, fog: false, opacity: 0 }));
+  const bloomMesh = (color, size, x, y, z) => {
+    const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: bloom, color, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, fog: false, opacity: 0 }));
     s.scale.set(size, size, 1); s.position.set(x, y, z); s.renderOrder = 4; body.add(s); return s;
   };
-  S.kartParts.halos = [sprite('#ffe9a8', 0.62, -0.3, 0.31, -0.93), sprite('#ffe9a8', 0.62, 0.3, 0.31, -0.93), sprite('#fff1c9', 0.5, 0, 0.335, -0.93)];
-  S.kartParts.brakeHalos = [sprite('#ff4a2a', 0.46, -0.38, 0.34, 0.92), sprite('#ff4a2a', 0.46, 0.38, 0.34, 0.92), sprite('#ff4a2a', 0.5, 0, 0.7, 0.9)];
+  S.kartParts.halos = [bloomMesh('#ffe9a8', 0.62, -0.3, 0.31, -0.93), bloomMesh('#ffe9a8', 0.62, 0.3, 0.31, -0.93), bloomMesh('#fff1c9', 0.5, 0, 0.335, -0.93)];
+  S.kartParts.brakeHalos = [bloomMesh('#ff4a2a', 0.46, -0.38, 0.34, 0.92), bloomMesh('#ff4a2a', 0.46, 0.38, 0.34, 0.92), bloomMesh('#ff4a2a', 0.5, 0, 0.7, 0.9)];
 
-  const blob = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 3.4), S.patch(new THREE.MeshBasicMaterial({ map: S.canvasTexture(128, 128, (x, w, h) => {
+  const shade = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 3.4), S.patch(new THREE.MeshBasicMaterial({ map: S.canvasTexture(128, 128, (x, w, h) => {
     const g = x.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, w / 2); g.addColorStop(0, 'rgba(70,45,80,.55)'); g.addColorStop(1, 'rgba(70,45,80,0)'); x.fillStyle = g; x.fillRect(0, 0, w, h);
-  }), transparent: true, depthWrite: false }), { key: 'blob', noGlow: true }));
-  blob.rotation.x = -Math.PI / 2; blob.renderOrder = 1; S.scene.add(blob); S.kartParts.blob = blob;
-  const pool = new THREE.Mesh(new THREE.PlaneGeometry(2.4, 3.6), S.patch(new THREE.MeshBasicMaterial({ map: S.canvasTexture(128, 192, (x, w, h) => {
+  }), transparent: true, depthWrite: false }), { key: 'shade', noGlow: true }));
+  shade.rotation.x = -Math.PI / 2; shade.renderOrder = 1; S.scene.add(shade); S.kartParts.blob = shade;
+  const wash = new THREE.Mesh(new THREE.PlaneGeometry(2.4, 3.6), S.patch(new THREE.MeshBasicMaterial({ map: S.canvasTexture(128, 192, (x, w, h) => {
     const g = x.createRadialGradient(w / 2, h * 0.72, 4, w / 2, h * 0.5, h * 0.5);
     g.addColorStop(0, 'rgba(255,236,170,.95)'); g.addColorStop(0.5, 'rgba(255,214,130,.38)'); g.addColorStop(1, 'rgba(255,200,110,0)');
     x.fillStyle = g; x.fillRect(0, 0, w, h);
-  }), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0, fog: false }), { key: 'pool', noGlow: true }));
-  pool.rotation.x = -Math.PI / 2; pool.position.set(0, -0.5, -2.7); pool.renderOrder = 2; pool.visible = false;
-  S.kart.add(pool); S.kartParts.pool = pool;
+  }), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0, fog: false }), { key: 'wash', noGlow: true }));
+  wash.rotation.x = -Math.PI / 2; wash.position.set(0, -0.5, -2.7); wash.renderOrder = 2; wash.visible = false;
+  S.kart.add(wash); S.kartParts.pool = wash;
   S.scene.add(S.kart);
 }
 
@@ -318,7 +318,7 @@ S._loc = new CANNON.Vec3();
 function steerWorld(tx, tz, speedCap = 1) {
   const d = new CANNON.Vec3(tx - S.chassis.position.x, 0, tz - S.chassis.position.z);
   S.chassis.quaternion.conjugate().vmult(d, S._loc);
-  const ang = Math.atan2(S._loc.x, -S._loc.z); // + = target to the right
+  const ang = Math.atan2(S._loc.x, -S._loc.z); 
   return [speedCap, S.clamp(-ang * 1.8, -1, 1), ang];
 }
 
@@ -444,7 +444,7 @@ function animateRig(dt, t, info) {
   const accel = (info.vF - S.kAnim.vF) / Math.max(dt, 1e-3); S.kAnim.vF = info.vF;
   const hold = info.mode === 'stacked' ? -0.09 : info.force > 0 ? -0.05 : (info.throttle < 0 ? 0.045 : 0);
   S.kAnim.pitch = S.damp(S.kAnim.pitch, S.clamp(accel * 0.0065 + hold, -0.1, 0.1), 6, dt);
-  const lean = S.clamp(S.steerVal * Math.min(Math.abs(info.vF) / 9, 1.2) * 0.16, -0.16, 0.16);    // lean into the turn
+  const lean = S.clamp(S.steerVal * Math.min(Math.abs(info.vF) / 9, 1.2) * 0.16, -0.16, 0.16);    
   S.kAnim.roll = S.damp(S.kAnim.roll, lean * Math.sign(info.vF || 1), 7, dt);
   const vy = S.chassis.velocity.y; const kick = (vy - S.kAnim.vy); S.kAnim.vy = vy;
   S.kAnim.bobV += (-S.kAnim.bob * 260 - S.kAnim.bobV * 14) * dt - kick * 0.9; S.kAnim.bob += S.kAnim.bobV * dt;
@@ -453,9 +453,9 @@ function animateRig(dt, t, info) {
   b.position.y = S.kAnim.bob + idle; b.rotation.x = S.kAnim.pitch; b.rotation.z = S.kAnim.roll;
   S.kartParts.drv.rotation.z = S.kAnim.roll * 0.8;
   const sp = Math.min(info.speed / 12, 1);
-  S.kartParts.scarf.forEach((spanBox, i) => {
-    spanBox.rotation.x = -0.9 + sp * 0.75 + Math.sin(t * (9 + sp * 8) - i * 0.9) * (0.12 + sp * 0.18);
-    spanBox.rotation.y = Math.sin(t * 6 - i * 1.1) * (0.08 + sp * 0.2) - S.steerVal * 0.25;
+  S.kartParts.scarf.forEach((knot, i) => {
+    knot.rotation.x = -0.9 + sp * 0.75 + Math.sin(t * (9 + sp * 8) - i * 0.9) * (0.12 + sp * 0.18);
+    knot.rotation.y = Math.sin(t * 6 - i * 1.1) * (0.08 + sp * 0.2) - S.steerVal * 0.25;
   });
   const pull = info.force > 0 ? (S.keys.boost ? 60 : 22) : 0;
   S.sparkAcc += pull * dt;

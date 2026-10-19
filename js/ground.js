@@ -3,12 +3,12 @@ import * as CANNON from 'cannon-es';
 export async function installGround(S) {
 S.GW = 160;
 S.LAWN_SECTIONS = [
-  { a0: -126, a1: -90, color: '#cdb8f0' },
-  { a0: -90, a1: -54, color: '#ffe08f' },
-  { a0: -54, a1: -18, color: '#a9d4f2' },
-  { a0: -18, a1: 54, color: '#ffc4a3' },
-  { a0: 54, a1: 90, color: '#a9dcb6' },
-  { a0: 90, a1: 126, color: '#f6b3c7' },
+  { a0: -126, a1: -90, color: '#cbb7ee' },
+  { a0: -90, a1: -54, color: '#ffd98a' },
+  { a0: -54, a1: -18, color: '#bfe0f5' },
+  { a0: -18, a1: 54, color: '#f7c6a4' },
+  { a0: 54, a1: 90, color: '#a8dcb8' },
+  { a0: 90, a1: 126, color: '#f4b6b8' },
 ];
 function paintTerrain(res) {
   const c = document.createElement('canvas'); c.width = c.height = res;
@@ -27,20 +27,20 @@ function paintTerrain(res) {
     x.beginPath(); x.arc(px, pz, 0.8 + r2() * 3.4, 0, 6.29); x.fill();
   }
   x.filter = 'none'; x.globalAlpha = 1;
-  const sectorOf = (px, pz) => {
+  const lawnSector = (px, pz) => {
     const ang = S.mapDeg(px, pz);
     const ell = Math.hypot(px / S.RING.rx, (pz - S.RING.cz) / S.RING.ry);
     if (ell < 1.05) return null;
-    if (px > 28 && pz > 7) return '#f6b3c7';
-    if (Math.abs(ang) > 166) return '#cdb8f0';
-    if (ang > 128) return '#ffe08f';
-    if (ang > 90) return '#a9d4f2';
-    if (ang > 14) return '#ffc4a3';
-    if (ang > -35) return '#a9dcb6';
+    if (px > 28 && pz > 7) return '#f4b6b8';
+    if (Math.abs(ang) > 166) return '#cbb7ee';
+    if (ang > 128) return '#ffd98a';
+    if (ang > 90) return '#bfe0f5';
+    if (ang > 14) return '#f7c6a4';
+    if (ang > -35) return '#a8dcb8';
     return null;
   };
   for (let iz = -72; iz <= 52; iz += 0.55) for (let ix = -68; ix <= 68; ix += 0.55) {
-    const col = sectorOf(ix, iz); if (!col) continue;
+    const col = lawnSector(ix, iz); if (!col) continue;
     x.fillStyle = col; x.fillRect(ix, iz, 0.6, 0.6);
   }
   for (const s of S.STANDS) {
@@ -57,7 +57,7 @@ function paintTerrain(res) {
     x.fillStyle = '#ebc4ae'; x.beginPath(); x.ellipse(0, 0, b.rx, b.rz, 0, 0, 6.29); x.fill(); x.restore();
   }
   const pave = '#e7deea', curb = '#cbbccf', tarmac = '#2c203b';
-  const fillBand = (pts, half, color, closed) => {
+  const paintBand = (pts, half, color, closed) => {
     const n = pts.length; if (n < 2) return;
     const left = [], right = [];
     for (let i = 0; i < n; i++) {
@@ -75,7 +75,7 @@ function paintTerrain(res) {
     x.closePath(); x.fill();
   };
 
-  const segHitsSpeed = (ax, az, bx, bz) => {
+  const segmentMeetsTrack = (ax, az, bx, bz) => {
     const dx = bx - ax, dz = bz - az, L = Math.hypot(dx, dz);
     if (L < 1e-4) return null;
     const ux = dx / L, uz = dz / L;
@@ -99,7 +99,7 @@ function paintTerrain(res) {
     return { x: ax + ux * last, z: az + uz * last, ux, uz };
   };
 
-  const fillSpoke = (ax, az, bx, bz, half, color) => {
+  const paintSpoke = (ax, az, bx, bz, half, color) => {
     const dx = bx - ax, dz = bz - az, L = Math.hypot(dx, dz);
     if (L < 1e-4) return;
     const ux = dx / L, uz = dz / L, sx = -uz, sz = ux;
@@ -126,8 +126,8 @@ function paintTerrain(res) {
   };
 
   const HW = S.SPEED_HW;
-  fillBand(S.SPEED_PTS, HW + 0.32, '#ff5b3a', true);
-  const edgeLine = (half, color, width, dash) => {
+  paintBand(S.SPEED_PTS, HW + 0.32, '#d98a63', true);
+  const paintEdge = (half, color, width, dash) => {
     x.save(); x.strokeStyle = color; x.lineWidth = width; x.lineJoin = 'round'; x.lineCap = 'round';
     if (dash) x.setLineDash(dash);
     for (const sign of [-1, 1]) {
@@ -144,14 +144,14 @@ function paintTerrain(res) {
     }
     x.restore();
   };
-  edgeLine(HW + 0.22, '#ffffff', 0.16, [0.7, 0.7]);
-  fillBand(S.SPEED_PTS, HW, tarmac, true);
-  fillBand(S.SPEED_PTS, HW - 0.5, '#38294c', true);
-  x.save(); x.strokeStyle = '#ffd27a'; x.lineWidth = 0.28; x.setLineDash([2.2, 1.6]);
+  paintEdge(HW + 0.22, '#ffffff', 0.16, [0.7, 0.7]);
+  paintBand(S.SPEED_PTS, HW, tarmac, true);
+  paintBand(S.SPEED_PTS, HW - 0.5, '#38294c', true);
+  x.save(); x.strokeStyle = '#eaa45f'; x.lineWidth = 0.28; x.setLineDash([2.2, 1.6]);
   x.beginPath(); S.SPEED_PTS.forEach((p, i) => i ? x.lineTo(p[0], p[1]) : x.moveTo(p[0], p[1])); x.closePath(); x.stroke(); x.restore();
   const segLen = S.SPEED_PTS.map((p, i) => { const n = S.SPEED_PTS[(i + 1) % S.SPEED_PTS.length]; return Math.hypot(n[0] - p[0], n[1] - p[1]); });
   const trackLen = segLen.reduce((a, b) => a + b, 0);
-  const atDist = (d) => {
+  const trackPointAt = (d) => {
     let left = ((d % trackLen) + trackLen) % trackLen;
     for (let i = 0; i < S.SPEED_PTS.length; i++) {
       if (left <= segLen[i] || i === S.SPEED_PTS.length - 1) {
@@ -165,13 +165,13 @@ function paintTerrain(res) {
     }
   };
   const startPt = S.speedSample(0.6781);
-  const nearMark = (px, pz) => Math.hypot(px - startPt[0], pz - startPt[1]) < 4.2 || S.BOOST_PTS.some(p => Math.hypot(px - p[0], pz - p[1]) < 5.5);
-  x.save(); x.strokeStyle = '#ffd27a'; x.lineWidth = 0.22; x.globalAlpha = 0.5; x.lineCap = 'round'; x.lineJoin = 'round';
+  const nearBoostOrStart = (px, pz) => Math.hypot(px - startPt[0], pz - startPt[1]) < 4.2 || S.BOOST_PTS.some(p => Math.hypot(px - p[0], pz - p[1]) < 5.5);
+  x.save(); x.strokeStyle = '#eaa45f'; x.lineWidth = 0.22; x.globalAlpha = 0.5; x.lineCap = 'round'; x.lineJoin = 'round';
   for (let d = 6.4; d < trackLen - 6.4; d += 6.4) {
-    const q = atDist(d);
+    const q = trackPointAt(d);
     for (const off of [-3.15, 3.15]) {
       const gx = q.x + -q.dz * off, gz = q.z + q.dx * off;
-      if (nearMark(gx, gz)) continue;
+      if (nearBoostOrStart(gx, gz)) continue;
       x.save(); x.translate(gx, gz); x.rotate(Math.atan2(q.dz, q.dx));
       x.beginPath(); x.moveTo(-0.55, -0.85); x.lineTo(0.4, 0); x.lineTo(-0.55, 0.85); x.stroke();
       x.restore();
@@ -180,19 +180,19 @@ function paintTerrain(res) {
   x.restore();
   const ringPts = [];
   for (let a = 0; a < 360; a += 4) ringPts.push(S.mapPt(a));
-  fillBand(ringPts, 3.3, curb, true);
+  paintBand(ringPts, 3.3, curb, true);
   const spokeSegs = [];
   for (const [sax, saz, bx0, bz0] of S.SPOKES) {
     const [ax, az] = Math.hypot(sax, saz) > S.HUB_R ? S.mapPt(S.mapDeg(sax, saz)) : [sax, saz];
-    const hit = segHitsSpeed(ax, az, bx0, bz0);
+    const hit = segmentMeetsTrack(ax, az, bx0, bz0);
     spokeSegs.push([ax, az, bx0, bz0, hit]);
-    if (hit) fillSpoke(ax, az, bx0, bz0, 3.3, curb);
-    else fillBand([[ax, az], [bx0, bz0]], 3.3, curb, false);
+    if (hit) paintSpoke(ax, az, bx0, bz0, 3.3, curb);
+    else paintBand([[ax, az], [bx0, bz0]], 3.3, curb, false);
   }
-  fillBand(ringPts, 2.8, pave, true);
+  paintBand(ringPts, 2.8, pave, true);
   for (const [ax, az, bx0, bz0, hit] of spokeSegs) {
-    if (hit) fillSpoke(ax, az, bx0, bz0, 2.8, pave);
-    else fillBand([[ax, az], [bx0, bz0]], 2.8, pave, false);
+    if (hit) paintSpoke(ax, az, bx0, bz0, 2.8, pave);
+    else paintBand([[ax, az], [bx0, bz0]], 2.8, pave, false);
   }
   x.fillStyle = curb; x.beginPath(); x.arc(0, 0, S.HUB_R + 0.5, 0, 6.29); x.fill();
   x.fillStyle = pave; x.beginPath(); x.arc(0, 0, S.HUB_R, 0, 6.29); x.fill();
@@ -206,7 +206,7 @@ function paintTerrain(res) {
     x.beginPath(); x.arc(s.pad.x, s.pad.z, 2.6, 0, 6.29); x.fill();
     x.globalAlpha = 1;
   }
-  const laneYaw = (p) => {
+  const trackYaw = (p) => {
     let best = 0, bd = 1e9;
     S.SPEED_PTS.forEach((q, i) => { const d = Math.hypot(q[0] - p[0], q[1] - p[1]); if (d < bd) { bd = d; best = i; } });
     const n = S.SPEED_PTS[(best + 1) % S.SPEED_PTS.length];
@@ -214,8 +214,8 @@ function paintTerrain(res) {
     return Math.atan2(n[1] - prev[1], n[0] - prev[0]);
   };
   for (const p of S.BOOST_PTS) {
-    x.save(); x.translate(p[0], p[1]); x.rotate(laneYaw(p));
-    x.fillStyle = '#ff5b3a'; x.strokeStyle = '#2a1d38'; x.lineWidth = 0.14;
+    x.save(); x.translate(p[0], p[1]); x.rotate(trackYaw(p));
+    x.fillStyle = '#d98a63'; x.strokeStyle = '#2b2438'; x.lineWidth = 0.14;
     x.beginPath(); x.roundRect(-3.2, -2.5, 6.4, 5.0, 0.7); x.fill(); x.stroke();
     x.strokeStyle = '#fff'; x.lineWidth = 0.32; x.lineCap = 'round'; x.lineJoin = 'round';
     for (const k of [-1.45, 0, 1.45]) {
@@ -225,7 +225,7 @@ function paintTerrain(res) {
   }
   {
     const sf = startPt;
-    x.save(); x.translate(sf[0], sf[1]); x.rotate(laneYaw(sf));
+    x.save(); x.translate(sf[0], sf[1]); x.rotate(trackYaw(sf));
     x.save(); x.beginPath(); x.rect(-1.4, -HW, 2.8, HW * 2); x.clip();
     x.fillStyle = '#fff'; x.fillRect(-1.4, -HW, 2.8, HW * 2);
     x.fillStyle = '#1c1326';
@@ -234,12 +234,12 @@ function paintTerrain(res) {
       if (((i + j) & 1) === 0) x.fillRect(i * cell, j * cell, cell + 0.02, cell + 0.02);
     }
     x.restore();
-    x.fillStyle = '#ff5b3a';
+    x.fillStyle = '#d98a63';
     x.beginPath(); x.roundRect(-1.4, -HW - 0.12, 2.8, 0.38, 0.1); x.fill();
     x.beginPath(); x.roundRect(-1.4, HW - 0.26, 2.8, 0.38, 0.1); x.fill();
     x.restore();
   }
-  x.save(); x.strokeStyle = 'rgba(42,29,56,.18)'; x.lineWidth = 0.08; x.setLineDash([0.4, 0.3]);
+  x.save(); x.strokeStyle = 'rgba(43,36,56,.18)'; x.lineWidth = 0.08; x.setLineDash([0.4, 0.3]);
   x.beginPath(); x.arc(S.SPAWN.x, S.SPAWN.z, 3.3, 0, 6.29); x.stroke(); x.restore();
   const r3 = S.rngFromSeed(5);
   for (let i = 0; i < 9000; i++) {
@@ -248,24 +248,24 @@ function paintTerrain(res) {
     x.fillStyle = r3() < 0.5 ? 'rgba(200,180,195,.35)' : 'rgba(255,255,255,.6)';
     x.fillRect(px, pz, 0.06, 0.06);
   }
-  const word = (str, px, pz, size, color, font = '800', ls = -0.04) => {
+  const groundWord = (str, px, pz, size, color, font = '800', ls = -0.04) => {
     x.save(); x.translate(px, pz); x.rotate(-S.CAM_YAW);
-    x.font = `${font} ${size * 10}px ${font === '400' ? '"Space Mono"' : 'Syne'}`; x.scale(0.1, 0.1);
+    x.font = `${font} ${size * 10}px ${font === '400' ? '"DM Mono"' : 'Fraunces'}`; x.scale(0.1, 0.1);
     x.letterSpacing = `${ls * size * 10}px`;
     x.fillStyle = color; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(str, 0, 0); x.restore();
   };
-  word('AAYAN', 0, -4.2, 1.5, 'rgba(42,29,56,.9)');
-  word('DESAI', 0, -2.6, 1.5, 'rgba(42,29,56,.5)');
-  word('QA AUTOMATION · DRIVE IN', 0, -1.2, 0.36, 'rgba(42,29,56,.6)', '400', 0.18);
+  groundWord('AAYAN', 0, -4.2, 1.5, 'rgba(43,36,56,.9)');
+  groundWord('DESAI', 0, -2.6, 1.5, 'rgba(43,36,56,.5)');
+  groundWord('QA AUTOMATION · DRIVE IN', 0, -1.2, 0.36, 'rgba(43,36,56,.6)', '400', 0.18);
   for (const s of S.STANDS) {
     const p = s.pad || S.polar(s.angle, S.RING_R);
-    word((s.short || s.title).toUpperCase(), p.x, p.z, 0.55, 'rgba(42,29,56,.7)', '700', -0.02);
+    groundWord((s.short || s.title).toUpperCase(), p.x, p.z, 0.55, 'rgba(43,36,56,.7)', '700', -0.02);
     const t = (s.ringDeg || 0) * S.DEG;
     const tx = -Math.sin(t), tz = -Math.cos(t);
-    word('P', p.x + tx * 2.1, p.z + tz * 2.1, 0.62, 'rgba(42,29,56,.55)', '700', 0);
-    word('P', p.x - tx * 2.1, p.z - tz * 2.1, 0.62, 'rgba(42,29,56,.55)', '700', 0);
+    groundWord('P', p.x + tx * 2.1, p.z + tz * 2.1, 0.62, 'rgba(43,36,56,.55)', '700', 0);
+    groundWord('P', p.x - tx * 2.1, p.z - tz * 2.1, 0.62, 'rgba(43,36,56,.55)', '700', 0);
   }
-  word('SKATE', 0, 26, 1.4, 'rgba(42,29,56,.2)');
+  groundWord('SKATE', 0, 26, 1.4, 'rgba(43,36,56,.2)');
   x.save(); x.fillStyle = 'rgba(255,91,58,.85)';
   for (const [px, pz] of [[-6, 30.6], [5.5, 28.95]]) { x.beginPath(); x.moveTo(px - 0.6, pz - 0.5); x.lineTo(px + 0.6, pz - 0.5); x.lineTo(px, pz + 0.4); x.fill(); }
   x.restore();
@@ -381,7 +381,7 @@ function seedTurf(n) {
 }
 
 function sowFlowers() {
-  const cols = ['#f6a9c0', '#ffe08f', '#cdb8f0', '#fff6ea', '#ffb79a'].map(c => new THREE.Color(c));
+  const cols = ['#f6a9c0', '#ffd98a', '#cbb7ee', '#fff6ea', '#ffb79a'].map(c => new THREE.Color(c));
   const n = 260, im = new THREE.InstancedMesh(S.G.ico(0.11, 0), S.toon('#ffffff'), n);
   im.castShadow = false; let k = 0;
   for (const b of S.BEDS) {

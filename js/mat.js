@@ -3,9 +3,9 @@ import { mergeGeometries, mergeVertices } from 'three/addons/utils/BufferGeometr
 
 export async function installPalette(S) {
   const light = {
-    key: '#ffd7a3',
+    key: '#ffdcae',
     sky: '#d3dfff',
-    lawn: '#d5e6c4',
+    lawn: '#cfe0b8',
     haze: '#e4efe4',
     top: '#a8cdf0',
   };
@@ -16,29 +16,29 @@ export async function installPalette(S) {
   S.ZENITH = new THREE.Color(light.top);
 
   S.C = {
-    ink: '#2a1d38',
+    ink: '#2b2438',
     inkSoft: '#6a5a86',
     cream: '#fbf3e6',
     concrete: '#efe7ea',
-    coral: '#ff5b3a',
-    mint: '#a9dcb6',
+    coral: '#d98a63',
+    mint: '#a8dcb8',
     mintDeep: '#86c99a',
-    pink: '#f6b3c7',
+    pink: '#f4b6b8',
     blossom: '#f9c3d2',
-    butter: '#ffe08f',
-    lilac: '#cdb8f0',
-    peach: '#ffc4a3',
-    sky: '#a9d4f2',
+    butter: '#ffd98a',
+    lilac: '#cbb7ee',
+    peach: '#f7c6a4',
+    sky: '#bfe0f5',
     trunk: '#c79f8e',
     tire: '#4b3d5e',
     wood: '#e9c79c',
-    hedge: '#93cfa0',
-    terracotta: '#f0a98a',
+    hedge: '#9ccf9f',
+    terracotta: '#d98a63',
   };
 
-  S.PAPER = new THREE.Color('#f7efe4');
+  S.PAPER = new THREE.Color('#f6efe3');
   S.DOTS = new THREE.Color('#d9c9cf');
-  S.RING_COL = new THREE.Color('#ffb547');
+  S.RING_COL = new THREE.Color('#eaa45f');
   S.DUSK = new THREE.Color('#d9ccd6');
 }
 

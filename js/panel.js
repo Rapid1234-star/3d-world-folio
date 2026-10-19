@@ -91,8 +91,8 @@ function showPanel(s, via = 'pad') {
 function posterData(s) {
   const title = esc(s.title || '');
   const badge = esc(s.badge || '');
-  const fill = s.color || '#cdb8f0';
-  return 'data:image/svg+xml;utf8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"><rect width="400" height="300" fill="${fill}"/><rect x="28" y="28" width="344" height="244" rx="16" fill="#fbf3e6"/><text x="48" y="78" font-family="Space Mono, monospace" font-size="16" fill="#2a1d38">${badge}</text><text x="48" y="160" font-family="Syne, sans-serif" font-size="42" font-weight="800" fill="#2a1d38">${title}</text></svg>`);
+  const fill = s.color || '#cbb7ee';
+  return 'data:image/svg+xml;utf8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"><rect width="400" height="300" fill="${fill}"/><rect x="28" y="28" width="344" height="244" rx="16" fill="#fbf3e6"/><text x="48" y="78" font-family="DM Mono, monospace" font-size="16" fill="#2b2438">${badge}</text><text x="48" y="160" font-family="Fraunces, sans-serif" font-size="42" font-weight="800" fill="#2b2438">${title}</text></svg>`);
 }
 function hidePanel() {
   if (!S.openStand) return;

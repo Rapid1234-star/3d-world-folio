@@ -25,41 +25,41 @@ function colliderCylinder(x, z, r, h) {
 
 S.SLOPE = { x0: 13, x1: 24, z: -39, hz: 5.75 };
 function onSlope(x, z) { return x > S.SLOPE.x0 && x < S.SLOPE.x1 && Math.abs(z - S.SLOPE.z) < S.SLOPE.hz; }
-function buildCrest() {
+function formCrest() {
   const X0 = 24, M = (x, ...a) => S.M(x + X0, ...a);
   const z = -39, h = 1.7, run = 11, half = S.SPEED_HW, tar = '#2c203b';
   const surf = (cx) => cx <= 0 ? (cx + run) / run * h : (run - cx) / run * h;
   const ja = Math.atan2(h, run);
-  const up = wedge(half, run / 2, h);
+  const up = rampWedge(half, run / 2, h);
   S.add(up.geo, M(-run / 2, 0, z, 0, -Math.PI / 2, 0), tar);
   const upB = new CANNON.Body({ mass: 0, type: CANNON.Body.STATIC });
   upB.addShape(up.shape); upB.position.set(-run / 2 + X0, 0, z); upB.quaternion.setFromEuler(0, -Math.PI / 2, 0); S.world.addBody(upB);
-  const dn = wedge(half, run / 2, h);
+  const dn = rampWedge(half, run / 2, h);
   S.add(dn.geo, M(run / 2, 0, z, 0, Math.PI / 2, 0), tar);
   const dnB = new CANNON.Body({ mass: 0, type: CANNON.Body.STATIC });
   dnB.addShape(dn.shape); dnB.position.set(run / 2 + X0, 0, z); dnB.quaternion.setFromEuler(0, Math.PI / 2, 0); S.world.addBody(dnB);
-  S.add(S.G.box(0.32, 0.08, half * 2), M(0, h + 0.04, z), '#ffd27a', { outline: false });
+  S.add(S.G.box(0.32, 0.08, half * 2), M(0, h + 0.04, z), '#eaa45f', { outline: false });
   for (const s of [-1, 1]) {
     const ez = z + s * (half - 0.1);
-    S.add(S.G.box(run + 0.3, 0.07, 0.18), M(-run / 2, h * 0.52, ez, 0, 0, ja), '#ffd27a', { outline: false, cast: false });
-    S.add(S.G.box(run + 0.3, 0.07, 0.18), M(run / 2, h * 0.52, ez, 0, 0, -ja), '#ffd27a', { outline: false, cast: false });
+    S.add(S.G.box(run + 0.3, 0.07, 0.18), M(-run / 2, h * 0.52, ez, 0, 0, ja), '#eaa45f', { outline: false, cast: false });
+    S.add(S.G.box(run + 0.3, 0.07, 0.18), M(run / 2, h * 0.52, ez, 0, 0, -ja), '#eaa45f', { outline: false, cast: false });
   }
   const jz = Math.atan2(h / 2, run);
   for (const s of [-1, 1]) {
     for (let i = 0; i < 6; i++) {
       const rx = -run + 0.95 + i * 1.7;
-      S.add(S.G.box(1.7, 0.42, 0.06), M(rx, surf(rx) / 2, z + s * (half + 0.02), 0, 0, jz), i % 2 ? '#fbf3e6' : '#ff5b3a', { outline: false, cast: false });
+      S.add(S.G.box(1.7, 0.42, 0.06), M(rx, surf(rx) / 2, z + s * (half + 0.02), 0, 0, jz), i % 2 ? '#fbf3e6' : '#d98a63', { outline: false, cast: false });
       const dx = run - 0.95 - i * 1.7;
-      S.add(S.G.box(1.7, 0.42, 0.06), M(dx, surf(dx) / 2, z + s * (half + 0.02), 0, 0, -jz), i % 2 ? '#ff5b3a' : '#fbf3e6', { outline: false, cast: false });
+      S.add(S.G.box(1.7, 0.42, 0.06), M(dx, surf(dx) / 2, z + s * (half + 0.02), 0, 0, -jz), i % 2 ? '#d98a63' : '#fbf3e6', { outline: false, cast: false });
     }
   }
   for (const cx of [-8, -4, 0, 4, 8]) {
     const y = surf(cx) + 0.08, tilt = cx < 0 ? ja : cx > 0 ? -ja : 0;
-    S.add(S.G.box(0.14, 0.04, 0.95), M(cx, y, z - 0.28, 0, -0.55, tilt), '#ffd27a', { outline: false, cast: false });
-    S.add(S.G.box(0.14, 0.04, 0.95), M(cx, y, z + 0.28, 0, 0.55, tilt), '#ffd27a', { outline: false, cast: false });
+    S.add(S.G.box(0.14, 0.04, 0.95), M(cx, y, z - 0.28, 0, -0.55, tilt), '#eaa45f', { outline: false, cast: false });
+    S.add(S.G.box(0.14, 0.04, 0.95), M(cx, y, z + 0.28, 0, 0.55, tilt), '#eaa45f', { outline: false, cast: false });
   }
   const padX = -5.5;
-  S.add(S.G.box(2.8, 0.05, 4.4), M(padX, surf(padX) + 0.06, z, 0, 0, ja), '#ff5b3a', { outline: false, cast: false });
+  S.add(S.G.box(2.8, 0.05, 4.4), M(padX, surf(padX) + 0.06, z, 0, 0, ja), '#d98a63', { outline: false, cast: false });
   for (const cx of [-6.35, -5.5, -4.65]) {
     const y = surf(cx) + 0.12;
     S.add(S.G.box(0.12, 0.035, 0.8), M(cx, y, z - 0.22, 0, -0.55, ja), '#ffffff', { outline: false, cast: false });
@@ -73,13 +73,13 @@ function buildCrest() {
   }
   S.aoSpots.push([X0, z, 8, 0.12]);
 }
-function chevron(x, z, yaw, color, s = 1) {
+function roadChevron(x, z, yaw, color, s = 1) {
   const g = new THREE.Group();
   const a = S.mesh(S.G.box(1.6 * s, 0.06, 0.45 * s), color); a.position.set(0.35 * s, 0.04, 0); a.rotation.y = 0.5; g.add(a);
   const b = S.mesh(S.G.box(1.6 * s, 0.06, 0.45 * s), color); b.position.set(0.35 * s, 0.04, 0); b.rotation.y = -0.5; g.add(b);
   g.position.set(x, 0.02, z); g.rotation.y = yaw; S.scene.add(g);
 }
-function wedge(w, l, h) {
+function rampWedge(w, l, h) {
   const V = [[-w, 0, l], [w, 0, l], [w, 0, -l], [-w, 0, -l], [w, h, -l], [-w, h, -l]];
   const F = [[0, 3, 2, 1], [3, 5, 4, 2], [0, 1, 4, 5], [1, 2, 4], [0, 5, 3]];
   const pos = [];
@@ -89,7 +89,7 @@ function wedge(w, l, h) {
   return { geo, shape };
 }
 
-S.aoSpots = []; // [x, z, radius, strength] painted into the ground as baked AO
+S.aoSpots = []; 
 
 function addTree(x, z, kind, s = 1) {
   const ry = S.R(0, 6.28);
@@ -97,13 +97,10 @@ function addTree(x, z, kind, s = 1) {
   const trunkH = S.R(1.5, 2.1);
   S.add(S.G.cyl(0.11, 0.19, trunkH, 6), T.clone().multiply(S.M(0, trunkH / 2, 0)), S.C.trunk);
   const col = { blossom: S.C.blossom, mint: S.C.mint, butter: S.C.butter, lilac: S.C.lilac, deep: S.C.mintDeep }[kind];
-  const n = 3 + (S.rand() * 2 | 0);
-  for (let i = 0; i < n; i++) {
-    const r = S.R(0.75, 1.15) * (i === 0 ? 1.2 : 1);
-    const a = i / n * 6.28 + S.R(0, 1);
-    const off = i === 0 ? 0 : S.R(0.55, 0.85);
-    S.add(S.G.ico(r, 0), T.clone().multiply(S.M(Math.cos(a) * off, trunkH + S.R(0.3, 0.9) + (i === 0 ? 0.35 : 0), Math.sin(a) * off, S.R(0, 3), S.R(0, 3), 0)), col, { sway: true });
-  }
+  const cy = trunkH + 0.7;
+  S.add(S.G.ico(1.05, 1), T.clone().multiply(S.M(0, cy, 0, S.R(0, 3), S.R(0, 3), 0, 1, 1.15, 1)), col, { sway: true });
+  S.add(S.G.ico(0.55, 1), T.clone().multiply(S.M(S.R(-0.5, 0.5), cy + 0.75, S.R(-0.5, 0.5), S.R(0, 3), S.R(0, 3), 0)), col, { sway: true });
+  if (S.rand() < 0.15) S.add(S.G.ico(0.22, 0), T.clone().multiply(S.M(S.R(-0.3, 0.3), cy + 1.1, S.R(-0.3, 0.3))), S.C.cream, { sway: true });
   colliderCylinder(x, z, 0.28 * s, 2.4);
   S.aoSpots.push([x, z, 2.2 * s, 0.28]);
   S.treePos.push([x, z, kind]);
@@ -142,9 +139,9 @@ function streetLamp(x, z) {
 }
 function parkBench(x, z, ry) {
   const T = S.M(x, 0, z, 0, ry, 0);
-  S.add(S.G.box(2.0, 0.1, 0.62), T.clone().multiply(S.M(0, 0.48, 0)), S.C.wood);
-  S.add(S.G.box(2.0, 0.5, 0.08), T.clone().multiply(S.M(0, 0.82, -0.3, -0.15)), S.C.wood);
-  for (const sx of [-0.85, 0.85]) S.add(S.G.box(0.1, 0.48, 0.55), T.clone().multiply(S.M(sx, 0.24, 0)), S.C.inkSoft);
+  S.add(S.G.box(2.1, 0.18, 0.7), T.clone().multiply(S.M(0, 0.5, 0)), S.C.wood);
+  S.add(S.G.box(2.1, 0.62, 0.14), T.clone().multiply(S.M(0, 0.92, -0.32, -0.12)), S.C.wood);
+  for (const sx of [-0.85, 0.85]) S.add(S.G.box(0.18, 0.5, 0.62), T.clone().multiply(S.M(sx, 0.25, 0)), S.C.inkSoft);
   colliderBox(x, 0.5, z, 1.0, 0.5, 0.32, ry);
   S.aoSpots.push([x, z, 1.4, 0.2]);
 }
@@ -153,27 +150,27 @@ function planter(x, z, s = 1) {
   colliderCylinder(x, z, 0.55 * s, 0.6 * s);
 }
 
-S.pads = [];      // { stand, pos, mesh, marker, on }
+S.pads = [];      
 S.tex = new THREE.TextureLoader();
 function canvasTexture(w, h, draw) {
   const c = document.createElement('canvas'); c.width = w; c.height = h;
   draw(c.getContext('2d'), w, h);
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; return t;
 }
-function basic(map, o = {}) { const m = new THREE.MeshBasicMaterial({ map, transparent: !!o.transparent, toneMapped: false, side: o.side || THREE.FrontSide }); return S.patch(m, { key: 'b' }); }
+function flatMat(map, o = {}) { const m = new THREE.MeshBasicMaterial({ map, transparent: !!o.transparent, toneMapped: false, side: o.side || THREE.FrontSide }); return S.patch(m, { key: 'b' }); }
 
 function posterTex(s) {
   return canvasTexture(1024, 768, (x, w, h) => {
     x.fillStyle = '#fbf3e6'; x.fillRect(0, 0, w, h);
     x.fillStyle = s.color; x.fillRect(0, 0, w, 96);
-    x.fillStyle = S.C.ink; x.font = '400 36px "Space Mono"'; x.textBaseline = 'middle';
+    x.fillStyle = S.C.ink; x.font = '400 36px "DM Mono"'; x.textBaseline = 'middle';
     x.fillText((s.badge || s.kind).toUpperCase(), 48, 50);
-    x.font = '800 108px Syne';
+    x.font = '800 108px Fraunces';
     const title = (s.title || '').toUpperCase();
     const fit = Math.min(1, 920 / Math.max(1, x.measureText(title).width));
     x.save(); x.translate(48, 280); x.scale(fit, fit); x.fillText(title, 0, 0); x.restore();
-    x.font = '500 40px "General Sans", sans-serif';
-    x.fillStyle = 'rgba(42,29,56,.72)';
+    x.font = '500 40px "Plus Jakarta Sans", sans-serif';
+    x.fillStyle = 'rgba(43,36,56,.72)';
     const line = s.line || '';
     const words = line.split(' ');
     let row = '', y = 420;
@@ -184,7 +181,7 @@ function posterTex(s) {
     }
     if (row) x.fillText(row, 48, y);
     if (s.boardLines) {
-      x.font = '500 32px "Space Mono"';
+      x.font = '500 32px "DM Mono"';
       s.boardLines.forEach((ln, i) => {
         const fit = Math.min(1, 900 / Math.max(1, x.measureText(ln).width));
         x.save(); x.translate(48, 520 + i * 48); x.scale(fit, fit); x.fillText(ln, 0, 0); x.restore();
@@ -197,31 +194,83 @@ function erectBooth(s, imgTex) {
   const pose = S.standPose(s), p = pose.p, rotY = pose.rotY, SC = 1.25;
   const T = S.M(p.x, 0, p.z, 0, rotY, 0, SC);
   const L = (...a) => T.clone().multiply(S.M(...a));
+  const id = s.id;
   S.add(S.G.box(6.4, 0.42, 4.2), L(0, 0.21, 0), s.color);
   S.add(S.G.box(6.9, 0.12, 4.7), L(0, 0.06, 0), S.C.cream);
-  for (const sx of [-2.25, 2.25]) S.add(S.G.cyl(0.12, 0.12, 4.3, 6), L(sx, 2.55, -1.0), S.C.inkSoft);
-  S.add(S.G.box(4.9, 3.75, 0.28), L(0, 2.95, -1.0, -0.08), S.C.cream);
-  S.add(S.G.box(5.6, 0.16, 1.7), L(0, 4.95, -0.55, 0.2), s.color);
-  for (let i = 0; i < 5; i++) S.add(S.G.box(0.55, 0.06, 1.72), L(-2.2 + i * 1.1, 5.04, -0.53, 0.2), S.C.cream, { outline: false });
-  for (const sx of [-2.75, 2.75]) {
-    S.add(S.G.cyl(0.42, 0.32, 0.55, 8), L(sx, 0.69, 1.25), S.C.terracotta);
-    S.add(S.G.ico(0.55, 0), L(sx, 1.3, 1.25, 0.4, 0.2, 0, 1, 1.1, 1), S.C.mintDeep, { sway: false });
+  let boardY = 2.95, boardZ = -1.0, boardTilt = -0.08, stripY = 4.62, stripZ = 0.33;
+  if (id === 'education') {
+    S.add(S.G.box(4.4, 5.6, 3.2), L(0, 3.2, -0.6), S.C.cream);
+    S.add(S.G.cone(2.6, 2.4, 4), L(0, 7.2, -0.6, 0, Math.PI / 4, 0), s.color);
+    S.add(S.G.cyl(0.5, 0.55, 1.4, 6), L(-1.6, 4.4, -0.6), S.C.terracotta);
+    S.add(S.G.box(1.0, 1.7, 0.12), L(0, 1.25, 1.05), S.C.wood);
+    S.add(S.G.box(1.5, 0.9, 0.1), L(1.4, 3.6, 1.05), S.C.sky);
+    for (const sx of [-1.4, -0.5, 0.5, 1.4]) S.add(S.G.box(0.3, 1.0, 0.1), L(sx, 4.6, 1.05), S.C.butter);
+    boardY = 3.6; boardZ = 0.95; boardTilt = 0; stripY = 6.9; stripZ = 1.1;
+  } else if (id === 'skills') {
+    S.add(S.G.box(5.2, 3.4, 3.6), L(0, 2.1, -0.4), S.C.cream);
+    const sl = Math.atan2(1.4, 3.6);
+    S.add(S.G.box(5.6, 0.22, 3.9), L(0, 4.1, -0.4, -sl), s.color);
+    S.add(S.G.box(0.5, 1.8, 0.5), L(1.8, 5.2, -0.4), S.C.terracotta);
+    S.add(S.G.cone(0.45, 0.3, 4), L(1.8, 6.2, -0.4, 0, Math.PI / 4, 0), S.C.inkSoft);
+    S.add(S.G.box(1.2, 1.8, 0.12), L(-1.4, 1.3, 1.42), S.C.wood);
+    S.add(S.G.box(1.8, 1.1, 0.1), L(0.6, 2.2, 1.42), S.C.sky);
+    S.add(S.G.box(2.4, 0.1, 0.5), L(0, 1.0, 1.7), S.C.wood);
+    boardY = 2.6; boardZ = 1.35; boardTilt = 0; stripY = 3.9; stripZ = 1.5;
+  } else if (id === 'patchifi') {
+    S.add(S.G.box(5.6, 3.2, 3.4), L(0, 2.0, -0.4), S.C.cream);
+    for (let i = 0; i < 4; i++) {
+      const sx = -2.1 + i * 1.4;
+      S.add(S.G.box(1.3, 0.18, 3.5), L(sx, 3.7 + (i % 2) * 0.5, -0.4, i % 2 ? 0.4 : -0.4, 0, 0), i % 2 ? s.color : S.C.sky);
+    }
+    S.add(S.G.cyl(0.35, 0.4, 2.2, 6), L(2.0, 4.4, -0.4), S.C.inkSoft);
+    S.add(S.G.box(1.4, 0.14, 0.6), L(0, 2.6, 1.55), s.color);
+    for (const sx of [-0.55, 0.55]) S.add(S.G.box(0.08, 0.55, 0.08), L(sx, 2.95, 1.55), S.C.inkSoft);
+    S.add(S.G.box(1.1, 1.6, 0.12), L(0, 1.25, 1.32), S.C.wood);
+    S.add(S.G.box(1.6, 0.9, 0.1), L(0, 2.9, 1.32), S.C.mint);
+    boardY = 2.5; boardZ = 1.25; boardTilt = 0; stripY = 3.75; stripZ = 1.4;
+  } else if (id === 'appify') {
+    S.add(S.G.box(5.4, 3.3, 3.5), L(0, 2.05, -0.4), S.C.cream);
+    S.add(S.G.box(5.6, 0.24, 1.4), L(0, 3.5, 1.2, 0.35), s.color);
+    for (let i = 0; i < 5; i++) S.add(S.G.box(0.5, 0.08, 1.42), L(-2.0 + i * 1.0, 3.62, 1.18, 0.35), S.C.cream, { outline: false });
+    S.add(S.G.box(2.2, 1.6, 0.1), L(0, 1.5, 1.38), S.C.sky);
+    S.add(S.G.box(0.12, 1.7, 0.12), L(0, 1.5, 1.45), S.C.inkSoft);
+    S.add(S.G.box(1.1, 1.9, 0.12), L(-1.8, 1.4, 1.38), S.C.wood);
+    S.add(S.G.box(0.1, 1.4, 0.1), L(1.8, 4.3, 1.5), S.C.inkSoft);
+    S.add(S.G.box(0.9, 0.7, 0.08), L(1.8, 4.6, 1.5), s.color);
+    boardY = 2.55; boardZ = 1.3; boardTilt = 0; stripY = 3.85; stripZ = 1.45;
+  } else {
+    S.add(S.G.box(5.4, 3.5, 3.5), L(0, 2.15, -0.4), S.C.cream);
+    const pr = Math.atan2(1.5, 1.8);
+    for (const sz of [-1, 1]) S.add(S.G.box(5.8, 0.2, 2.1), L(0, 4.2, -0.4 + sz * 0.9, 0, 0, sz * pr), s.color);
+    S.add(S.G.cyl(0.18, 0.18, 2.6, 8), L(-2.0, 1.7, 1.5), S.C.cream);
+    S.add(S.G.cyl(0.18, 0.18, 2.6, 8), L(2.0, 1.7, 1.5), S.C.cream);
+    S.add(S.G.box(5.6, 0.7, 0.12), L(0, 3.3, 1.55), s.color);
+    S.add(S.G.box(1.2, 1.7, 0.12), L(0, 1.25, 1.4), S.C.wood);
+    S.add(S.G.box(1.4, 0.8, 0.1), L(-1.5, 2.8, 1.4), S.C.sky);
+    S.add(S.G.box(1.4, 0.8, 0.1), L(1.5, 2.8, 1.4), S.C.sky);
+    boardY = 2.7; boardZ = 1.3; boardTilt = 0; stripY = 4.05; stripZ = 1.45;
   }
-  const board = new THREE.Mesh(new THREE.PlaneGeometry(4.45, 3.34), basic(imgTex || posterTex(s))); s._board = board;
-  board.applyMatrix4(L(0, 2.95, -0.855, -0.08)); S.scene.add(board);
+  if (id !== 'education') {
+    for (const sx of [-2.75, 2.75]) {
+      S.add(S.G.cyl(0.42, 0.32, 0.55, 8), L(sx, 0.69, 1.25), S.C.terracotta);
+      S.add(S.G.ico(0.55, 0), L(sx, 1.3, 1.25, 0.4, 0.2, 0, 1, 1.1, 1), S.C.mintDeep, { sway: false });
+    }
+  }
+  const board = new THREE.Mesh(new THREE.PlaneGeometry(4.45, 3.34), flatMat(imgTex || posterTex(s))); s._board = board;
+  board.applyMatrix4(L(0, boardY, boardZ + 0.145, boardTilt)); S.scene.add(board);
   const strip = canvasTexture(1024, 128, (x, w, h) => {
     x.fillStyle = '#fbf3e6'; x.fillRect(0, 0, w, h);
-    x.fillStyle = S.C.ink; x.font = '800 74px Syne'; x.textBaseline = 'middle';
+    x.fillStyle = S.C.ink; x.font = '800 74px Fraunces'; x.textBaseline = 'middle';
     const label = (s.n ? s.n + '  ' : '') + s.title.toUpperCase();
     const fit = Math.min(1, 700 / x.measureText(label).width);
     x.save(); x.translate(40, h / 2 + 4); x.scale(fit, fit); x.fillText(label, 0, 0); x.restore();
-    x.font = '400 26px "Space Mono"'; x.textAlign = 'right'; x.fillStyle = 'rgba(42,29,56,.6)';
+    x.font = '400 26px "DM Mono"'; x.textAlign = 'right'; x.fillStyle = 'rgba(43,36,56,.6)';
     x.fillText((s.section || s.kind).toUpperCase(), w - 40, h / 2 + 4);
   });
-  const sm = new THREE.Mesh(new THREE.PlaneGeometry(5.6, 0.7), basic(strip));
-  sm.applyMatrix4(L(0, 4.62, 0.33, -0.05)); S.scene.add(sm);
+  const sm = new THREE.Mesh(new THREE.PlaneGeometry(5.6, 0.7), flatMat(strip));
+  sm.applyMatrix4(L(0, stripY, stripZ, -0.05)); S.scene.add(sm);
   colliderBox(p.x, 0.5, p.z, 3.4 * SC, 0.5, 2.3 * SC, rotY);
-  const bp = new THREE.Vector3(0, 0, -1.0).applyMatrix4(T); // board footprint
+  const bp = new THREE.Vector3(0, 0, -1.0).applyMatrix4(T);
   colliderBox(bp.x, 3, bp.z, 2.5 * SC, 3, 0.35, rotY);
   S.aoSpots.push([p.x, p.z, 3.2, 0.08]);
   return { group: [board, sm] };
@@ -232,14 +281,15 @@ function glassHouse(s) {
   const T = S.M(p.x, 0, p.z, 0, rotY, 0);
   const L = (...a) => T.clone().multiply(S.M(...a));
   const W = 3.6, D = 2.6, H = 2.7, RH = 1.5;
-  S.add(S.G.box(W * 2 + 0.8, 0.3, D * 2 + 0.8), L(0, 0.15, 0), S.C.cream);
-  for (let i = 0; i <= 6; i++) { const x = -W + i * (2 * W / 6); for (const z of [-D, D]) if (!(z === D && (i === 3))) S.add(S.G.box(0.12, H, 0.12), L(x, 0.3 + H / 2, z), S.C.cream); }
-  for (let i = 1; i < 4; i++) { const z = -D + i * (2 * D / 4); for (const x of [-W, W]) S.add(S.G.box(0.12, H, 0.12), L(x, 0.3 + H / 2, z), S.C.cream); }
-  for (const z of [-D, D]) S.add(S.G.box(2 * W + 0.12, 0.14, 0.14), L(0, 0.3 + H, z), S.C.cream);
-  for (const x of [-W, W]) S.add(S.G.box(0.14, 0.14, 2 * D), L(x, 0.3 + H, 0), S.C.cream);
+  S.add(S.G.box(W * 2 + 0.8, 0.3, D * 2 + 0.8), L(0, 0.15, 0), s.color);
+  for (let i = 0; i <= 6; i++) { const x = -W + i * (2 * W / 6); for (const z of [-D, D]) if (!(z === D && (i === 3))) S.add(S.G.box(0.12, H, 0.12), L(x, 0.3 + H / 2, z), S.C.terracotta); }
+  for (let i = 1; i < 4; i++) { const z = -D + i * (2 * D / 4); for (const x of [-W, W]) S.add(S.G.box(0.12, H, 0.12), L(x, 0.3 + H / 2, z), S.C.terracotta); }
+  for (const z of [-D, D]) S.add(S.G.box(2 * W + 0.12, 0.14, 0.14), L(0, 0.3 + H, z), S.C.terracotta);
+  for (const x of [-W, W]) S.add(S.G.box(0.14, 0.14, 2 * D), L(x, 0.3 + H, 0), S.C.terracotta);
   const slope = Math.atan2(RH, D), rl = Math.hypot(RH, D);
-  for (let i = 0; i <= 6; i++) { const x = -W + i * (2 * W / 6); for (const sz of [-1, 1]) S.add(S.G.box(0.1, 0.1, rl), L(x, 0.3 + H + RH / 2, sz * D / 2, sz * slope), S.C.cream); }
-  S.add(S.G.box(2 * W + 0.3, 0.16, 0.16), L(0, 0.3 + H + RH, 0), S.C.cream);
+  for (let i = 0; i <= 6; i++) { const x = -W + i * (2 * W / 6); for (const sz of [-1, 1]) S.add(S.G.box(0.1, 0.1, rl), L(x, 0.3 + H + RH / 2, sz * D / 2, sz * slope), S.C.terracotta); }
+  S.add(S.G.box(2 * W + 0.3, 0.16, 0.16), L(0, 0.3 + H + RH, 0), s.color);
+  S.add(S.G.cone(0.9, 0.7, 4), L(0, 0.3 + H + RH + 0.4, 0, 0, Math.PI / 4, 0), s.color);
   S.add(S.G.box(1.1, 2.1, 0.08), L(0, 1.35, D + 0.02), S.C.wood);
   S.add(S.G.box(2.6, 0.1, 1.0), L(-1.2, 1.15, -1.4), S.C.wood);
   for (const sx of [-2.35, -0.05]) S.add(S.G.box(0.1, 0.85, 0.9), L(sx, 0.72, -1.4), S.C.inkSoft);
@@ -265,22 +315,25 @@ function helloSign(s) {
   const pose = S.standPose(s), p = pose.p, rotY = pose.rotY;
   const T = S.M(p.x, 0, p.z, 0, rotY, 0);
   const L = (...a) => T.clone().multiply(S.M(...a));
-  for (const sx of [-2.6, 2.6]) S.add(S.G.box(0.3, 4.6, 0.3), L(sx, 2.3, 0), S.C.inkSoft);
-  S.add(S.G.box(6.4, 3.0, 0.3), L(0, 3.2, 0), s.color);
-  S.add(S.G.box(6.7, 0.18, 0.5), L(0, 4.8, 0), S.C.cream);
+  S.add(S.G.box(6.8, 0.3, 1.4), L(0, 0.15, 0), s.color);
+  for (const sx of [-2.6, 2.6]) S.add(S.G.box(0.3, 4.6, 0.3), L(sx, 2.45, 0), S.C.terracotta);
+  S.add(S.G.box(6.4, 3.0, 0.3), L(0, 3.2, 0), S.C.cream);
+  S.add(S.G.box(6.7, 0.18, 0.5), L(0, 4.8, 0), s.color);
+  const pr = Math.atan2(0.7, 0.7);
+  for (const sz of [-1, 1]) S.add(S.G.box(0.9, 0.12, 1.5), L(0, 5.2, sz * 0.35, 0, 0, sz * pr), s.color);
   const face = canvasTexture(1280, 600, (x, w, h) => {
     x.fillStyle = '#fbf3e6'; x.fillRect(0, 0, w, h);
-    x.fillStyle = S.C.ink; x.font = '800 210px Syne'; x.textBaseline = 'alphabetic';
+    x.fillStyle = S.C.ink; x.font = '800 210px Fraunces'; x.textBaseline = 'alphabetic';
     x.fillText('SAY', 60, 250); x.fillStyle = S.C.coral; x.fillText('HELLO', 60, 440);
-    x.fillStyle = S.C.ink; x.font = '400 36px "Space Mono"'; x.fillText('AAYANIRSHAD99@GMAIL.COM', 66, 530);
+    x.fillStyle = S.C.ink; x.font = '400 36px "DM Mono"'; x.fillText('AAYANIRSHAD99@GMAIL.COM', 66, 530);
     x.strokeStyle = S.C.ink; x.lineWidth = 6; x.beginPath(); x.arc(1110, 190, 90, 0, 6.29); x.stroke();
-    x.font = '800 120px Syne'; x.textAlign = 'center'; x.fillText('↓', 1110, 232);
+    x.font = '800 120px Fraunces'; x.textAlign = 'center'; x.fillText('↓', 1110, 232);
   });
-  const fm = new THREE.Mesh(new THREE.PlaneGeometry(6.0, 2.8), basic(face)); s._board = fm;
+  const fm = new THREE.Mesh(new THREE.PlaneGeometry(6.0, 2.8), flatMat(face)); s._board = fm;
   fm.applyMatrix4(L(0, 3.2, 0.16)); S.scene.add(fm);
-  S.add(S.G.box(0.14, 1.1, 0.14), L(3.6, 0.55, 1.2), S.C.inkSoft);
-  S.add(S.G.box(0.55, 0.45, 0.8), L(3.6, 1.32, 1.2), S.C.butter);
-  S.add(S.G.box(0.05, 0.4, 0.12), L(3.9, 1.6, 1.0), S.C.coral);
+  S.add(S.G.box(0.14, 1.1, 0.14), L(3.6, 0.75, 1.2), S.C.terracotta);
+  S.add(S.G.box(0.55, 0.45, 0.8), L(3.6, 1.52, 1.2), S.C.butter);
+  S.add(S.G.box(0.05, 0.4, 0.12), L(3.9, 1.8, 1.0), S.C.coral);
   colliderBox(p.x, 2, p.z, 3.3, 2, 0.4, rotY);
   S.aoSpots.push([p.x, p.z, 2.4, 0.08]);
   const mail = S.mesh(S.G.box(0.7, 0.55, 0.85), S.C.butter);
@@ -333,7 +386,7 @@ function physicsProp(shape, mass, meshObj, x, y, z, ry = 0, tag) {
   S.world.addBody(b); S.scene.add(meshObj);
   const p = { body: b, mesh: meshObj, tag, home: new CANNON.Vec3(x, y, z), down: false, burst: false }; S.props.push(p); S.propByBody.set(b, p); return p;
 }
-function cone(x, z) {
+function trafficCone(x, z) {
   const g = new THREE.Group();
   const c = S.mesh(S.G.cone(0.24, 0.62, 8), S.C.coral); c.position.y = 0.06;
   const st = S.mesh(S.G.cyl(0.165, 0.19, 0.1, 8), S.C.cream, { outline: false }); st.position.y = 0.02;
@@ -341,65 +394,87 @@ function cone(x, z) {
   g.add(c, st, base);
   physicsProp(new CANNON.Cylinder(0.08, 0.26, 0.62, 8), 1.5, g, x, 0.31, z, 0, 'cone');
 }
-function can(x, y, z, col) {
+function sodaCan(x, y, z, col) {
   const g = new THREE.Group();
   const c = S.mesh(S.G.cyl(0.26, 0.26, 0.56, 9), col);
   const lid = S.mesh(S.G.cyl(0.24, 0.24, 0.04, 9), S.C.cream, { outline: false }); lid.position.y = 0.29;
   g.add(c, lid);
   physicsProp(new CANNON.Cylinder(0.26, 0.26, 0.56, 9), 1.6, g, x, y, z, S.R(0, 3), 'can');
 }
-function crate(x, y, z, col, ry) {
+function woodCrate(x, y, z, col, ry) {
   const g = S.mesh(S.G.box(0.8, 0.8, 0.8), col);
   const band = S.mesh(S.G.box(0.84, 0.16, 0.84), S.C.cream, { outline: false }); g.add(band);
   physicsProp(new CANNON.Box(new CANNON.Vec3(0.4, 0.4, 0.4)), 3, g, x, y, z, ry, 'crate');
 }
-function pot(x, z) {
+function flowerPot(x, z) {
   const g = new THREE.Group();
-  const c = S.mesh(S.G.cyl(0.32, 0.24, 0.5, 8), S.C.terracotta);
+  const c = S.mesh(S.G.cyl(0.32, 0.24, 0.5, 6), S.C.terracotta);
+  const rim = S.mesh(S.G.cyl(0.38, 0.38, 0.1, 6), S.C.terracotta, { outline: false }); rim.position.y = 0.28; g.add(rim);
   const pl = S.mesh(S.G.ico(0.38, 0), [S.C.blossom, S.C.butter, S.C.lilac][S.rand() * 3 | 0]); pl.position.y = 0.48; pl.scale.y = 0.9;
   g.add(c, pl);
-  physicsProp(new CANNON.Cylinder(0.32, 0.24, 0.5, 8), 2.2, g, x, 0.25, z, S.R(0, 3), 'pot');
+  physicsProp(new CANNON.Cylinder(0.32, 0.24, 0.5, 6), 2.2, g, x, 0.25, z, S.R(0, 3), 'pot');
 }
 function playBall(x, z) {
-  const g = S.mesh(S.G.ico(0.7, 1), S.C.butter);
-  const stripe = S.mesh(new THREE.TorusGeometry(0.7, 0.07, 4, 16), S.C.coral, { outline: false }); g.add(stripe);
+  const g = S.mesh(S.G.ico(0.7, 1), S.C.cream);
+  const spots = [[0.7, 0, 0], [-0.7, 0, 0], [0, 0, 0.7], [0, 0, -0.7], [0, 0.7, 0], [0, -0.7, 0]];
+  for (const [px, py, pz] of spots) {
+    const d = S.mesh(S.G.ico(0.22, 0), S.C.ink, { outline: false });
+    d.position.set(px * 0.92, py * 0.92, pz * 0.92);
+    g.add(d);
+  }
   const b = physicsProp(new CANNON.Sphere(0.7), 1.2, g, x, 0.7, z, 0, 'playBall');
   b.body.linearDamping = 0.25; b.body.angularDamping = 0.3;
 }
+function goalPost(x, z, ry) {
+  const T = S.M(x, 0, z, 0, ry, 0);
+  for (const sx of [-1.1, 1.1]) S.add(S.G.cyl(0.07, 0.07, 1.6, 6), T.clone().multiply(S.M(sx, 0.8, 0)), S.C.cream);
+  S.add(S.G.cyl(0.07, 0.07, 2.24, 6), T.clone().multiply(S.M(0, 1.6, 0, 0, 0, Math.PI / 2)), S.C.cream);
+  colliderBox(x, 0.8, z, 1.2, 0.8, 0.1, ry);
+  S.aoSpots.push([x, z, 1.6, 0.22]);
+}
+function parkCat(x, z, ry) {
+  const T = S.M(x, 0, z, 0, ry, 0);
+  S.add(S.G.box(0.5, 0.3, 0.7), T.clone().multiply(S.M(0, 0.28, 0)), S.C.cream);
+  S.add(S.G.box(0.34, 0.32, 0.3), T.clone().multiply(S.M(0, 0.52, -0.4)), S.C.cream);
+  for (const sx of [-0.1, 0.1]) S.add(S.G.cone(0.07, 0.12, 4), T.clone().multiply(S.M(sx, 0.72, -0.4)), S.C.pink);
+  S.add(S.G.cyl(0.05, 0.05, 0.45, 5), T.clone().multiply(S.M(0.22, 0.4, 0.25, 0.5, 0, 0.6)), S.C.cream);
+  colliderBox(x, 0.3, z, 0.28, 0.3, 0.4, ry);
+  S.aoSpots.push([x, z, 0.7, 0.2]);
+}
 
-function letterBrick(ch, x, z, color = S.C.cream) {
+function glyphBrick(ch, x, z, color = S.C.cream) {
   const w = 0.62, h = 0.96, d = 0.4;
   const tex = canvasTexture(128, 160, (ctx, W, H) => {
     ctx.fillStyle = '#fbf3e6'; ctx.fillRect(0, 0, W, H);
-    ctx.fillStyle = '#2a1d38'; ctx.font = '800 108px Syne';
+    ctx.fillStyle = '#2b2438'; ctx.font = '800 108px Fraunces';
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     ctx.fillText(ch, W / 2, H / 2 + 6);
   });
   const g = new THREE.Group();
   g.add(S.mesh(S.G.box(w, h, d), color));
-  const face = new THREE.Mesh(new THREE.PlaneGeometry(w * 0.9, h * 0.9), basic(tex));
+  const face = new THREE.Mesh(new THREE.PlaneGeometry(w * 0.9, h * 0.9), flatMat(tex));
   face.position.z = d / 2 + 0.012;
   const back = face.clone(); back.position.z = -(d / 2 + 0.012); back.rotation.y = Math.PI;
   g.add(face, back);
   physicsProp(new CANNON.Box(new CANNON.Vec3(w / 2, h / 2, d / 2)), 2.2, g, x, h / 2, z, 0, 'name');
 }
-function buildNameBricks() {
+function spellName() {
   let x = -3.6;
-  const cols = ['#cdb8f0', '#ffe08f', '#a9d4f2', '#ffc4a3', '#a9dcb6', '#f6b3c7', '#ffc4a3', '#a9d4f2', '#ffe08f', '#cdb8f0'];
+  const cols = ['#cbb7ee', '#ffd98a', '#bfe0f5', '#f7c6a4', '#a8dcb8', '#f4b6b8', '#f7c6a4', '#bfe0f5', '#ffd98a', '#cbb7ee'];
   let i = 0;
   for (const word of ['AAYAN', 'DESAI']) {
-    for (const ch of word) { letterBrick(ch, x, -1.6, cols[i++ % cols.length]); x += 0.76; }
+    for (const ch of word) { glyphBrick(ch, x, -1.6, cols[i++ % cols.length]); x += 0.76; }
     x += 0.42;
   }
 }
-function buildBrickStack() {
+function stackBricks() {
   const w = 0.72, h = 0.26, d = 0.4;
   for (let row = 0; row < 4; row++) for (let i = 0; i < 3; i++) {
     const brick = S.mesh(S.G.box(w, h, d), row % 2 ? S.C.cream : '#f3e4d4');
     physicsProp(new CANNON.Box(new CANNON.Vec3(w / 2, h / 2, d / 2)), 0.7, brick, -9.2 + (i - 1) * 0.76, h / 2 + row * 0.28, 27.2, 0, 'stack');
   }
 }
-function buildHoop() {
+function formHoop() {
   S.add(S.G.cyl(0.08, 0.08, 1.7, 8), S.M(-1.35, 0.85, 30.5), S.C.cream);
   S.add(S.G.cyl(0.08, 0.08, 1.7, 8), S.M(1.35, 0.85, 30.5), S.C.cream);
   S.add(S.G.box(2.9, 0.12, 0.12), S.M(0, 1.64, 30.5), S.C.coral);
@@ -427,12 +502,12 @@ function projectBoards(F) {
     const postR = S.mesh(S.G.box(0.08, 1.9, 0.08), S.C.ink); postR.position.set(0.66, 0.95, 0);
     const makeFrame = S.mesh(S.G.box(1.55, 2.15, 0.08), S.C.cream); makeFrame.position.set(0, 1.55, 0);
     const tex = canvasTexture(512, 680, (ctx, w, h) => {
-      ctx.fillStyle = '#a9dcb6'; ctx.fillRect(0, 0, w, h);
-      ctx.fillStyle = '#2a1d38'; ctx.fillRect(18, 18, w - 36, h - 36);
+      ctx.fillStyle = '#a8dcb8'; ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = '#2b2438'; ctx.fillRect(18, 18, w - 36, h - 36);
       ctx.fillStyle = '#d7f3e2'; ctx.fillRect(34, 34, w - 68, h - 68);
-      ctx.fillStyle = '#ff5b3a'; ctx.font = '700 36px "Space Mono"'; ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+      ctx.fillStyle = '#d98a63'; ctx.font = '700 36px "DM Mono"'; ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
       ctx.fillText(card.n, 52, 110);
-      ctx.fillStyle = '#2a1d38'; ctx.font = '800 40px Syne';
+      ctx.fillStyle = '#2b2438'; ctx.font = '800 40px Fraunces';
       const words = card.name.split(' ');
       let line = '', y = 190;
       for (const word of words) {
@@ -441,10 +516,10 @@ function projectBoards(F) {
         else line = next;
       }
       if (line) ctx.fillText(line, 52, y);
-      ctx.fillStyle = 'rgba(42,29,56,.66)'; ctx.font = '400 24px "Space Mono"';
+      ctx.fillStyle = 'rgba(43,36,56,.66)'; ctx.font = '400 24px "DM Mono"';
       ctx.fillText(card.line, 52, y + 56);
     });
-    const face = new THREE.Mesh(new THREE.PlaneGeometry(1.32, 1.86), basic(tex));
+    const face = new THREE.Mesh(new THREE.PlaneGeometry(1.32, 1.86), flatMat(tex));
     face.position.set(0, 1.55, -0.05);
     face.rotation.y = Math.PI;
     g.add(postL, postR, makeFrame, face);
@@ -454,11 +529,11 @@ function projectBoards(F) {
   });
   const ground = canvasTexture(640, 96, (ctx, w, h) => {
     ctx.clearRect(0, 0, w, h);
-    ctx.fillStyle = 'rgba(42,29,56,.72)';
-    ctx.font = '800 42px Syne'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = 'rgba(43,36,56,.72)';
+    ctx.font = '800 42px Fraunces'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     ctx.fillText('PROJECTS', w / 2, h / 2);
   });
-  const label = new THREE.Mesh(new THREE.PlaneGeometry(3.2, 0.48), basic(ground, { transparent: true }));
+  const label = new THREE.Mesh(new THREE.PlaneGeometry(3.2, 0.48), flatMat(ground, { transparent: true }));
   label.applyMatrix4(F.L(0, 0.04, -2.4, -Math.PI / 2));
   S.scene.add(label);
   const plinth = S.mesh(S.G.box(10.2, 0.1, 2.6), S.C.mint);
@@ -473,7 +548,7 @@ function projectBoards(F) {
     S.scene.add(post);
   }
 }
-function buildSocials(F) {
+function hangSocials(F) {
   const items = [['GITHUB', 'Rapid1234-star'], ['LINKEDIN', 'aayan-desai'], ['EMAIL', 'aayanirshad99']];
   items.forEach((it, i) => {
     const lx = (i - 1) * 1.85, lz = -3.6;
@@ -483,15 +558,15 @@ function buildSocials(F) {
     const postR = S.mesh(S.G.box(0.07, 1.05, 0.07), S.C.ink); postR.position.set(0.55, 0.52, 0);
     const makeFrame = S.mesh(S.G.box(1.35, 1.65, 0.08), S.C.cream); makeFrame.position.set(0, 1.28, 0);
     const tex = canvasTexture(420, 520, (ctx, w, h) => {
-      ctx.fillStyle = '#f6b3c7'; ctx.fillRect(0, 0, w, h);
-      ctx.fillStyle = '#2a1d38'; ctx.fillRect(18, 18, w - 36, h - 36);
+      ctx.fillStyle = '#f4b6b8'; ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = '#2b2438'; ctx.fillRect(18, 18, w - 36, h - 36);
       ctx.fillStyle = '#fbf3e6'; ctx.fillRect(34, 34, w - 68, h - 68);
-      ctx.fillStyle = '#2a1d38'; ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
-      ctx.font = '800 48px Syne'; ctx.fillText(it[0], 52, 180);
-      ctx.fillStyle = 'rgba(42,29,56,.66)'; ctx.font = '400 22px "Space Mono"';
+      ctx.fillStyle = '#2b2438'; ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+      ctx.font = '800 48px Fraunces'; ctx.fillText(it[0], 52, 180);
+      ctx.fillStyle = 'rgba(43,36,56,.66)'; ctx.font = '400 22px "DM Mono"';
       ctx.fillText(it[1], 52, 240);
     });
-    const face = new THREE.Mesh(new THREE.PlaneGeometry(1.15, 1.4), basic(tex));
+    const face = new THREE.Mesh(new THREE.PlaneGeometry(1.15, 1.4), flatMat(tex));
     face.position.set(0, 1.28, -0.05);
     face.rotation.y = Math.PI;
     g.add(postL, postR, makeFrame, face);
@@ -532,7 +607,7 @@ function assemblePark(images) {
   ];
   ramps.push({ x: -8, z: 28, w: 1.3, l: 1.5, h: 0.5, ry: Math.PI, col: S.C.sky });
   for (const r of ramps) {
-    const { geo, shape } = wedge(r.w, r.l, r.h);
+    const { geo, shape } = rampWedge(r.w, r.l, r.h);
     S.add(geo, S.M(r.x, 0, r.z, 0, r.ry, 0), r.col);
     S.add(S.G.cyl(0.06, 0.06, r.w * 2 + 0.1, 6), S.M(r.x, r.h, r.z + (r.ry ? 1 : -1) * r.l, 0, 0, Math.PI / 2), S.C.inkSoft);
     S.add(S.G.box(r.w * 2, 0.02, 0.18), S.M(r.x, 0.01, r.z + (r.ry ? -1 : 1) * (r.l - 0.09)), S.C.cream, { outline: false, cast: false });
@@ -541,10 +616,10 @@ function assemblePark(images) {
     S.bumps.push({ x: r.x, z: r.z + (r.ry ? 1 : -1) * r.l, rad: 1.25, hot: false });
     S.aoSpots.push([r.x, r.z, 2.6, 0.18]);
   }
-  buildCrest();
-  { // funbox: up, flat, down
+  formCrest();
+  {
     const fx = 4, fz = 26, h = 0.7;
-    const up = wedge(1.6, 1.4, h), dn = wedge(1.6, 1.4, h);
+    const up = rampWedge(1.6, 1.4, h), dn = rampWedge(1.6, 1.4, h);
     S.add(up.geo, S.M(fx - 2.6, 0, fz, 0, -Math.PI / 2, 0), S.C.mint);
     S.add(dn.geo, S.M(fx + 2.6, 0, fz, 0, Math.PI / 2, 0), S.C.mint);
     S.add(S.G.box(2.4, h, 3.2), S.M(fx, h / 2, fz), S.C.mint);
@@ -557,18 +632,20 @@ function assemblePark(images) {
     S.bumps.push({ x: fx, z: fz, rad: 2.1, hot: false });
     S.aoSpots.push([fx, fz, 4, 0.18]);
   }
-  buildNameBricks();
-  buildBrickStack();
-  buildHoop();
+  spellName();
+  stackBricks();
+  formHoop();
   const cols = [S.C.pink, S.C.butter, S.C.mint, S.C.lilac, S.C.peach, S.C.sky];
   let k = 0;
-  for (let row = 0; row < 4; row++) for (let i = 0; i < 4 - row; i++) can(-6 + (i - (3 - row) / 2) * 0.56, 0.28 + row * 0.565, 29, cols[k++ % cols.length]);
+  for (let row = 0; row < 4; row++) for (let i = 0; i < 4 - row; i++) sodaCan(-6 + (i - (3 - row) / 2) * 0.56, 0.28 + row * 0.565, 29, cols[k++ % cols.length]);
   { const el = Math.hypot(34.5, -5), ux = 34.5 / el, uz = -5 / el;
-    for (let i = 0; i < 6; i++) { const t = 11.1 + i * 2.4, s = i % 2 ? 1 : -1; cone(ux * t - uz * 3.7 * s, uz * t + ux * 3.7 * s); } }
-  { const p = S.polar(150, 27.5); let n = 0; for (let row = 0; row < 3; row++) for (let i = 0; i < 3 - row; i++) crate(p.x + (i - (2 - row) / 2) * 0.84, 0.4 + row * 0.81, p.z, [S.C.peach, S.C.sky, S.C.pink, S.C.butter, S.C.lilac, S.C.mint][n++ % 6], 0.3); }
+    for (let i = 0; i < 6; i++) { const t = 11.1 + i * 2.4, s = i % 2 ? 1 : -1; trafficCone(ux * t - uz * 3.7 * s, uz * t + ux * 3.7 * s); } }
+  { const p = S.polar(150, 27.5); let n = 0; for (let row = 0; row < 3; row++) for (let i = 0; i < 3 - row; i++) woodCrate(p.x + (i - (2 - row) / 2) * 0.84, 0.4 + row * 0.81, p.z, [S.C.peach, S.C.sky, S.C.pink, S.C.butter, S.C.lilac, S.C.mint][n++ % 6], 0.3); }
   { const el = Math.hypot(-34.5, -5), ux = -34.5 / el, uz = -5 / el;
-    for (let i = 0; i < 5; i++) { const t = 11.1 + i * 2.4, s = i % 2 ? -1 : 1; pot(ux * t - uz * 3.75 * s, uz * t + ux * 3.75 * s); } }
+    for (let i = 0; i < 5; i++) { const t = 11.1 + i * 2.4, s = i % 2 ? -1 : 1; flowerPot(ux * t - uz * 3.75 * s, uz * t + ux * 3.75 * s); } }
   playBall(5.5, -2.5);
+  goalPost(7.5, -2.5, Math.PI / 2);
+  parkCat(4.2, -1.4, 2.4);
 
   dressScene(images);
 
@@ -597,7 +674,7 @@ function assemblePark(images) {
     const n = S.SPEED_PTS[(i + 1) % S.SPEED_PTS.length];
     let dx = n[0] - p[0], dz = n[1] - p[1];
     const len = Math.hypot(dx, dz);
-    if (len < 0.2) continue; // a repeated corner point has no direction and would plant a pillar on the lane
+    if (len < 0.2) continue;
     dx /= len; dz /= len;
     let nx = -dz, nz = dx;
     if (nx * p[0] + nz * p[1] < 0) { nx = -nx; nz = -nz; }
@@ -626,7 +703,7 @@ function standFrame(s) {
   const T = S.M(p.x, 0, p.z, 0, rotY, 0);
   return { p, rotY, T, L: (...a) => T.clone().multiply(S.M(...a)), at: (lx, lz) => new THREE.Vector3(lx, 0, lz).applyMatrix4(T) };
 }
-function spanBox(a, b, y, color, thick = 0.05) { // a box spanning two ground points
+function spanBox(a, b, y, color, thick = 0.05) {
   const dx = b[0] - a[0], dz = b[1] - a[1], len = Math.hypot(dx, dz);
   S.add(S.G.box(thick, thick, len), S.M((a[0] + b[0]) / 2, y, (a[1] + b[1]) / 2, 0, Math.atan2(dx, dz), 0), color, { outline: false });
 }
@@ -664,7 +741,7 @@ function signPanel(lines, w = 2.2) {
       const y0 = i * 116;
       x.fillStyle = l.bg || '#fbf3e6'; x.beginPath(); x.roundRect(6, y0 + 8, W - 12, 100, 18); x.fill();
       x.strokeStyle = S.C.ink; x.lineWidth = 5; x.stroke();
-      x.fillStyle = l.ink || S.C.ink; x.font = '800 46px Syne'; x.textBaseline = 'middle';
+      x.fillStyle = l.ink || S.C.ink; x.font = '800 46px Fraunces'; x.textBaseline = 'middle';
       x.textAlign = l.right ? 'right' : 'left';
       const fit = Math.min(1, (W - 70) / x.measureText(l.t).width);
       x.save(); x.translate(l.right ? W - 34 : 34, y0 + 60); x.scale(fit, fit); x.fillText(l.t, 0, 0); x.restore();
@@ -674,7 +751,7 @@ function signPanel(lines, w = 2.2) {
 function wayPost(x, z, lines) {
   S.add(S.G.cyl(0.07, 0.09, 3.1, 6), S.M(x, 1.55, z), S.C.inkSoft);
   const t = signPanel(lines); const h = 0.5 * lines.length;
-  const m = new THREE.Mesh(new THREE.PlaneGeometry(2.2, h), basic(t)); m.position.set(x + Math.sin(S.CAM_YAW) * 0.16, 2.95 - h / 2, z + Math.cos(S.CAM_YAW) * 0.16); m.rotation.y = S.CAM_YAW; S.scene.add(m);
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(2.2, h), flatMat(t)); m.position.set(x + Math.sin(S.CAM_YAW) * 0.16, 2.95 - h / 2, z + Math.cos(S.CAM_YAW) * 0.16); m.rotation.y = S.CAM_YAW; S.scene.add(m);
   const back = new THREE.Mesh(new THREE.PlaneGeometry(2.2, h), S.toon(S.C.inkSoft)); back.position.copy(m.position).addScaledVector(new THREE.Vector3(Math.sin(S.CAM_YAW), 0, Math.cos(S.CAM_YAW)), -0.03); back.rotation.y = S.CAM_YAW + Math.PI; S.scene.add(back);
   colliderCylinder(x, z, 0.12, 3); S.occ.push([x, z, 1.2]); S.aoSpots.push([x, z, 0.8, 0.2]);
 }
@@ -699,7 +776,7 @@ function fenceBed(b) {
   });
 }
 
-S.standFx = []; // { s, pos, w } proximity glow targets
+S.standFx = [];
 function badgePost(s, F, badgeTex) {
   const base = F.at(-5.0, 1.6);
   S.add(S.G.cyl(0.09, 0.12, 3.5, 6), S.M(base.x, 1.75, base.z), S.C.inkSoft);
@@ -707,7 +784,7 @@ function badgePost(s, F, badgeTex) {
   const g = new THREE.Group(); g.position.set(base.x, 3.95, base.z); g.rotation.y = F.rotY;
   const rim = S.mesh(new THREE.TorusGeometry(0.98, 0.08, 6, 28), s.color); g.add(rim);
   const backing = new THREE.Mesh(new THREE.CircleGeometry(0.98, 32), S.toon(S.C.cream)); backing.position.z = -0.01; backing.rotation.y = Math.PI; g.add(backing);
-  if (badgeTex) { const face = new THREE.Mesh(new THREE.CircleGeometry(0.95, 40), basic(badgeTex)); face.position.z = 0.02; g.add(face); }
+  if (badgeTex) { const face = new THREE.Mesh(new THREE.CircleGeometry(0.95, 40), flatMat(badgeTex)); face.position.z = 0.02; g.add(face); }
   S.scene.add(g); colliderCylinder(base.x, base.z, 0.16, 3.5); S.occ.push([base.x, base.z, 1.2]); S.aoSpots.push([base.x, base.z, 1.1, 0.22]);
   return g;
 }
@@ -717,15 +794,15 @@ function foldBoard(s, F) {
   const face = canvasTexture(512, 384, (x, W, H) => {
     x.fillStyle = '#fbf3e6'; x.fillRect(0, 0, W, H);
     x.fillStyle = s.color; x.fillRect(0, 0, W, 84);
-    x.fillStyle = S.C.ink; x.font = '400 34px "Space Mono"'; x.textBaseline = 'middle'; x.fillText(s.n ? `STAND ${s.n}` : s.kind.toUpperCase(), 30, 44);
-    x.font = '800 74px Syne'; const t = (s.id === 'projects' ? 'FIVE SIGNS' : s.short).toUpperCase();
+    x.fillStyle = S.C.ink; x.font = '400 34px "DM Mono"'; x.textBaseline = 'middle'; x.fillText(s.n ? `STAND ${s.n}` : s.kind.toUpperCase(), 30, 44);
+    x.font = '800 74px Fraunces'; const t = (s.id === 'projects' ? 'FIVE SIGNS' : s.short).toUpperCase();
     const fit = Math.min(1, (W - 60) / x.measureText(t).width); x.save(); x.translate(30, 190); x.scale(fit, fit); x.fillText(t, 0, 0); x.restore();
-    x.font = '700 36px Syne'; x.fillStyle = S.C.coral; x.fillText(s.id === 'projects' ? 'signs behind the stand' : 'pull up on the pad →', 30, 300);
+    x.font = '700 36px Fraunces'; x.fillStyle = S.C.coral; x.fillText(s.id === 'projects' ? 'signs behind the stand' : 'pull up on the pad →', 30, 300);
   });
   for (const sd of [-1, 1]) {
     const panel = new THREE.Group(); panel.rotation.x = sd * 0.24; panel.position.z = sd * 0.28;
     const bd = S.mesh(S.G.box(0.9, 1.15, 0.05), S.C.cream); bd.position.set(0, 0.575, 0); panel.add(bd);
-    const fm = new THREE.Mesh(new THREE.PlaneGeometry(0.84, 0.63), basic(face)); fm.position.set(0, 0.68, sd * 0.035); if (sd < 0) fm.rotation.y = Math.PI; panel.add(fm);
+    const fm = new THREE.Mesh(new THREE.PlaneGeometry(0.84, 0.63), flatMat(face)); fm.position.set(0, 0.68, sd * 0.035); if (sd < 0) fm.rotation.y = Math.PI; panel.add(fm);
     g.add(panel);
   }
   g.children.forEach(c => c.position.y = -0.55);
@@ -1034,11 +1111,11 @@ function skillPlinths(F) {
     S.add(S.G.box(1.2, 0.45, 0.7), S.M(at.x, 0.22, at.z), S.C.sky);
     const tex = canvasTexture(256, 128, (ctx, w, h) => {
       ctx.fillStyle = '#fbf3e6'; ctx.fillRect(0, 0, w, h);
-      ctx.fillStyle = '#2a1d38'; ctx.textAlign = 'center';
-      ctx.font = '800 36px Syne'; ctx.fillText(lb[0], w / 2, 52);
-      ctx.font = '400 22px "Space Mono"'; ctx.fillText(lb[1], w / 2, 92);
+      ctx.fillStyle = '#2b2438'; ctx.textAlign = 'center';
+      ctx.font = '800 36px Fraunces'; ctx.fillText(lb[0], w / 2, 52);
+      ctx.font = '400 22px "DM Mono"'; ctx.fillText(lb[1], w / 2, 92);
     });
-    const face = new THREE.Mesh(new THREE.PlaneGeometry(1.05, 0.52), basic(tex));
+    const face = new THREE.Mesh(new THREE.PlaneGeometry(1.05, 0.52), flatMat(tex));
     face.position.set(at.x, 0.52, at.z); face.rotation.x = -0.4; S.scene.add(face);
   });
 }
@@ -1048,17 +1125,17 @@ function shopFace(s, F) {
     S.add(S.G.box(1.6, 0.9, 0.08), S.M(at.x, 2.2, at.z, 0, F.rotY, 0), S.C.ink);
     const tex = canvasTexture(320, 180, (ctx, w, h) => {
       ctx.fillStyle = '#1c1326'; ctx.fillRect(0, 0, w, h);
-      ctx.fillStyle = '#7fe6c4'; ctx.font = '700 28px "Space Mono"'; ctx.fillText('840+ TESTS', 24, 78);
-      ctx.fillStyle = '#fbf3e6'; ctx.font = '400 18px "Space Mono"'; ctx.fillText('Playwright · 8 modules', 24, 118);
+      ctx.fillStyle = '#7fe6c4'; ctx.font = '700 28px "DM Mono"'; ctx.fillText('840+ TESTS', 24, 78);
+      ctx.fillStyle = '#fbf3e6'; ctx.font = '400 18px "DM Mono"'; ctx.fillText('Playwright · 8 modules', 24, 118);
     });
-    const scr = new THREE.Mesh(new THREE.PlaneGeometry(1.4, 0.72), basic(tex));
+    const scr = new THREE.Mesh(new THREE.PlaneGeometry(1.4, 0.72), flatMat(tex));
     scr.position.set(at.x, 2.2, at.z); scr.rotation.y = F.rotY; S.scene.add(scr);
   } else {
     for (const sx of [-0.55, 0.55]) S.add(S.G.box(0.7, 0.95, 0.06), S.M(at.x, 2.1, at.z, 0, F.rotY, 0).multiply(S.M(sx, 0, 0.2)), S.C.cream);
   }
-  const rise = new THREE.Mesh(new THREE.PlaneGeometry(2.2, 0.36), basic(canvasTexture(480, 80, (ctx, w, h) => {
+  const rise = new THREE.Mesh(new THREE.PlaneGeometry(2.2, 0.36), flatMat(canvasTexture(480, 80, (ctx, w, h) => {
     ctx.fillStyle = '#fbf3e6'; ctx.fillRect(0, 0, w, h);
-    ctx.fillStyle = '#2a1d38'; ctx.font = '800 36px Syne'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#2b2438'; ctx.font = '800 36px Fraunces'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     ctx.fillText(s.short.toUpperCase(), w / 2, h / 2);
   })));
   rise.position.set(at.x, 0.2, at.z); rise.rotation.y = F.rotY; S.scene.add(rise); s._rise = rise;
@@ -1070,7 +1147,7 @@ function dressScene(images) {
     s._totem = badgePost(s, F, badges[s.id]);
     foldBoard(s, F);
     if (s.id === 'projects') projectBoards(F);
-    if (s.id === 'contact') buildSocials(F);
+    if (s.id === 'contact') hangSocials(F);
     const piece = ({ about: yardPiece, contact: planePiece, education: bookPiece, skills: domePiece, appify: kitePiece, patchifi: boomboxPiece })[s.id];
     if (piece) piece(s, F);
     if (s.id === 'skills') skillPlinths(F);
@@ -1078,10 +1155,10 @@ function dressScene(images) {
     if (s.id === 'patchifi') {
       const other = S.STANDS.find(st => st.id === 'appify');
       const mx = (s.pos.x + other.pos.x) / 2, mz = (s.pos.z + other.pos.z) / 2;
-      const lab = new THREE.Mesh(new THREE.PlaneGeometry(3.4, 0.42), basic(canvasTexture(640, 96, (ctx, w, h) => {
+      const lab = new THREE.Mesh(new THREE.PlaneGeometry(3.4, 0.42), flatMat(canvasTexture(640, 96, (ctx, w, h) => {
         ctx.clearRect(0, 0, w, h);
-        ctx.fillStyle = 'rgba(42,29,56,.72)';
-        ctx.font = '800 42px Syne'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillStyle = 'rgba(43,36,56,.72)';
+        ctx.font = '800 42px Fraunces'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
         ctx.fillText('EXPERIENCE', w / 2, h / 2);
       }), { transparent: true }));
       lab.rotation.x = -Math.PI / 2; lab.position.set(mx, 0.05, mz); S.scene.add(lab);
@@ -1097,10 +1174,10 @@ function dressScene(images) {
     for (const sd of [1, -1]) for (const t of runs[sd] || []) planterBed(ux * t + nx * 7.6 * sd, uz * t + nz * 7.6 * sd, ry);
   }
   wayPost(5.0, -16, [{ t: '↑ NORTH CREST' }, { t: 'SPEEDWAY', bg: '#2c203b' }]);
-  wayPost(23.09, -7.99, [{ t: '→ PROJECTS' }, { t: 'PIAZZA', bg: '#a9dcb6' }]);
-  wayPost(-23.09, -7.99, [{ t: '← ABOUT' }, { t: 'EDUCATION', bg: '#ffe08f' }]);
+  wayPost(23.09, -7.99, [{ t: '→ PROJECTS' }, { t: 'PIAZZA', bg: '#a8dcb8' }]);
+  wayPost(-23.09, -7.99, [{ t: '← ABOUT' }, { t: 'EDUCATION', bg: '#ffd98a' }]);
   wayPost(5.0, 17, [{ t: '↓ SKATE SLAB' }, { t: 'HOP: SPACE' }]);
-  wayPost(28.2, 9.5, [{ t: '→ CONTACT GARDEN', bg: '#f6b3c7' }]);
+  wayPost(28.2, 9.5, [{ t: '→ CONTACT GARDEN', bg: '#f4b6b8' }]);
   const ring = S.lampPos.map(l => [...l, Math.atan2(l[0], -(l[1] - S.RING.cz))]).sort((a, b) => a[2] - b[2]);
   for (let i = 0; i < ring.length; i++) {
     const a = ring[i], b = ring[(i + 1) % ring.length];
@@ -1112,7 +1189,7 @@ function dressScene(images) {
   lightString([pp[0].x, pp[0].z], [pp[2].x, pp[2].z], 3.6, 3.6, 1.3, 16);
   quarterRamp(9.9, 30.2, 0, 5, 1.7);
   S.add(S.G.box(2.6, 0.24, 1.3), S.M(-0.8, 0.12, 28.4), S.C.butter); colliderBox(-0.8, 0.12, 28.4, 1.3, 0.12, 0.65);
-  { // grind rail along the west edge of the slab
+  {
     S.add(S.G.cyl(0.06, 0.06, 7, 6), S.M(-12.4, 0.55, 26, Math.PI / 2, 0, 0), S.C.inkSoft);
     for (const z of [23, 26, 29]) S.add(S.G.box(0.08, 0.55, 0.08), S.M(-12.4, 0.27, z), S.C.inkSoft);
     colliderBox(-12.4, 0.3, 26, 0.08, 0.3, 3.5);
@@ -1120,14 +1197,14 @@ function dressScene(images) {
   for (const [x, z] of [[12.2, 24.6], [13.2, 25.4], [11.4, 25.8]]) oilBarrel(x, z);
   for (const [x, z] of [[-13.2, 30.2], [-12.4, 30.8]]) for (let k = 0; k < 3; k++) wheelTire(x, 0.16 + k * 0.31, z);
   for (const [x, z] of [[-6.6, 3.0], [6.6, 2.6]]) trashBin(x, z);
-  for (const [x, z] of [[-2.6, 27.4], [2.6, 27.4], [-1.6, 29.6], [1.6, 29.6]]) cone(x, z);
+  for (const [x, z] of [[-2.6, 27.4], [2.6, 27.4], [-1.6, 29.6], [1.6, 29.6]]) trafficCone(x, z);
 }
 S.colliderBox = colliderBox;
 S.colliderCylinder = colliderCylinder;
 S.onSlope = onSlope;
-S.buildCrest = buildCrest;
-S.chevron = chevron;
-S.wedge = wedge;
+S.formCrest = formCrest;
+S.roadChevron = roadChevron;
+S.rampWedge = rampWedge;
 S.addTree = addTree;
 S.palm = palm;
 S.bush = bush;
@@ -1136,7 +1213,7 @@ S.streetLamp = streetLamp;
 S.parkBench = parkBench;
 S.planter = planter;
 S.canvasTexture = canvasTexture;
-S.basic = basic;
+S.flatMat = flatMat;
 S.posterTex = posterTex;
 S.erectBooth = erectBooth;
 S.glassHouse = glassHouse;
@@ -1144,17 +1221,19 @@ S.splitLeafAt = splitLeafAt;
 S.helloSign = helloSign;
 S.addStopPad = addStopPad;
 S.physicsProp = physicsProp;
-S.cone = cone;
-S.can = can;
-S.crate = crate;
-S.pot = pot;
+S.trafficCone = trafficCone;
+S.sodaCan = sodaCan;
+S.woodCrate = woodCrate;
+S.flowerPot = flowerPot;
 S.playBall = playBall;
-S.letterBrick = letterBrick;
-S.buildNameBricks = buildNameBricks;
-S.buildBrickStack = buildBrickStack;
-S.buildHoop = buildHoop;
+S.goalPost = goalPost;
+S.parkCat = parkCat;
+S.glyphBrick = glyphBrick;
+S.spellName = spellName;
+S.stackBricks = stackBricks;
+S.formHoop = formHoop;
 S.projectBoards = projectBoards;
-S.buildSocials = buildSocials;
+S.hangSocials = hangSocials;
 S.assemblePark = assemblePark;
 S.standFrame = standFrame;
 S.spanBox = spanBox;
